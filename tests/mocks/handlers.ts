@@ -23,13 +23,52 @@ export const handlers = [
   ),
 
   http.get(`${BASE_URL}/api/v1/quotes`, () =>
-    HttpResponse.json([]),
+    HttpResponse.json([
+      {
+        id: 'quote-1',
+        description: 'Peça mecânica para protótipo industrial de alta precisão',
+        material: 'PLA',
+        color: 'Branco',
+        quantity: 5,
+        finish: 'Padrão',
+        desiredDeadline: '2026-04-15',
+        status: 'RECEIVED',
+        createdAt: '2026-03-11T00:00:00Z',
+        customer: { id: 'cust-1', name: 'João Silva', email: 'joao@example.com', whatsapp: '11999999999' },
+        files: [],
+      },
+      {
+        id: 'quote-2',
+        description: 'Suporte para câmera de segurança residencial',
+        material: 'PETG',
+        color: 'Preto',
+        quantity: 2,
+        finish: 'Lixado',
+        desiredDeadline: '2026-05-01',
+        status: 'UNDER_REVIEW',
+        createdAt: '2026-03-10T00:00:00Z',
+        customer: { id: 'cust-2', name: 'Maria Souza', email: 'maria@example.com' },
+        files: [],
+      },
+    ]),
   ),
 
-  http.patch(`${BASE_URL}/api/v1/quotes/:id/status`, () =>
-    HttpResponse.json({
-      id: 'quote-1',
-      status: 'UNDER_REVIEW',
+  http.patch(`${BASE_URL}/api/v1/quotes/:id/status`, ({ params, request }) =>
+    request.json().then((body: unknown) => {
+      const b = body as { status?: string }
+      return HttpResponse.json({
+        id: params['id'],
+        description: 'Peça mecânica para protótipo industrial de alta precisão',
+        material: 'PLA',
+        color: 'Branco',
+        quantity: 5,
+        finish: 'Padrão',
+        desiredDeadline: '2026-04-15',
+        status: b.status ?? 'UNDER_REVIEW',
+        createdAt: '2026-03-11T00:00:00Z',
+        customer: { id: 'cust-1', name: 'João Silva', email: 'joao@example.com', whatsapp: '11999999999' },
+        files: [],
+      })
     }),
   ),
 
