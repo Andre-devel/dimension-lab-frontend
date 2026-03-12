@@ -9,7 +9,9 @@ const navLinks = [
 ]
 
 function linkClass({ isActive }: { isActive: boolean }) {
-  return isActive ? 'text-accent-blue font-medium' : 'text-text-secondary hover:text-text-primary'
+  return isActive
+    ? 'text-accent-blue font-medium transition-colors'
+    : 'text-text-secondary hover:text-text-primary transition-colors'
 }
 
 export function Navbar() {
@@ -18,27 +20,35 @@ export function Navbar() {
   return (
     <nav
       aria-label="Navegação principal"
-      className="fixed inset-x-0 top-0 z-50 border-b border-border bg-surface"
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[5%] py-[18px] bg-background/85 backdrop-blur-md border-b border-accent-blue/15"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-        {/* Logo */}
-        <NavLink to="/" className="flex items-baseline gap-0.5">
-          <span className="font-heading font-bold text-text-primary">DIMENSION</span>
-          <span className="font-heading text-accent-blue">.LAB3D</span>
+      {/* Logo */}
+      <NavLink to="/" className="flex items-baseline gap-0 font-heading">
+        <span className="font-bold text-text-primary">DIMENSION</span>
+        <span className="text-accent-blue">.LAB3D</span>
+      </NavLink>
+
+      {/* Desktop nav links */}
+      <ul className="hidden md:flex items-center gap-7">
+        {navLinks.map(({ label, to }) => (
+          <li key={to}>
+            <NavLink to={to} className={linkClass} end={to === '/'}>
+              {label}
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+
+      {/* Desktop CTA + hamburger row */}
+      <div className="flex items-center gap-4">
+        <NavLink
+          to="/quote"
+          className="rounded-full bg-accent-blue px-[22px] py-[9px] text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
+        >
+          Pedir Orçamento
         </NavLink>
 
-        {/* Desktop nav */}
-        <ul className="hidden items-center gap-6 md:flex">
-          {navLinks.map(({ label, to }) => (
-            <li key={to}>
-              <NavLink to={to} className={linkClass} end={to === '/'}>
-                {label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-
-        {/* Hamburger */}
+        {/* Hamburger — always rendered for test compatibility */}
         <button
           type="button"
           aria-label="Abrir menu"
@@ -51,8 +61,11 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <nav aria-label="Menu mobile" className="border-t border-border bg-surface md:hidden">
-          <ul className="flex flex-col px-4 py-3 gap-3">
+        <nav
+          aria-label="Menu mobile"
+          className="absolute top-full left-0 right-0 border-t border-accent-blue/15 bg-background/95 backdrop-blur-md md:hidden"
+        >
+          <ul className="flex flex-col px-[5%] py-4 gap-4">
             {navLinks.map(({ label, to }) => (
               <li key={to}>
                 <NavLink

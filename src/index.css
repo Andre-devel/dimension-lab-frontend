@@ -11,3 +11,170 @@
     @apply border-border;
   }
 }
+
+/* =============================================
+   SCROLLBAR
+   ============================================= */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0A0F;
+}
+::-webkit-scrollbar-thumb {
+  background: #4D9FFF;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8B5CF6;
+}
+
+/* =============================================
+   KEYFRAMES
+   ============================================= */
+@keyframes gridMove {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(40px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-18px); }
+}
+
+@keyframes spin {
+  from { transform: rotateX(-20deg) rotateY(0deg); }
+  to   { transform: rotateX(-20deg) rotateY(360deg); }
+}
+
+@keyframes ringPulse {
+  0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+/* =============================================
+   HERO BACKGROUND
+   ============================================= */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(77, 159, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(77, 159, 255, 0.07) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridMove 8s linear infinite;
+  pointer-events: none;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 60% 50%, rgba(77, 159, 255, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* =============================================
+   HERO BADGE
+   ============================================= */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: rgba(77, 159, 255, 0.1);
+  border: 1px solid rgba(77, 159, 255, 0.3);
+  color: #4D9FFF;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin-bottom: 20px;
+}
+
+.hero-badge .badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4D9FFF;
+  animation: pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* =============================================
+   3D CUBE
+   ============================================= */
+.cube-wrap {
+  position: absolute;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 200px;
+  height: 200px;
+  perspective: 700px;
+  animation: float 5s ease-in-out infinite;
+}
+
+.cube {
+  width: 140px;
+  height: 140px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: spin 12s linear infinite;
+  margin: 30px auto;
+}
+
+.face {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border: 1px solid rgba(77, 159, 255, 0.5);
+  background: rgba(77, 159, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: rgba(77, 159, 255, 0.8);
+  backface-visibility: visible;
+}
+
+.face.front  { transform: translateZ(70px); }
+.face.back   { transform: rotateY(180deg) translateZ(70px); }
+.face.left   { transform: rotateY(-90deg) translateZ(70px); }
+.face.right  { transform: rotateY(90deg) translateZ(70px); }
+.face.top    { transform: rotateX(90deg) translateZ(70px); }
+.face.bottom { transform: rotateX(-90deg) translateZ(70px); }
+
+/* =============================================
+   GLOW RINGS
+   ============================================= */
+.glow-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(77, 159, 255, 0.3);
+  animation: ringPulse 3s ease-out infinite;
+}
+
+.glow-ring:nth-child(1) {
+  width: 220px;
+  height: 220px;
+  animation-delay: 0s;
+}
+
+.glow-ring:nth-child(2) {
+  width: 280px;
+  height: 280px;
+  animation-delay: 1s;
+}
+
+.glow-ring:nth-child(3) {
+  width: 340px;
+  height: 340px;
+  animation-delay: 2s;
+}
