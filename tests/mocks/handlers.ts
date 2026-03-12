@@ -73,16 +73,37 @@ export const handlers = [
   ),
 
   http.get(`${BASE_URL}/api/v1/portfolio-items`, () =>
-    HttpResponse.json([]),
+    HttpResponse.json([
+      {
+        id: 'item-1',
+        title: 'Suporte para câmera',
+        category: { id: 'cat-1', name: 'Mecânico', slug: 'mecanico' },
+        material: 'PLA',
+        printTime: 3,
+        complexity: 'Médio',
+        photos: [],
+        visible: true,
+      },
+      {
+        id: 'item-2',
+        title: 'Vaso decorativo',
+        category: { id: 'cat-2', name: 'Decorativo', slug: 'decorativo' },
+        material: 'PETG',
+        printTime: 5,
+        complexity: 'Fácil',
+        photos: [],
+        visible: true,
+      },
+    ]),
   ),
 
   http.get(`${BASE_URL}/api/v1/portfolio-items/:id`, ({ params }) =>
     HttpResponse.json({
       id: params['id'],
-      title: 'Test Item',
-      category: { id: 'cat-1', name: 'Geral', slug: 'geral' },
+      title: 'Suporte para câmera',
+      category: { id: 'cat-1', name: 'Mecânico', slug: 'mecanico' },
       material: 'PLA',
-      printTime: '4h',
+      printTime: 3,
       complexity: 'Médio',
       photos: [],
       visible: true,

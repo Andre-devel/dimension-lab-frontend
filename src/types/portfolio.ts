@@ -9,7 +9,7 @@ export interface PortfolioItem {
   title: string
   category: Category
   material: string
-  printTime: string
+  printTime: number | null
   complexity: string
   photos: string[]
   modelFile?: string
