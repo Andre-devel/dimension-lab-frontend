@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { vi, describe, it, expect } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import PortfolioItemForm from '@/pages/Admin/PortfolioAdmin/PortfolioItemForm'
 
 const mockOnSubmit = vi.fn()
@@ -12,7 +12,7 @@ beforeEach(() => {
 function renderForm(initialData?: Parameters<typeof PortfolioItemForm>[0]['initialData']) {
   return render(
     <MemoryRouter>
-      <PortfolioItemForm onSubmit={mockOnSubmit} />
+      <PortfolioItemForm onSubmit={mockOnSubmit} initialData={initialData} />
     </MemoryRouter>
   )
 }
@@ -23,6 +23,12 @@ describe('PortfolioItemForm', () => {
     expect(screen.getByLabelText(/título/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/categoria/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/material/i)).toBeInTheDocument()
+  })
+
+  it('renders file inputs for photos and model', () => {
+    renderForm()
+    const fileInputs = document.querySelectorAll('input[type="file"]')
+    expect(fileInputs.length).toBe(2)
   })
 
   it('calls onSubmit with form data when submitted', async () => {
@@ -37,6 +43,7 @@ describe('PortfolioItemForm', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Vaso',
+          categoryName: 'Decorativo',
           material: 'PLA',
         })
       )
@@ -47,5 +54,21 @@ describe('PortfolioItemForm', () => {
     renderForm()
     fireEvent.click(screen.getByRole('button', { name: /salvar/i }))
     expect(mockOnSubmit).not.toHaveBeenCalled()
+  })
+
+  it('pre-fills form when initialData is provided', () => {
+    renderForm({
+      id: 'item-1',
+      title: 'Vaso Decorativo',
+      category: { id: 'cat-1', name: 'Decorativo', slug: 'decorativo' },
+      material: 'PLA',
+      printTime: 2,
+      complexity: 'Fácil',
+      photos: ['foto.jpg'],
+      visible: true,
+    })
+    expect(screen.getByDisplayValue('Vaso Decorativo')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Decorativo')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('PLA')).toBeInTheDocument()
   })
 })

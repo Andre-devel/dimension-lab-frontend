@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { PortfolioItemFormData } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
 
@@ -6,15 +6,6 @@ interface Props {
   initialData?: PortfolioItem
   onSubmit: (data: PortfolioItemFormData) => void
   saving?: boolean
-}
-
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
 }
 
 export default function PortfolioItemForm({ initialData, onSubmit, saving }: Props) {
@@ -25,8 +16,10 @@ export default function PortfolioItemForm({ initialData, onSubmit, saving }: Pro
     initialData?.printTime != null ? String(initialData.printTime) : ''
   )
   const [complexity, setComplexity] = useState(initialData?.complexity ?? '')
-  const [photosText, setPhotosText] = useState(initialData?.photos.join('\n') ?? '')
-  const [modelFile, setModelFile] = useState(initialData?.modelFile ?? '')
+  const [photoFiles, setPhotoFiles] = useState<File[]>([])
+  const [modelFile, setModelFile] = useState<File | null>(null)
+  const photosInputRef = useRef<HTMLInputElement>(null)
+  const modelInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (initialData) {
@@ -35,8 +28,6 @@ export default function PortfolioItemForm({ initialData, onSubmit, saving }: Pro
       setMaterial(initialData.material)
       setPrintTime(initialData.printTime != null ? String(initialData.printTime) : '')
       setComplexity(initialData.complexity ?? '')
-      setPhotosText(initialData.photos.join('\n'))
-      setModelFile(initialData.modelFile ?? '')
     }
   }, [initialData])
 
@@ -44,23 +35,14 @@ export default function PortfolioItemForm({ initialData, onSubmit, saving }: Pro
     e.preventDefault()
     if (!title.trim() || !categoryName.trim() || !material.trim()) return
 
-    const photos = photosText
-      .split('\n')
-      .map((s) => s.trim())
-      .filter(Boolean)
-
     onSubmit({
       title: title.trim(),
-      category: {
-        id: initialData?.category.id,
-        name: categoryName.trim(),
-        slug: slugify(categoryName.trim()),
-      },
+      categoryName: categoryName.trim(),
       material: material.trim(),
       printTime: printTime ? Number(printTime) : null,
       complexity: complexity.trim() || undefined,
-      photos,
-      modelFile: modelFile.trim() || undefined,
+      photos: photoFiles.length > 0 ? photoFiles : undefined,
+      modelFile: modelFile ?? null,
     })
   }
 
@@ -136,27 +118,48 @@ export default function PortfolioItemForm({ initialData, onSubmit, saving }: Pro
       </div>
 
       <div>
-        <label htmlFor="photos" className={labelClass}>URLs das fotos (uma por linha)</label>
-        <textarea
-          id="photos"
-          value={photosText}
-          onChange={(e) => setPhotosText(e.target.value)}
-          rows={3}
-          className={fieldClass}
-          placeholder="https://..."
+        <label className={labelClass}>
+          Fotos
+          {initialData && initialData.photos.length > 0 && (
+            <span className="ml-2 text-text-secondary normal-case font-normal">
+              ({initialData.photos.length} atual(is) — novas substituem)
+            </span>
+          )}
+        </label>
+        <input
+          ref={photosInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => setPhotoFiles(Array.from(e.target.files ?? []))}
+          className="block w-full text-sm text-text-secondary file:mr-3 file:rounded-md file:border-0 file:bg-surface-2 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-text-primary hover:file:bg-border cursor-pointer"
         />
+        {photoFiles.length > 0 && (
+          <p className="mt-1 text-xs text-text-secondary">
+            {photoFiles.length} foto(s) selecionada(s)
+          </p>
+        )}
       </div>
 
       <div>
-        <label htmlFor="modelFile" className={labelClass}>URL do arquivo 3D (STL/GLB)</label>
+        <label className={labelClass}>
+          Arquivo 3D (STL / GLB / OBJ)
+          {initialData?.modelFile && (
+            <span className="ml-2 text-text-secondary normal-case font-normal">
+              (já possui — novo substitui)
+            </span>
+          )}
+        </label>
         <input
-          id="modelFile"
-          type="text"
-          value={modelFile}
-          onChange={(e) => setModelFile(e.target.value)}
-          className={fieldClass}
-          placeholder="https://..."
+          ref={modelInputRef}
+          type="file"
+          accept=".stl,.glb,.obj,.3mf"
+          onChange={(e) => setModelFile(e.target.files?.[0] ?? null)}
+          className="block w-full text-sm text-text-secondary file:mr-3 file:rounded-md file:border-0 file:bg-surface-2 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-text-primary hover:file:bg-border cursor-pointer"
         />
+        {modelFile && (
+          <p className="mt-1 text-xs text-text-secondary">{modelFile.name}</p>
+        )}
       </div>
 
       <button

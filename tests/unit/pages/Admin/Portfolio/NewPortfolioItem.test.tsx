@@ -49,7 +49,9 @@ describe('NewPortfolioItem page', () => {
     fireEvent.click(screen.getByRole('button', { name: /salvar/i }))
 
     await waitFor(() => {
-      expect(portfolioService.create).toHaveBeenCalled()
+      expect(portfolioService.create).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Vaso', categoryName: 'Deco', material: 'PLA' })
+      )
       expect(mockNavigate).toHaveBeenCalledWith('/admin/portfolio')
     })
   })

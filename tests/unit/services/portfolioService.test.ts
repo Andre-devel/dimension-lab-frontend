@@ -59,32 +59,33 @@ describe('portfolioService', () => {
   })
 
   describe('create', () => {
-    it('posts to portfolio-items and returns created item', async () => {
+    it('posts FormData to portfolio-items and returns created item', async () => {
       mockedApi.post = vi.fn().mockResolvedValue({ data: mockItem })
-      const formData = {
+      const result = await portfolioService.create({
         title: 'Test Item',
-        category: { name: 'Geral', slug: 'geral' },
+        categoryName: 'Geral',
         material: 'PLA',
-        photos: [],
-      }
-      const result = await portfolioService.create(formData)
+      })
       expect(result).toEqual(mockItem)
-      expect(mockedApi.post).toHaveBeenCalledWith('/api/v1/portfolio-items', formData)
+      const [url, body, config] = vi.mocked(mockedApi.post).mock.calls[0]
+      expect(url).toBe('/api/v1/portfolio-items')
+      expect(body).toBeInstanceOf(FormData)
+      expect(config?.headers?.['Content-Type']).toBe('multipart/form-data')
     })
   })
 
   describe('update', () => {
-    it('puts to portfolio-items/:id and returns updated item', async () => {
+    it('puts FormData to portfolio-items/:id and returns updated item', async () => {
       mockedApi.put = vi.fn().mockResolvedValue({ data: mockItem })
-      const formData = {
+      const result = await portfolioService.update('item-1', {
         title: 'Updated',
-        category: { name: 'Geral', slug: 'geral' },
+        categoryName: 'Geral',
         material: 'PETG',
-        photos: [],
-      }
-      const result = await portfolioService.update('item-1', formData)
+      })
       expect(result).toEqual(mockItem)
-      expect(mockedApi.put).toHaveBeenCalledWith('/api/v1/portfolio-items/item-1', formData)
+      const [url, body] = vi.mocked(mockedApi.put).mock.calls[0]
+      expect(url).toBe('/api/v1/portfolio-items/item-1')
+      expect(body).toBeInstanceOf(FormData)
     })
   })
 
