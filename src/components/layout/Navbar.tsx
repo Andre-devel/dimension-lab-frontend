@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { Menu } from 'lucide-react'
+import { useAuthStore } from '@/store/authStore'
+import { authService } from '@/services/authService'
 
-const navLinks = [
+const publicLinks = [
   { label: 'Home', to: '/' },
   { label: 'Portfólio', to: '/portfolio' },
   { label: 'Orçamento', to: '/quote' },
@@ -16,6 +18,22 @@ function linkClass({ isActive }: { isActive: boolean }) {
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { user, isAuthenticated, clearUser } = useAuthStore()
+  const navigate = useNavigate()
+
+  const authLink = isAuthenticated
+    ? user?.role === 'ADMIN'
+      ? { label: 'Admin', to: '/admin' }
+      : { label: 'Meus Orçamentos', to: '/my-quotes' }
+    : null
+
+  const navLinks = authLink ? [...publicLinks, authLink] : publicLinks
+
+  async function handleLogout() {
+    await authService.logout()
+    clearUser()
+    navigate('/')
+  }
 
   return (
     <nav
@@ -39,14 +57,33 @@ export function Navbar() {
         ))}
       </ul>
 
-      {/* Desktop CTA + hamburger row */}
+      {/* Desktop CTA + auth + hamburger */}
       <div className="flex items-center gap-4">
-        <NavLink
-          to="/quote"
-          className="rounded-full bg-accent-blue px-[22px] py-[9px] text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
-        >
-          Pedir Orçamento
-        </NavLink>
+        {isAuthenticated ? (
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="rounded-full border border-accent-blue px-[22px] py-[9px] text-sm font-semibold text-accent-blue transition-all hover:bg-accent-blue/10"
+          >
+            Sair
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => authService.loginWithGoogle()}
+              className="rounded-full border border-accent-blue px-[22px] py-[9px] text-sm font-semibold text-accent-blue transition-all hover:bg-accent-blue/10"
+            >
+              Entrar
+            </button>
+            <NavLink
+              to="/quote"
+              className="rounded-full bg-accent-blue px-[22px] py-[9px] text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
+            >
+              Pedir Orçamento
+            </NavLink>
+          </>
+        )}
 
         {/* Hamburger — always rendered for test compatibility */}
         <button

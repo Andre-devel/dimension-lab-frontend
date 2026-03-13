@@ -1,5 +1,21 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { vi, beforeEach } from 'vitest'
+
+vi.mock('@/store/authStore', () => ({
+  useAuthStore: vi.fn(),
+}))
+
+
+vi.mock('@/services/authService', () => ({
+  authService: {
+    loginWithGoogle: vi.fn(),
+    logout: vi.fn(),
+  },
+}))
+
+import { useAuthStore } from '@/store/authStore'
+import { authService } from '@/services/authService'
 import { Navbar } from '@/components/layout/Navbar'
 
 function renderWithRouter(ui: React.ReactElement) {
@@ -7,6 +23,13 @@ function renderWithRouter(ui: React.ReactElement) {
 }
 
 describe('Navbar', () => {
+  beforeEach(() => {
+    vi.mocked(useAuthStore).mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+    } as ReturnType<typeof useAuthStore>)
+  })
+
   it('renders logo "DIMENSION" and ".LAB3D"', () => {
     renderWithRouter(<Navbar />)
     expect(screen.getByText('DIMENSION')).toBeInTheDocument()
@@ -56,4 +79,35 @@ describe('Navbar', () => {
     expect(portfolioLinks[0].closest('a')).toHaveAttribute('href', '/portfolio')
     expect(quoteLinks[0].closest('a')).toHaveAttribute('href', '/quote')
   })
+
+  it('shows "Entrar" button when not authenticated', () => {
+    renderWithRouter(<Navbar />)
+    expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument()
+  })
+
+  it('shows "Sair" button and "Meus Orçamentos" link when authenticated as CLIENT', () => {
+    vi.mocked(useAuthStore).mockReturnValue({
+      user: { id: 'u1', email: 'a@b.com', role: 'CLIENT' },
+      isAuthenticated: true,
+    } as ReturnType<typeof useAuthStore>)
+    renderWithRouter(<Navbar />)
+    expect(screen.getByRole('button', { name: 'Sair' })).toBeInTheDocument()
+    expect(screen.getByText('Meus Orçamentos')).toBeInTheDocument()
+  })
+
+  it('shows "Admin" link when authenticated as ADMIN', () => {
+    vi.mocked(useAuthStore).mockReturnValue({
+      user: { id: 'u1', email: 'admin@b.com', role: 'ADMIN' },
+      isAuthenticated: true,
+    } as ReturnType<typeof useAuthStore>)
+    renderWithRouter(<Navbar />)
+    expect(screen.getByText('Admin')).toBeInTheDocument()
+  })
+
+  it('calls loginWithGoogle when "Entrar" is clicked', () => {
+    renderWithRouter(<Navbar />)
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }))
+    expect(vi.mocked(authService.loginWithGoogle)).toHaveBeenCalledOnce()
+  })
+
 })

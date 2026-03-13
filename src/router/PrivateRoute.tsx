@@ -9,7 +9,15 @@ interface Props {
 }
 
 export function PrivateRoute({ role, children }: Props) {
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isAuthenticated, isAuthLoading } = useAuthStore()
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <span className="h-8 w-8 animate-spin rounded-full border-2 border-accent-blue border-t-transparent" />
+      </div>
+    )
+  }
 
   if (!isAuthenticated) return <Navigate to="/" replace />
   if (role === 'ADMIN' && user?.role !== 'ADMIN') return <Navigate to="/" replace />

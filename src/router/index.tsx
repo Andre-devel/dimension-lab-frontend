@@ -21,7 +21,20 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
   },
-  // TODO: restore PrivateRoute role="ADMIN" before OAuth integration (Phase 3)
-  { path: '/admin',             element: <AdminDashboard /> },
-  { path: '/admin/quotes/:id',  element: <AdminQuoteDetail /> },
+  {
+    path: '/admin',
+    element: (
+      <PrivateRoute role="ADMIN">
+        <AdminDashboard />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/admin/quotes/:id',
+    element: (
+      <PrivateRoute role="ADMIN">
+        <AdminQuoteDetail />
+      </PrivateRoute>
+    ),
+  },
 ])
