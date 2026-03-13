@@ -4,7 +4,7 @@ import { vi } from 'vitest'
 
 vi.mock('@/services/portfolioService', () => ({
   portfolioService: {
-    list: vi.fn(),
+    getById: vi.fn(),
   },
 }))
 
@@ -23,7 +23,7 @@ const mockItem = {
   material: 'PLA',
   printTime: 3,
   complexity: 'Médio',
-  photos: ['foto1.jpg'],
+  photos: ['/uploads/foto1.jpg'],
   modelFile: undefined,
   visible: true,
 }
@@ -36,13 +36,13 @@ describe('PortfolioDetail page', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('shows loading state initially', () => {
-    vi.mocked(portfolioService.list).mockImplementation(() => new Promise(() => {}))
+    vi.mocked(portfolioService.getById).mockImplementation(() => new Promise(() => {}))
     renderPage()
     expect(screen.getByText(/carregando/i)).toBeInTheDocument()
   })
 
   it('renders item title after loading', async () => {
-    vi.mocked(portfolioService.list).mockResolvedValueOnce([mockItem])
+    vi.mocked(portfolioService.getById).mockResolvedValueOnce(mockItem)
     renderPage()
     await waitFor(() => {
       expect(screen.getByText('Suporte para câmera')).toBeInTheDocument()
@@ -50,7 +50,7 @@ describe('PortfolioDetail page', () => {
   })
 
   it('renders material and category', async () => {
-    vi.mocked(portfolioService.list).mockResolvedValueOnce([mockItem])
+    vi.mocked(portfolioService.getById).mockResolvedValueOnce(mockItem)
     renderPage()
     await waitFor(() => {
       expect(screen.getAllByText('PLA').length).toBeGreaterThan(0)
@@ -58,8 +58,8 @@ describe('PortfolioDetail page', () => {
     })
   })
 
-  it('shows "não encontrado" when item not in list', async () => {
-    vi.mocked(portfolioService.list).mockResolvedValueOnce([])
+  it('shows "não encontrado" when item not found', async () => {
+    vi.mocked(portfolioService.getById).mockRejectedValueOnce(new Error('Not found'))
     renderPage()
     await waitFor(() => {
       expect(screen.getByText(/não encontrado/i)).toBeInTheDocument()
@@ -67,7 +67,7 @@ describe('PortfolioDetail page', () => {
   })
 
   it('renders back link to /portfolio', async () => {
-    vi.mocked(portfolioService.list).mockResolvedValueOnce([mockItem])
+    vi.mocked(portfolioService.getById).mockResolvedValueOnce(mockItem)
     renderPage()
     const backLink = screen.getByRole('link', { name: /voltar/i })
     expect(backLink).toHaveAttribute('href', '/portfolio')

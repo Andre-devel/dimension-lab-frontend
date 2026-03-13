@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/Card'
 import type { PortfolioItem } from '@/types/portfolio'
+import { fileUrl } from '@/utils/fileUrl'
 
 interface Props {
   item: PortfolioItem
@@ -12,7 +13,7 @@ export function PortfolioCard({ item }: Props) {
       <Card hoverable>
         {item.photos.length > 0 ? (
           <img
-            src={item.photos[0]}
+            src={fileUrl(item.photos[0])}
             alt={item.title}
             className="mb-3 h-40 w-full rounded object-cover"
           />

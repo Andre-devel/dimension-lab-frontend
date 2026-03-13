@@ -4,15 +4,15 @@ import { PageWrapper } from '@/components/layout/PageWrapper'
 import { Card } from '@/components/ui/Card'
 import { portfolioService } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
+import { fileUrl } from '@/utils/fileUrl'
 
 export default function PortfolioDetail() {
   const { id } = useParams<{ id: string }>()
   const [item, setItem] = useState<PortfolioItem | null | undefined>(undefined)
 
   useEffect(() => {
-    portfolioService.list().then((data) => {
-      setItem(data.find((i) => i.id === id) ?? null)
-    })
+    if (!id) return
+    portfolioService.getById(id).then(setItem).catch(() => setItem(null))
   }, [id])
 
   return (
@@ -36,7 +36,7 @@ export default function PortfolioDetail() {
                 {item.photos.map((photo, i) => (
                   <img
                     key={i}
-                    src={photo}
+                    src={fileUrl(photo)}
                     alt={`${item.title} - foto ${i + 1}`}
                     className="w-full rounded-lg object-cover"
                   />
@@ -50,7 +50,7 @@ export default function PortfolioDetail() {
                 <h2 className="mb-3 text-lg font-semibold text-text-primary">Modelo 3D</h2>
                 {/* @ts-expect-error model-viewer is a custom element */}
                 <model-viewer
-                  src={item.modelFile}
+                  src={fileUrl(item.modelFile)}
                   alt={item.title}
                   auto-rotate
                   camera-controls
