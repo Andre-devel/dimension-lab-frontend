@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { FileUploadZone } from '@/components/ui/FileUploadZone'
 import { quoteService } from '@/services/quoteService'
 import { MATERIALS, FINISHES } from '@/constants/quoteStatus'
+import { useAuthStore } from '@/store/authStore'
 
 const schema = z.object({
   description: z.string().min(10, 'Mínimo 10 caracteres'),
@@ -18,7 +19,7 @@ const schema = z.object({
   desiredDeadline: z.string().min(1, 'Informe o prazo'),
   customerName: z.string().optional(),
   customerEmail: z.string().email('E-mail inválido').optional().or(z.literal('')),
-  customerWhatsapp: z.string().optional(),
+  customerWhatsapp: z.string().min(10, 'Informe seu WhatsApp com DDD').optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -33,6 +34,7 @@ const inputCls = (hasError: boolean) =>
   ].join(' ')
 
 export default function QuoteRequest() {
+  const { isAuthenticated, user, setUser } = useAuthStore()
   const [files, setFiles] = useState<File[]>([])
   const [success, setSuccess] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -51,11 +53,19 @@ export default function QuoteRequest() {
 
   async function onSubmit(data: FormValues) {
     setSubmitError('')
+    const needsWhatsapp = !isAuthenticated || !user?.whatsapp
+    if (needsWhatsapp && (!data.customerWhatsapp || data.customerWhatsapp.length < 10)) {
+      setSubmitError('Informe seu WhatsApp com DDD.')
+      return
+    }
     try {
       await quoteService.create({
         ...data,
         files,
       })
+      if (isAuthenticated && user && !user.whatsapp && data.customerWhatsapp) {
+        setUser({ ...user, whatsapp: data.customerWhatsapp })
+      }
       setSuccess(true)
       reset()
       setFiles([])
@@ -237,36 +247,66 @@ export default function QuoteRequest() {
               </div>
 
               {/* Customer data */}
-              <div className="flex flex-col gap-4 pt-1">
-                <h2 className="font-heading text-sm font-semibold text-text-primary">
-                  Seus dados (opcional)
-                </h2>
+              {isAuthenticated ? (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3 rounded-lg border border-accent-blue/20 bg-accent-blue/5 px-4 py-3">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent-blue/20 text-sm">
+                      ✓
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-text-primary">
+                        {user?.name ?? user?.email}
+                      </p>
+                      <p className="text-xs text-text-secondary">
+                        {user?.email}
+                        {user?.whatsapp && (
+                          <span className="ml-2 text-accent-blue">{user.whatsapp}</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  {!user?.whatsapp && (
+                    <Input
+                      id="customerWhatsapp"
+                      label="WhatsApp (com DDD)"
+                      type="tel"
+                      error={errors.customerWhatsapp?.message}
+                      {...register('customerWhatsapp')}
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4 pt-1">
+                  <h2 className="font-heading text-sm font-semibold text-text-primary">
+                    Seus dados (opcional)
+                  </h2>
 
-                {/* Name + WhatsApp row */}
-                <div className="grid gap-4 md:grid-cols-2">
+                  {/* Name + WhatsApp row */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Input
+                      id="customerName"
+                      label="Seu nome"
+                      error={errors.customerName?.message}
+                      {...register('customerName')}
+                    />
+                    <Input
+                      id="customerWhatsapp"
+                      label="WhatsApp (com DDD)"
+                      type="tel"
+                      error={errors.customerWhatsapp?.message}
+                      {...register('customerWhatsapp')}
+                    />
+                  </div>
+
                   <Input
-                    id="customerName"
-                    label="Seu nome"
-                    error={errors.customerName?.message}
-                    {...register('customerName')}
-                  />
-                  <Input
-                    id="customerWhatsapp"
-                    label="WhatsApp (com DDD)"
-                    type="tel"
-                    error={errors.customerWhatsapp?.message}
-                    {...register('customerWhatsapp')}
+                    id="customerEmail"
+                    label="Seu e-mail"
+                    type="email"
+                    error={errors.customerEmail?.message}
+                    {...register('customerEmail')}
                   />
                 </div>
-
-                <Input
-                  id="customerEmail"
-                  label="Seu e-mail"
-                  type="email"
-                  error={errors.customerEmail?.message}
-                  {...register('customerEmail')}
-                />
-              </div>
+              )}
 
               {submitError && (
                 <p className="text-sm text-red-500">{submitError}</p>
