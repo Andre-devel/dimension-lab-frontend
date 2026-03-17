@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { Input } from '@/components/ui/Input'
 import { CustomSelect } from '@/components/ui/CustomSelect'
+import { DatePicker } from '@/components/ui/DatePicker'
 import { Button } from '@/components/ui/Button'
 import { FileUploadZone } from '@/components/ui/FileUploadZone'
 import { quoteService } from '@/services/quoteService'
@@ -221,13 +222,19 @@ export default function QuoteRequest() {
               />
 
               {/* Desired Deadline */}
-              <Input
-                id="desiredDeadline"
-                label="Prazo desejado"
-                type="text"
-                placeholder="AAAA-MM-DD"
-                error={errors.desiredDeadline?.message}
-                {...register('desiredDeadline')}
+              <Controller
+                control={control}
+                name="desiredDeadline"
+                render={({ field }) => (
+                  <DatePicker
+                    id="desiredDeadline"
+                    label="Prazo desejado"
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    error={errors.desiredDeadline?.message}
+                  />
+                )}
               />
 
               {/* File upload */}
