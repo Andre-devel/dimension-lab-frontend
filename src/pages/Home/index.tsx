@@ -1,5 +1,9 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageWrapper } from '@/components/layout/PageWrapper'
+import { Carousel } from '@/components/ui/Carousel'
+import { portfolioService } from '@/services/portfolioService'
+import type { PortfolioItem } from '@/types/portfolio'
 
 const steps = [
   {
@@ -28,114 +32,315 @@ const steps = [
   },
 ]
 
-const testimonials = [
-  {
-    quote:
-      'Encomendei peças para meu projeto de robótica e fiquei impressionado com a qualidade. Entrega rápida e comunicação excelente!',
-    name: 'Carlos Mendes',
-    city: 'São Paulo, SP',
-    initial: 'C',
-  },
-  {
-    quote:
-      'Precisei de protótipos para minha startup e o Dimension.Lab3D superou todas as expectativas. Recomendo demais!',
-    name: 'Ana Lima',
-    city: 'Rio de Janeiro, RJ',
-    initial: 'A',
-  },
-  {
-    quote:
-      'Qualidade incrível nas miniaturas que pedi. Detalhes perfeitos e material de excelente qualidade. Já fiz vários pedidos!',
-    name: 'Pedro Oliveira',
-    city: 'Belo Horizonte, MG',
-    initial: 'P',
-  },
-]
-
 export default function Home() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([])
+  const [portfolioLoading, setPortfolioLoading] = useState(true)
+
+  // ── Canvas cube animation ──────────────────────────────────────────────────
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const wrap = wrapRef.current
+    if (!canvas || !wrap) return
+
+    const ctx = canvas.getContext('2d')!
+    const DPR = window.devicePixelRatio || 1
+    let W = 0, H = 0, cx = 0, cy = 0
+
+    const SHAPE: { x: number; y: number; z: number }[] = []
+    const COUNT = 260
+
+    function genCube() {
+      SHAPE.length = 0
+      const s = Math.min(W, H) * 0.22
+      const verts: { x: number; y: number; z: number }[] = []
+      for (let x = -1; x <= 1; x += 2)
+        for (let y = -1; y <= 1; y += 2)
+          for (let z = -1; z <= 1; z += 2)
+            verts.push({ x: x * s, y: y * s, z: z * s })
+
+      for (const v of verts)
+        for (let i = 0; i < 4; i++)
+          SHAPE.push({ x: v.x + (Math.random() - .5) * 8, y: v.y + (Math.random() - .5) * 8, z: v.z + (Math.random() - .5) * 8 })
+
+      const edges = [[0,1],[0,2],[0,4],[1,3],[1,5],[2,3],[2,6],[3,7],[4,5],[4,6],[5,7],[6,7]]
+      for (const [a, b] of edges)
+        for (let i = 1; i < 10; i++) {
+          const t = i / 10
+          SHAPE.push({
+            x: verts[a].x + (verts[b].x - verts[a].x) * t + (Math.random() - .5) * 4,
+            y: verts[a].y + (verts[b].y - verts[a].y) * t + (Math.random() - .5) * 4,
+            z: verts[a].z + (verts[b].z - verts[a].z) * t + (Math.random() - .5) * 4,
+          })
+        }
+
+      const faces = [[0,1,3,2],[4,5,7,6],[0,1,5,4],[2,3,7,6],[0,2,6,4],[1,3,7,5]]
+      for (const [a, b, c, d] of faces)
+        for (let i = 0; i < 6; i++) {
+          const u = Math.random(), v = Math.random()
+          const p1x = verts[a].x + (verts[b].x - verts[a].x) * u
+          const p1y = verts[a].y + (verts[b].y - verts[a].y) * u
+          const p1z = verts[a].z + (verts[b].z - verts[a].z) * u
+          const p2x = verts[d].x + (verts[c].x - verts[d].x) * u
+          const p2y = verts[d].y + (verts[c].y - verts[d].y) * u
+          const p2z = verts[d].z + (verts[c].z - verts[d].z) * u
+          SHAPE.push({
+            x: p1x + (p2x - p1x) * v + (Math.random() - .5) * 3,
+            y: p1y + (p2y - p1y) * v + (Math.random() - .5) * 3,
+            z: p1z + (p2z - p1z) * v + (Math.random() - .5) * 3,
+          })
+        }
+
+      while (SHAPE.length < COUNT)
+        SHAPE.push({ x: (Math.random() - .5) * s * 1.6, y: (Math.random() - .5) * s * 1.6, z: (Math.random() - .5) * s * 1.6 })
+    }
+
+    function ease(t: number) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2 }
+
+    interface Particle { x: number; y: number; z: number; size: number; hue: number; alpha: number; vx: number; vy: number; vz: number }
+    const particles: Particle[] = []
+
+    function initParticles() {
+      particles.length = 0
+      const spread = Math.min(W || 500, H || 500) * 1.2
+      for (let i = 0; i < COUNT; i++)
+        particles.push({
+          x: (Math.random() - .5) * spread, y: (Math.random() - .5) * spread, z: (Math.random() - .5) * spread,
+          size: 1 + Math.random() * 2.2,
+          hue: [195, 210, 230, 270][Math.floor(Math.random() * 4)],
+          alpha: .35 + Math.random() * .65,
+          vx: 0, vy: 0, vz: 0,
+        })
+    }
+
+    let mouseX = -9999, mouseY = -9999
+
+    function onMouseMove(e: MouseEvent) {
+      const rect = wrap.getBoundingClientRect()
+      mouseX = e.clientX - rect.left
+      mouseY = e.clientY - rect.top
+    }
+    function onMouseLeave() { mouseX = -9999; mouseY = -9999 }
+
+    canvas.addEventListener('mousemove', onMouseMove)
+    canvas.addEventListener('mouseleave', onMouseLeave)
+
+    function resize() {
+      const rect = wrap.getBoundingClientRect()
+      W = rect.width; H = rect.height
+      canvas.width = W * DPR; canvas.height = H * DPR
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
+      cx = W / 2; cy = H / 2
+      genCube()
+    }
+
+    const FORM_DURATION = 2000 // ms para formar o cubo
+    const startTime = performance.now()
+    let rafId: number
+
+    function frame(time: number) {
+      rafId = requestAnimationFrame(frame)
+      if (!W) return
+      ctx.clearRect(0, 0, W, H)
+
+      const elapsed = time - startTime
+      const rotY = elapsed * .0004
+      const rotX = Math.sin(elapsed * .0002) * .3
+
+      const prog = Math.min(1, ease(elapsed / FORM_DURATION))
+
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY)
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX)
+
+      const projected: { i: number; px: number; py: number; sc: number; z: number; size: number; hue: number; alpha: number }[] = []
+
+      for (let i = 0; i < COUNT; i++) {
+        const p = particles[i]
+        const sp = SHAPE[i % SHAPE.length]
+
+        let tx = sp.x * cosY - sp.z * sinY
+        let tz = sp.x * sinY + sp.z * cosY
+        let ty = sp.y * cosX - tz * sinX
+        tz = sp.y * sinX + tz * cosX
+
+        p.vx *= .85; p.vy *= .85; p.vz *= .85
+        const spd = .04 + prog * .08
+        p.x += (tx - p.x) * spd; p.y += (ty - p.y) * spd; p.z += (tz - p.z) * spd
+
+        const fov = 600, sc = fov / (fov + p.z)
+        const px = cx + p.x * sc, py = cy + p.y * sc
+        const dx = px - mouseX, dy = py - mouseY
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < 120 && dist > 0) { const f = (120 - dist) / 120 * 4; p.x += (dx / dist) * f; p.y += (dy / dist) * f }
+
+        projected.push({ i, px, py, sc, z: p.z, size: p.size, hue: p.hue, alpha: p.alpha })
+      }
+
+      projected.sort((a, b) => a.z - b.z)
+
+      if (prog > .3) {
+        const lineAlpha = (prog - .3) / .7 * .18
+        const maxD = 55 * (Math.min(W, H) / 500)
+        ctx.lineWidth = .6
+        for (let i = 0; i < projected.length; i++) {
+          const a = projected[i]
+          for (let j = i + 1; j < Math.min(i + 20, projected.length); j++) {
+            const b = projected[j]
+            const d = Math.hypot(a.px - b.px, a.py - b.py)
+            if (d < maxD) {
+              ctx.strokeStyle = `rgba(0,170,255,${(1 - d / maxD) * lineAlpha})`
+              ctx.beginPath(); ctx.moveTo(a.px, a.py); ctx.lineTo(b.px, b.py); ctx.stroke()
+            }
+          }
+        }
+      }
+
+      for (const p of projected) {
+        const bright = 45 + p.sc * 35, a = p.alpha * Math.min(1, p.sc)
+        ctx.beginPath(); ctx.arc(p.px, p.py, p.size * p.sc * 4, 0, Math.PI * 2)
+        ctx.fillStyle = `hsla(${p.hue},100%,${bright}%,${a * .06})`; ctx.fill()
+        ctx.beginPath(); ctx.arc(p.px, p.py, p.size * p.sc, 0, Math.PI * 2)
+        ctx.fillStyle = `hsla(${p.hue},100%,${bright}%,${a})`; ctx.fill()
+      }
+    }
+
+    resize()
+    initParticles()
+
+    const ro = new ResizeObserver(() => { resize(); initParticles() })
+    ro.observe(wrap)
+
+    rafId = requestAnimationFrame(frame)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      ro.disconnect()
+      canvas.removeEventListener('mousemove', onMouseMove)
+      canvas.removeEventListener('mouseleave', onMouseLeave)
+    }
+  }, [])
+
+  // ── Portfolio ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    portfolioService.list()
+      .then(items => setPortfolioItems(items))
+      .catch(() => {})
+      .finally(() => setPortfolioLoading(false))
+  }, [])
+
   return (
     <PageWrapper>
+
       {/* ─── HERO ─── */}
       <section
-        className="relative flex items-center overflow-hidden"
-        style={{ minHeight: '100vh', padding: '120px 5% 80px' }}
+        className="relative flex flex-col lg:flex-row lg:items-center lg:min-h-[calc(100vh-64px)] overflow-hidden"
+        style={{ padding: '40px 5% 40px' }}
       >
-        {/* Animated background layers */}
         <div className="hero-grid" />
         <div className="hero-bg" />
 
-        {/* Left content */}
-        <div className="relative z-10 max-w-[620px]">
-          {/* Badge */}
-          <div className="hero-badge">
+        {/* Left */}
+        <div className="relative z-10 flex-1 max-w-[620px]">
+          <div
+            className="hero-badge"
+            style={{ animation: 'fadeUp .6s ease 0s both' }}
+          >
             <span className="badge-dot" />
             Impressão 3D Personalizada
           </div>
 
-          {/* H1 */}
           <h1
             className="font-heading font-black leading-tight mb-5"
-            style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)' }}
+            style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', animation: 'fadeUp .6s ease .1s both' }}
           >
             Sua ideia,{' '}
-            <em className="text-accent-blue not-italic">impressa</em>
-            {' '}em 3D com precisão
+            <br className="hidden sm:block" />
+            na pressa com{' '}
+            <br className="hidden sm:block" />
+            <span
+              style={{
+                background: 'linear-gradient(100deg, #00E5FF, #4D9FFF, #8B5CF6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              precisão total
+            </span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-text-secondary mb-8 max-w-[480px] text-lg leading-relaxed">
-            Do protótipo à peça final — impressão 3D profissional em PLA, PETG, ABS, Resina e
-            muito mais. Entregamos qualidade, rapidez e atenção a cada detalhe.
+          <p
+            className="text-text-secondary mb-8 max-w-[480px] text-lg leading-relaxed"
+            style={{ animation: 'fadeUp .6s ease .2s both' }}
+          >
+            Envie seu arquivo, acompanhe em tempo real e receba em até 24h.
           </p>
 
-          {/* CTA buttons */}
-          <div className="flex flex-wrap gap-4 mb-12">
+          <div
+            className="flex gap-3"
+            style={{ animation: 'fadeUp .6s ease .3s both' }}
+          >
             <Link
               to="/quote"
-              className="rounded-full bg-accent-blue px-7 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
+              className="rounded-full bg-accent-blue px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow whitespace-nowrap"
             >
               Pedir Orçamento
             </Link>
             <Link
               to="/portfolio"
-              className="rounded-full border border-border px-7 py-3 text-sm font-semibold text-text-secondary transition-all hover:text-text-primary hover:border-accent-blue/50"
+              className="rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-text-secondary transition-all hover:text-text-primary hover:border-accent-blue/50 whitespace-nowrap"
             >
               Ver Portfólio
             </Link>
           </div>
-
-          {/* Stats */}
-          <div className="flex flex-wrap gap-8">
-            {[
-              { value: '500+', label: 'Projetos Entregues' },
-              { value: '48h', label: 'Entrega Média' },
-              { value: '4.9★', label: 'Avaliação' },
-            ].map(({ value, label }) => (
-              <div key={label} className="flex flex-col">
-                <span className="text-accent-blue font-extrabold text-3xl leading-none">
-                  {value}
-                </span>
-                <span className="text-text-secondary text-xs mt-1">{label}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Right — 3D Cube (hidden on mobile) */}
-        <div className="cube-wrap hidden lg:block">
-          <div className="glow-ring" />
-          <div className="glow-ring" />
-          <div className="glow-ring" />
-          <div className="cube">
-            <div className="face front">⬡</div>
-            <div className="face back">◈</div>
-            <div className="face left">◉</div>
-            <div className="face right">⬡</div>
-            <div className="face top">◈</div>
-            <div className="face bottom">◉</div>
-          </div>
+        {/* Desktop — canvas cubo partículas */}
+        <div
+          ref={wrapRef}
+          className="hidden lg:relative lg:flex lg:flex-none lg:ml-10 lg:h-[480px]"
+          style={{ flex: '0 0 480px' }}
+        >
+          <canvas
+            ref={canvasRef}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+          />
         </div>
       </section>
+
+      {/* ─── PORTFÓLIO PREVIEW ─── */}
+      {(portfolioLoading || portfolioItems.length > 0) && (
+        <section style={{ padding: 'clamp(48px, 8vw, 100px) 0', background: 'rgba(10,10,20,0.6)' }}>
+          <div style={{ padding: '0 5%' }} className="mb-10">
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading text-2xl lg:text-3xl font-bold text-accent-blue">
+                Galeria
+              </h2>
+              <Link
+                to="/portfolio"
+                className="text-sm text-text-secondary hover:text-accent-blue transition-colors"
+              >
+                Ver todos →
+              </Link>
+            </div>
+          </div>
+
+          {portfolioLoading ? (
+            <div style={{ padding: '0 5%' }} className="flex gap-6 overflow-hidden">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-card bg-surface-2 animate-pulse flex-shrink-0"
+                  style={{ width: 256, height: 240 }}
+                />
+              ))}
+            </div>
+          ) : (
+            <Carousel items={portfolioItems.slice(0, 10)} />
+          )}
+        </section>
+      )}
 
       {/* ─── COMO FUNCIONA ─── */}
       <section className="bg-surface" style={{ padding: '100px 5%' }}>
@@ -159,7 +364,6 @@ export default function Home() {
               key={number}
               className="relative bg-surface-2 rounded-card border border-border p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-glow overflow-hidden"
             >
-              {/* Watermark number */}
               <span
                 className="absolute top-2 right-4 font-heading font-black select-none pointer-events-none"
                 style={{ fontSize: '5rem', lineHeight: 1, color: 'rgba(77,159,255,0.07)' }}
@@ -167,8 +371,10 @@ export default function Home() {
                 {number}
               </span>
 
-              {/* Icon */}
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-md bg-accent-blue/10 border border-accent-blue/20 text-xl">
+              <div
+                className="mb-4 flex h-11 w-11 items-center justify-center rounded-md border border-accent-blue/20 text-xl"
+                style={{ background: 'rgba(0,229,255,.08)' }}
+              >
                 {icon}
               </div>
 
@@ -179,44 +385,54 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── TESTIMONIALS ─── */}
-      <section className="bg-surface" style={{ padding: '100px 5%' }}>
-        <p className="text-accent-blue text-xs font-semibold uppercase tracking-[0.15em] mb-3">
-          Depoimentos
-        </p>
-        <h2 className="font-heading text-3xl font-bold text-text-primary mb-12">
-          O que dizem nossos clientes
-        </h2>
+      {/* ─── CTA ─── */}
+      <section
+        className="relative overflow-hidden"
+        style={{ padding: '100px 5%' }}
+      >
+        {/* Orb */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%', left: '50%',
+            transform: 'translate(-50%,-50%)',
+            width: 600, height: 600,
+            background: 'radial-gradient(circle, rgba(77,159,255,.12) 0%, transparent 70%)',
+            pointerEvents: 'none',
+            animation: 'orbFloat 8s ease-in-out infinite',
+          }}
+        />
 
         <div
-          className="grid gap-6"
-          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}
+          className="relative z-10 mx-auto max-w-2xl text-center rounded-2xl border border-accent-blue/20 px-6 py-10 lg:p-12"
+          style={{ background: 'rgba(77,159,255,.04)' }}
         >
-          {testimonials.map(({ quote, name, city, initial }) => (
-            <div
-              key={name}
-              className="bg-surface-2 rounded-card border border-border p-6 flex flex-col gap-4"
+          <h2
+            className="font-black text-text-primary mb-4"
+            style={{ fontSize: 'clamp(1.4rem, 5vw, 2.8rem)' }}
+          >
+            Pronto para imprimir sua ideia?
+          </h2>
+          <p className="text-text-secondary mb-8 leading-relaxed max-w-md mx-auto">
+            Orçamento gratuito em até 24h. Sem burocracia, sem surpresas.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/quote"
+              className="rounded-full bg-accent-blue px-6 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
             >
-              {/* Stars */}
-              <span className="text-accent-blue text-lg tracking-wide">★★★★★</span>
-
-              {/* Quote */}
-              <p className="text-text-secondary text-sm leading-relaxed flex-1">"{quote}"</p>
-
-              {/* Author */}
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-blue text-white font-bold text-sm flex-shrink-0">
-                  {initial}
-                </div>
-                <div>
-                  <p className="text-text-primary text-sm font-semibold">{name}</p>
-                  <p className="text-text-secondary text-xs">{city}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+              Pedir Orçamento
+            </Link>
+            <Link
+              to="/my-quotes"
+              className="rounded-full border border-border px-6 py-3 font-semibold text-text-secondary transition-all hover:text-text-primary hover:border-accent-blue/50"
+            >
+              Meus pedidos
+            </Link>
+          </div>
         </div>
       </section>
+
     </PageWrapper>
   )
 }

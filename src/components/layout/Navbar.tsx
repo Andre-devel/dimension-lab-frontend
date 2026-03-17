@@ -78,7 +78,7 @@ export function Navbar() {
             </button>
             <NavLink
               to="/quote"
-              className="rounded-full bg-accent-blue px-[22px] py-[9px] text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
+              className="hidden md:inline-flex rounded-full bg-accent-blue px-[22px] py-[9px] text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
             >
               Pedir Orçamento
             </NavLink>
