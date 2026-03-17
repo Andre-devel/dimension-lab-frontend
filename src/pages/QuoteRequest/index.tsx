@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { Input } from '@/components/ui/Input'
+import { CustomSelect } from '@/components/ui/CustomSelect'
 import { Button } from '@/components/ui/Button'
 import { FileUploadZone } from '@/components/ui/FileUploadZone'
 import { quoteService } from '@/services/quoteService'
@@ -48,6 +49,7 @@ export default function QuoteRequest() {
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -173,48 +175,39 @@ export default function QuoteRequest() {
                 )}
               </div>
 
-              {/* Material */}
-              <div className="flex flex-col gap-1">
-                <label htmlFor="material" className="text-sm text-text-secondary">
-                  Material
-                </label>
-                <select
-                  id="material"
-                  {...register('material')}
-                  className={inputCls(!!errors.material)}
-                >
-                  <option value="">Selecione...</option>
-                  {materials.map((m) => (
-                    <option key={m.id} value={m.name}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.material && (
-                  <span className="text-xs text-red-500">{errors.material.message}</span>
-                )}
-              </div>
+              {/* Material + Color row */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <Controller
+                  control={control}
+                  name="material"
+                  render={({ field }) => (
+                    <CustomSelect
+                      id="material"
+                      label="Material"
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      options={materials.map((m) => ({ value: m.name, label: m.name }))}
+                      error={errors.material?.message}
+                    />
+                  )}
+                />
 
-              {/* Color */}
-              <div className="flex flex-col gap-1">
-                <label htmlFor="color" className="text-sm text-text-secondary">
-                  Cor
-                </label>
-                <select
-                  id="color"
-                  {...register('color')}
-                  className={inputCls(!!errors.color)}
-                >
-                  <option value="">Selecione...</option>
-                  {colors.map((c) => (
-                    <option key={c.id} value={c.name}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.color && (
-                  <span className="text-xs text-red-500">{errors.color.message}</span>
-                )}
+                <Controller
+                  control={control}
+                  name="color"
+                  render={({ field }) => (
+                    <CustomSelect
+                      id="color"
+                      label="Cor"
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      options={colors.map((c) => ({ value: c.name, label: c.name }))}
+                      error={errors.color?.message}
+                    />
+                  )}
+                />
               </div>
 
               {/* Quantity */}
