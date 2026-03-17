@@ -9,7 +9,21 @@ import type { Quote } from '@/types/quote'
 export default function MyQuotes() {
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [loading, setLoading] = useState(true)
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
   const { updatedIds } = useQuoteNotifications(quotes)
+
+  async function handleCancel(id: string) {
+    if (!window.confirm('Tem certeza que deseja cancelar este orçamento?')) return
+    setCancellingId(id)
+    try {
+      const updated = await quoteService.cancel(id)
+      setQuotes((prev) => prev.map((q) => (q.id === id ? updated : q)))
+    } catch {
+      alert('Não foi possível cancelar o orçamento. Tente novamente.')
+    } finally {
+      setCancellingId(null)
+    }
+  }
 
   useEffect(() => {
     quoteService
@@ -67,6 +81,16 @@ export default function MyQuotes() {
 
                 <div className="flex items-center gap-3 shrink-0">
                   <StatusBadge status={quote.status} />
+                  {quote.status === 'RECEIVED' && (
+                    <button
+                      type="button"
+                      disabled={cancellingId === quote.id}
+                      onClick={() => handleCancel(quote.id)}
+                      className="rounded-full border border-red-500/40 px-4 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 hover:border-red-500/70 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {cancellingId === quote.id ? 'Cancelando…' : 'Cancelar'}
+                    </button>
+                  )}
                 </div>
               </li>
             ))}

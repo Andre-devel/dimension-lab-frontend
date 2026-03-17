@@ -7,6 +7,7 @@ export const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
   PRINTING:     'Imprimindo',
   READY:        'Pronto',
   DELIVERED:    'Entregue',
+  CANCELLED:    'Cancelado',
 }
 
 export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
@@ -16,6 +17,7 @@ export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
   PRINTING:     '#2563EB',
   READY:        '#10B981',
   DELIVERED:    '#4A4A6A',
+  CANCELLED:    '#6B7280',
 }
 
 export const MATERIALS = ['PLA', 'ABS', 'PETG', 'TPU', 'Resina'] as const

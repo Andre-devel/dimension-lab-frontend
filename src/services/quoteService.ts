@@ -35,4 +35,9 @@ export const quoteService = {
     const { data } = await api.patch<Quote>(`/api/v1/quotes/${id}/status`, { status })
     return data
   },
+
+  async cancel(id: string): Promise<Quote> {
+    const { data } = await api.patch<Quote>(`/api/v1/quotes/${id}/cancel`)
+    return data
+  },
 }

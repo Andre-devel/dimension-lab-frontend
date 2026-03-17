@@ -5,6 +5,7 @@ export type QuoteStatus =
   | 'PRINTING'
   | 'READY'
   | 'DELIVERED'
+  | 'CANCELLED'
 
 export type FileType = 'IMAGE' | 'VIDEO' | 'MODEL_3D'
 
