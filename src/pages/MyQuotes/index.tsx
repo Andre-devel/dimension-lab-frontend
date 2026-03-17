@@ -72,7 +72,7 @@ export default function MyQuotes() {
                     )}
                   </div>
                   <p className="text-sm text-text-secondary">
-                    {quote.material} · {quote.quantity}x · {quote.finish}
+                    {quote.material} · {quote.quantity}x
                   </p>
                   <p className="text-xs text-text-secondary">
                     Prazo: {new Date(quote.desiredDeadline).toLocaleDateString('pt-BR')}

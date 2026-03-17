@@ -8,7 +8,6 @@ export const quoteService = {
     form.append('material',        payload.material)
     form.append('color',           payload.color)
     form.append('quantity',        String(payload.quantity))
-    form.append('finish',          payload.finish)
     form.append('desiredDeadline', payload.desiredDeadline)
     if (payload.customerName)      form.append('customerName',      payload.customerName)
     if (payload.customerEmail)     form.append('customerEmail',     payload.customerEmail)

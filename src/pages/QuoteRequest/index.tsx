@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -7,15 +7,15 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { FileUploadZone } from '@/components/ui/FileUploadZone'
 import { quoteService } from '@/services/quoteService'
-import { MATERIALS, FINISHES } from '@/constants/quoteStatus'
+import { materialService, colorService } from '@/services/catalogService'
+import type { Material, Color } from '@/types/catalog'
 import { useAuthStore } from '@/store/authStore'
 
 const schema = z.object({
   description: z.string().min(10, 'Mínimo 10 caracteres'),
   material: z.string().min(1, 'Selecione um material'),
-  color: z.string().min(1, 'Informe a cor'),
+  color: z.string().min(1, 'Selecione uma cor'),
   quantity: z.number().min(1, 'Mínimo 1 unidade'),
-  finish: z.string().min(1, 'Selecione um acabamento'),
   desiredDeadline: z.string().min(1, 'Informe o prazo'),
   customerName: z.string().optional(),
   customerEmail: z.string().email('E-mail inválido').optional().or(z.literal('')),
@@ -38,6 +38,13 @@ export default function QuoteRequest() {
   const [files, setFiles] = useState<File[]>([])
   const [success, setSuccess] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [materials, setMaterials] = useState<Material[]>([])
+  const [colors, setColors] = useState<Color[]>([])
+
+  useEffect(() => {
+    materialService.listActive().then(setMaterials).catch(() => {})
+    colorService.listActive().then(setColors).catch(() => {})
+  }, [])
 
   const {
     register,
@@ -177,9 +184,9 @@ export default function QuoteRequest() {
                   className={inputCls(!!errors.material)}
                 >
                   <option value="">Selecione...</option>
-                  {MATERIALS.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
+                  {materials.map((m) => (
+                    <option key={m.id} value={m.name}>
+                      {m.name}
                     </option>
                   ))}
                 </select>
@@ -189,12 +196,26 @@ export default function QuoteRequest() {
               </div>
 
               {/* Color */}
-              <Input
-                id="color"
-                label="Cor"
-                error={errors.color?.message}
-                {...register('color')}
-              />
+              <div className="flex flex-col gap-1">
+                <label htmlFor="color" className="text-sm text-text-secondary">
+                  Cor
+                </label>
+                <select
+                  id="color"
+                  {...register('color')}
+                  className={inputCls(!!errors.color)}
+                >
+                  <option value="">Selecione...</option>
+                  {colors.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.color && (
+                  <span className="text-xs text-red-500">{errors.color.message}</span>
+                )}
+              </div>
 
               {/* Quantity */}
               <Input
@@ -205,28 +226,6 @@ export default function QuoteRequest() {
                 error={errors.quantity?.message}
                 {...register('quantity', { valueAsNumber: true })}
               />
-
-              {/* Finish */}
-              <div className="flex flex-col gap-1">
-                <label htmlFor="finish" className="text-sm text-text-secondary">
-                  Acabamento
-                </label>
-                <select
-                  id="finish"
-                  {...register('finish')}
-                  className={inputCls(!!errors.finish)}
-                >
-                  <option value="">Selecione...</option>
-                  {FINISHES.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
-                </select>
-                {errors.finish && (
-                  <span className="text-xs text-red-500">{errors.finish.message}</span>
-                )}
-              </div>
 
               {/* Desired Deadline */}
               <Input

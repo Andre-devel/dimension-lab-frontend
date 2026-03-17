@@ -41,12 +41,26 @@ export default function AdminDashboard() {
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-text-primary">Painel Admin</h1>
-          <Link
-            to="/admin/portfolio"
-            className="rounded-md border border-border px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
-          >
-            Gerenciar Portfólio →
-          </Link>
+          <div className="flex gap-2 flex-wrap">
+            <Link
+              to="/admin/portfolio"
+              className="rounded-md border border-border px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Gerenciar Portfólio →
+            </Link>
+            <Link
+              to="/admin/materials"
+              className="rounded-md border border-border px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Gerenciar Materiais →
+            </Link>
+            <Link
+              to="/admin/colors"
+              className="rounded-md border border-border px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Gerenciar Cores →
+            </Link>
+          </div>
         </div>
 
         {/* Filter buttons */}

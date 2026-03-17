@@ -21,7 +21,6 @@ export interface Quote {
   material: string
   color: string
   quantity: number
-  finish: string
   desiredDeadline: string
   status: QuoteStatus
   createdAt: string
@@ -41,7 +40,6 @@ export interface CreateQuotePayload {
   material: string
   color: string
   quantity: number
-  finish: string
   desiredDeadline: string
   files: File[]
   customerName?: string

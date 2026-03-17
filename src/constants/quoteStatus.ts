@@ -21,4 +21,3 @@ export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
 }
 
 export const MATERIALS = ['PLA', 'ABS', 'PETG', 'TPU', 'Resina'] as const
-export const FINISHES  = ['Padrão', 'Lixado', 'Pintado', 'Cromado'] as const
