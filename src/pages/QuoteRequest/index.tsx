@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import {
+  MessageSquare, Layers, Palette, Hash,
+  Calendar as CalendarIcon, UploadCloud, User, Phone, Mail,
+} from 'lucide-react'
 import { PageWrapper } from '@/components/layout/PageWrapper'
-import { Input } from '@/components/ui/Input'
 import { CustomSelect } from '@/components/ui/CustomSelect'
 import { DatePicker } from '@/components/ui/DatePicker'
-import { Button } from '@/components/ui/Button'
 import { FileUploadZone } from '@/components/ui/FileUploadZone'
 import { quoteService } from '@/services/quoteService'
 import { materialService, colorService } from '@/services/catalogService'
@@ -28,12 +31,35 @@ type FormValues = z.infer<typeof schema>
 
 const ACCEPT = '.jpg,.jpeg,.png,.mp4,.stl,.obj'
 
-const inputCls = (hasError: boolean) =>
-  [
-    'w-full rounded-btn border bg-surface-2 px-3 py-2 text-sm text-text-primary outline-none',
-    'placeholder:text-text-secondary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors',
-    hasError ? 'border-red-500' : 'border-border',
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function QLabel({ htmlFor, icon, children }: { htmlFor?: string; icon: ReactNode; children: ReactNode }) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      className="font-heading flex items-center gap-1.5"
+      style={{
+        fontSize: 10,
+        fontWeight: 500,
+        letterSpacing: '0.18em',
+        textTransform: 'uppercase',
+        color: 'rgba(136,144,181,0.9)',
+      }}
+    >
+      <span style={{ opacity: 0.55, display: 'flex', alignItems: 'center' }}>{icon}</span>
+      {children}
+    </label>
+  )
+}
+
+function qInput(hasError?: boolean): string {
+  return [
+    'q-input w-full rounded-[8px] px-4 py-[13px] text-sm text-text-primary placeholder:text-[#4a5080]',
+    hasError ? '!border-red-500' : '',
   ].join(' ')
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 
 export default function QuoteRequest() {
   const { isAuthenticated, user, setUser } = useAuthStore()
@@ -56,9 +82,7 @@ export default function QuoteRequest() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      quantity: 1,
-    },
+    defaultValues: { quantity: 1 },
   })
 
   async function onSubmit(data: FormValues) {
@@ -69,10 +93,7 @@ export default function QuoteRequest() {
       return
     }
     try {
-      await quoteService.create({
-        ...data,
-        files,
-      })
+      await quoteService.create({ ...data, files })
       if (isAuthenticated && user && !user.whatsapp && data.customerWhatsapp) {
         setUser({ ...user, whatsapp: data.customerWhatsapp })
       }
@@ -97,7 +118,7 @@ export default function QuoteRequest() {
               Orçamento enviado!
             </h2>
             <p className="text-text-secondary mb-8">
-              Orçamento enviado com sucesso! Entraremos em contato em breve.
+              Entraremos em contato em breve.
             </p>
             <button
               type="button"
@@ -115,12 +136,11 @@ export default function QuoteRequest() {
   return (
     <PageWrapper>
       <div style={{ padding: '100px 5% 80px' }}>
-        {/* Two-column layout */}
         <div
           className="grid gap-[60px]"
           style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}
         >
-          {/* Left — info */}
+          {/* ── Left — info ───────────────────────────────────────────────── */}
           <div className="flex flex-col justify-center">
             <p className="text-accent-blue text-xs font-semibold uppercase tracking-[0.15em] mb-3">
               Orçamento
@@ -133,12 +153,11 @@ export default function QuoteRequest() {
               personalizado em até 24 horas.
             </p>
 
-            {/* Perks */}
             <div className="flex flex-col gap-4">
               {[
-                { icon: '⚡', title: 'Resposta em 24h', desc: 'Orçamento rápido e detalhado' },
-                { icon: '🎨', title: 'Qualquer filamento', desc: 'PLA, PETG, ABS, Resina, TPU' },
-                { icon: '📐', title: 'Modelagem inclusa', desc: 'Ajudamos com o arquivo 3D' },
+                { icon: '⚡', title: 'Resposta em 24h',       desc: 'Orçamento rápido e detalhado' },
+                { icon: '🎨', title: 'Qualquer filamento',    desc: 'PLA, PETG, ABS, Resina, TPU' },
+                { icon: '📐', title: 'Modelagem inclusa',     desc: 'Ajudamos com o arquivo 3D' },
                 { icon: '🚚', title: 'Envio para todo Brasil', desc: 'Entregamos em qualquer estado' },
               ].map(({ icon, title, desc }) => (
                 <div key={title} className="flex items-start gap-4">
@@ -154,104 +173,174 @@ export default function QuoteRequest() {
             </div>
           </div>
 
-          {/* Right — form card */}
-          <div className="rounded-[18px] border border-border/30 bg-surface p-8 md:p-10">
+          {/* ── Right — form card ─────────────────────────────────────────── */}
+          <div
+            style={{
+              position: 'relative',
+              background: 'rgba(15,16,35,0.97)',
+              border: '1px solid rgba(30,33,80,0.65)',
+              borderRadius: 20,
+              padding: '36px 32px 28px',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Gradient top bar */}
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+              background: 'linear-gradient(135deg, #00E5FF, #4D9FFF, #8B5CF6)',
+              borderRadius: '20px 20px 0 0',
+              pointerEvents: 'none',
+            }} />
+
+            {/* Corner accent — top right */}
+            <div style={{
+              position: 'absolute', top: 14, right: 14,
+              width: 26, height: 26,
+              borderTop: '1.5px solid rgba(0,229,255,0.25)',
+              borderRight: '1.5px solid rgba(0,229,255,0.25)',
+              borderRadius: '0 6px 0 0',
+              pointerEvents: 'none',
+            }} />
+
+            {/* Corner accent — bottom left */}
+            <div style={{
+              position: 'absolute', bottom: 14, left: 14,
+              width: 26, height: 26,
+              borderBottom: '1.5px solid rgba(139,92,246,0.25)',
+              borderLeft: '1.5px solid rgba(139,92,246,0.25)',
+              borderRadius: '0 0 0 6px',
+              pointerEvents: 'none',
+            }} />
+
             <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
+
               {/* Description */}
-              <div className="flex flex-col gap-1">
-                <label htmlFor="description" className="text-sm text-text-secondary">
-                  Descrição do projeto
-                </label>
+              <div className="flex flex-col gap-1.5">
+                <QLabel htmlFor="description" icon={<MessageSquare size={11} />}>
+                  Detalhes do projeto
+                </QLabel>
                 <textarea
                   id="description"
                   rows={4}
+                  placeholder="Descreva dimensões, acabamento, referências ou qualquer detalhe importante..."
                   {...register('description')}
-                  className={[
-                    inputCls(!!errors.description),
-                    'resize-none',
-                  ].join(' ')}
+                  className={qInput(!!errors.description) + ' resize-none'}
                 />
                 {errors.description && (
                   <span className="text-xs text-red-500">{errors.description.message}</span>
                 )}
               </div>
 
-              {/* Material + Color row */}
+              {/* Material + Color */}
               <div className="grid gap-4 md:grid-cols-2">
-                <Controller
-                  control={control}
-                  name="material"
-                  render={({ field }) => (
-                    <CustomSelect
-                      id="material"
-                      label="Material"
-                      value={field.value ?? ''}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      options={materials.map((m) => ({ value: m.name, label: m.name }))}
-                      error={errors.material?.message}
+                <div className="flex flex-col gap-1.5">
+                  <QLabel htmlFor="material" icon={<Layers size={11} />}>Material</QLabel>
+                  <div className="q-field-override">
+                    <Controller
+                      control={control}
+                      name="material"
+                      render={({ field }) => (
+                        <CustomSelect
+                          id="material"
+                          label=""
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          options={materials.map((m) => ({ value: m.name, label: m.name }))}
+                          error={errors.material?.message}
+                        />
+                      )}
                     />
-                  )}
-                />
+                  </div>
+                </div>
 
-                <Controller
-                  control={control}
-                  name="color"
-                  render={({ field }) => (
-                    <CustomSelect
-                      id="color"
-                      label="Cor"
-                      value={field.value ?? ''}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      options={colors.map((c) => ({ value: c.name, label: c.name }))}
-                      error={errors.color?.message}
+                <div className="flex flex-col gap-1.5">
+                  <QLabel htmlFor="color" icon={<Palette size={11} />}>Cor</QLabel>
+                  <div className="q-field-override">
+                    <Controller
+                      control={control}
+                      name="color"
+                      render={({ field }) => (
+                        <CustomSelect
+                          id="color"
+                          label=""
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          options={[
+                            { value: 'Multicor', label: '🎨 Multicor (mais de uma cor)' },
+                            ...colors.map((c) => ({ value: c.name, label: c.name })),
+                          ]}
+                          error={errors.color?.message}
+                        />
+                      )}
                     />
-                  )}
-                />
+                  </div>
+                </div>
               </div>
 
-              {/* Quantity */}
-              <Input
-                id="quantity"
-                label="Quantidade"
-                type="number"
-                min={1}
-                error={errors.quantity?.message}
-                {...register('quantity', { valueAsNumber: true })}
-              />
-
-              {/* Desired Deadline */}
-              <Controller
-                control={control}
-                name="desiredDeadline"
-                render={({ field }) => (
-                  <DatePicker
-                    id="desiredDeadline"
-                    label="Prazo desejado"
-                    value={field.value ?? ''}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={errors.desiredDeadline?.message}
+              {/* Quantity + Deadline */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <QLabel htmlFor="quantity" icon={<Hash size={11} />}>Quantidade</QLabel>
+                  <input
+                    id="quantity"
+                    type="number"
+                    min={1}
+                    className={qInput(!!errors.quantity)}
+                    {...register('quantity', { valueAsNumber: true })}
                   />
-                )}
-              />
+                  {errors.quantity && (
+                    <span className="text-xs text-red-500">{errors.quantity.message}</span>
+                  )}
+                </div>
 
-              {/* File upload */}
-              <div>
-                <h2 className="mb-3 font-heading text-sm font-semibold text-text-primary">
-                  Arquivos do projeto
-                </h2>
+                <div className="flex flex-col gap-1.5">
+                  <QLabel htmlFor="desiredDeadline" icon={<CalendarIcon size={11} />}>
+                    Prazo desejado
+                  </QLabel>
+                  <div className="q-field-override">
+                    <Controller
+                      control={control}
+                      name="desiredDeadline"
+                      render={({ field }) => (
+                        <DatePicker
+                          id="desiredDeadline"
+                          label=""
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          error={errors.desiredDeadline?.message}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Files */}
+              <div className="flex flex-col gap-1.5">
+                <QLabel icon={<UploadCloud size={11} />}>Arquivos do projeto</QLabel>
                 <FileUploadZone onFilesChange={setFiles} accept={ACCEPT} />
               </div>
 
               {/* Customer data */}
               {isAuthenticated ? (
                 <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-3 rounded-lg border border-accent-blue/20 bg-accent-blue/5 px-4 py-3">
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent-blue/20 text-sm">
-                      ✓
-                    </div>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    borderRadius: 10,
+                    border: '1px solid rgba(77,159,255,0.2)',
+                    background: 'rgba(77,159,255,0.05)',
+                    padding: '12px 16px',
+                  }}>
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      width: 32, height: 32, flexShrink: 0,
+                      borderRadius: '50%',
+                      background: 'rgba(77,159,255,0.2)',
+                      color: '#4D9FFF', fontSize: 14,
+                    }}>✓</div>
                     <div>
                       <p className="text-sm font-semibold text-text-primary">
                         {user?.name ?? user?.email}
@@ -265,61 +354,109 @@ export default function QuoteRequest() {
                     </div>
                   </div>
                   {!user?.whatsapp && (
-                    <Input
-                      id="customerWhatsapp"
-                      label="WhatsApp (com DDD)"
-                      type="tel"
-                      error={errors.customerWhatsapp?.message}
-                      {...register('customerWhatsapp')}
-                    />
+                    <div className="flex flex-col gap-1.5">
+                      <QLabel htmlFor="customerWhatsapp" icon={<Phone size={11} />}>
+                        WhatsApp (com DDD)
+                      </QLabel>
+                      <input
+                        id="customerWhatsapp"
+                        type="tel"
+                        placeholder="(00) 00000-0000"
+                        className={qInput(!!errors.customerWhatsapp)}
+                        {...register('customerWhatsapp')}
+                      />
+                      {errors.customerWhatsapp && (
+                        <span className="text-xs text-red-500">{errors.customerWhatsapp.message}</span>
+                      )}
+                    </div>
                   )}
                 </div>
               ) : (
-                <div className="flex flex-col gap-4 pt-1">
-                  <h2 className="font-heading text-sm font-semibold text-text-primary">
+                <div className="flex flex-col gap-4">
+                  <p className="font-heading text-[10px] uppercase tracking-[0.15em] text-text-secondary">
                     Seus dados (opcional)
-                  </h2>
-
-                  {/* Name + WhatsApp row */}
+                  </p>
                   <div className="grid gap-4 md:grid-cols-2">
-                    <Input
-                      id="customerName"
-                      label="Seu nome"
-                      error={errors.customerName?.message}
-                      {...register('customerName')}
-                    />
-                    <Input
-                      id="customerWhatsapp"
-                      label="WhatsApp (com DDD)"
-                      type="tel"
-                      error={errors.customerWhatsapp?.message}
-                      {...register('customerWhatsapp')}
-                    />
+                    <div className="flex flex-col gap-1.5">
+                      <QLabel htmlFor="customerName" icon={<User size={11} />}>Seu nome</QLabel>
+                      <input
+                        id="customerName"
+                        type="text"
+                        placeholder="Nome completo"
+                        className={qInput(!!errors.customerName)}
+                        {...register('customerName')}
+                      />
+                      {errors.customerName && (
+                        <span className="text-xs text-red-500">{errors.customerName.message}</span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <QLabel htmlFor="customerWhatsapp" icon={<Phone size={11} />}>WhatsApp</QLabel>
+                      <input
+                        id="customerWhatsapp"
+                        type="tel"
+                        placeholder="(00) 00000-0000"
+                        className={qInput(!!errors.customerWhatsapp)}
+                        {...register('customerWhatsapp')}
+                      />
+                      {errors.customerWhatsapp && (
+                        <span className="text-xs text-red-500">{errors.customerWhatsapp.message}</span>
+                      )}
+                    </div>
                   </div>
-
-                  <Input
-                    id="customerEmail"
-                    label="Seu e-mail"
-                    type="email"
-                    error={errors.customerEmail?.message}
-                    {...register('customerEmail')}
-                  />
+                  <div className="flex flex-col gap-1.5">
+                    <QLabel htmlFor="customerEmail" icon={<Mail size={11} />}>E-mail</QLabel>
+                    <input
+                      id="customerEmail"
+                      type="email"
+                      placeholder="seu@email.com"
+                      className={qInput(!!errors.customerEmail)}
+                      {...register('customerEmail')}
+                    />
+                    {errors.customerEmail && (
+                      <span className="text-xs text-red-500">{errors.customerEmail.message}</span>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {submitError && (
-                <p className="text-sm text-red-500">{submitError}</p>
-              )}
+              {submitError && <p className="text-sm text-red-500">{submitError}</p>}
 
-              <Button
-                type="submit"
-                variant="primary"
-                loading={isSubmitting}
-                className="w-full rounded-full hover:shadow-glow"
+              {/* Divider */}
+              <div
+                className="flex items-center gap-3"
+                style={{ color: 'rgba(74,80,128,0.7)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}
               >
-                Enviar Orçamento
-              </Button>
+                <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(30,33,80,0.9), transparent)' }} />
+                <span className="font-heading">enviar</span>
+                <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(30,33,80,0.9), transparent)' }} />
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="q-submit-btn font-heading"
+              >
+                {isSubmitting ? (
+                  <span className="inline-flex items-center justify-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Enviando...
+                  </span>
+                ) : (
+                  'Enviar Orçamento'
+                )}
+              </button>
             </form>
+
+            {/* Status bar */}
+            <div
+              className="flex items-center justify-center gap-1.5"
+              style={{ marginTop: 20, color: 'rgba(74,80,128,0.7)', fontSize: 12, letterSpacing: '0.05em' }}
+            >
+              <span className="q-status-dot" />
+              Aceitando novos pedidos
+            </div>
           </div>
         </div>
       </div>

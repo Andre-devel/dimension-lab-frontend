@@ -15,6 +15,10 @@
 /* =============================================
    SCROLLBAR
    ============================================= */
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -195,4 +199,96 @@
 @keyframes carouselSlide {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+/* =============================================
+   QUOTE FORM
+   ============================================= */
+
+/* Inputs */
+.q-input {
+  background: rgba(20, 21, 48, 0.9);
+  border: 1.5px solid rgba(30, 33, 80, 0.9);
+  transition: border-color 0.3s cubic-bezier(.4,0,.2,1),
+              box-shadow   0.3s cubic-bezier(.4,0,.2,1),
+              background   0.3s;
+}
+.q-input:hover {
+  border-color: rgba(42, 48, 112, 1);
+}
+.q-input:focus {
+  border-color: #00E5FF;
+  box-shadow: 0 0 0 3px rgba(0,229,255,0.15), 0 0 20px rgba(0,229,255,0.06);
+  background: rgba(21, 22, 64, 0.95);
+  outline: none;
+}
+
+/* Override CustomSelect / DatePicker trigger inside .q-field-override */
+.q-field-override button[type="button"]:first-of-type {
+  background: rgba(20, 21, 48, 0.9) !important;
+  border: 1.5px solid rgba(30, 33, 80, 0.9) !important;
+  padding: 13px 16px !important;
+  border-radius: 8px !important;
+  transition: border-color 0.3s ease !important;
+}
+.q-field-override button[type="button"]:first-of-type:hover {
+  border-color: rgba(42, 48, 112, 1) !important;
+}
+
+/* Submit button */
+.q-submit-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #00E5FF 0%, #4D9FFF 40%, #8B5CF6 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 200, 255, 0.2);
+}
+.q-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 35px rgba(0, 200, 255, 0.3), 0 0 60px rgba(123, 47, 247, 0.2);
+}
+.q-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.q-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.q-submit-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -60%;
+  width: 40%; height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+  transform: skewX(-20deg);
+  animation: q-shimmer 3s ease-in-out infinite;
+}
+@keyframes q-shimmer {
+  0%       { left: -60% }
+  40%, 100% { left: 120% }
+}
+
+/* Status dot */
+.q-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  display: inline-block;
+  flex-shrink: 0;
+  animation: q-pulse 2s ease-in-out infinite;
+}
+@keyframes q-pulse {
+  0%, 100% { opacity: 1 }
+  50%       { opacity: 0.35 }
 }

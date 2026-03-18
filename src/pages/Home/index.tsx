@@ -343,7 +343,7 @@ export default function Home() {
       )}
 
       {/* ─── COMO FUNCIONA ─── */}
-      <section className="bg-surface" style={{ padding: '100px 5%' }}>
+      <section id="como-funciona" className="bg-surface" style={{ padding: '100px 5%' }}>
         <p className="text-accent-blue text-xs font-semibold uppercase tracking-[0.15em] mb-3">
           Processo
         </p>

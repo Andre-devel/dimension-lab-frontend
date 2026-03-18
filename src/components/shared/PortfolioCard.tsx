@@ -11,17 +11,19 @@ export function PortfolioCard({ item }: Props) {
   return (
     <Link to={`/portfolio/${item.id}`} className="block group">
       <Card hoverable>
-        {item.photos.length > 0 ? (
-          <img
-            src={fileUrl(item.photos[0])}
-            alt={item.title}
-            className="mb-3 h-40 w-full rounded object-cover"
-          />
-        ) : (
-          <div className="mb-3 h-40 w-full rounded bg-surface-2 flex items-center justify-center">
-            <span className="text-xs text-text-secondary">Sem foto</span>
-          </div>
-        )}
+        <div className="mb-3 w-full rounded overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: '260px' }}>
+          {item.photos.length > 0 ? (
+            <img
+              src={fileUrl(item.photos[0])}
+              alt={item.title}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="h-full w-full bg-surface-2 flex items-center justify-center">
+              <span className="text-xs text-text-secondary">Sem foto</span>
+            </div>
+          )}
+        </div>
 
         <h3 className="font-semibold text-text-primary group-hover:text-accent-blue transition-colors">
           {item.title}
