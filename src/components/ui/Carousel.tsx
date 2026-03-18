@@ -66,6 +66,10 @@ export function Carousel({ items }: Props) {
                   <img
                     src={fileUrl(item.photos[0])}
                     alt={item.title}
+                    width={160}
+                    height={284}
+                    loading="lazy"
+                    decoding="async"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 ) : (

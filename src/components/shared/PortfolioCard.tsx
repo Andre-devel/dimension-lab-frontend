@@ -16,6 +16,10 @@ export function PortfolioCard({ item }: Props) {
             <img
               src={fileUrl(item.photos[0])}
               alt={item.title}
+              width={300}
+              height={533}
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
             />
           ) : (
