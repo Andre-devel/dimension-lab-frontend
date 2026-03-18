@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /my-quotes
+
+Sitemap: https://dimensionlab3d.com.br/sitemap.xml

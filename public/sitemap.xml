@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://dimensionlab3d.com.br/</loc>
+    <lastmod>2026-03-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://dimensionlab3d.com.br/portfolio</loc>
+    <lastmod>2026-03-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://dimensionlab3d.com.br/quote</loc>
+    <lastmod>2026-03-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!--
+    NOTA: URLs de itens individuais do portfólio (/portfolio/:id) são dinâmicas.
+    Para incluí-las no sitemap, gere este arquivo via script ou endpoint do backend
+    que liste todos os IDs públicos. Exemplo de endpoint sugerido:
+      GET /api/portfolio/public-ids  → retorna lista de UUIDs visíveis
+    Depois use um script (ex: scripts/generate-sitemap.ts) para gerar o XML completo.
+  -->
+
+</urlset>
