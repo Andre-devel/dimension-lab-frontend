@@ -2,8 +2,44 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { Carousel } from '@/components/ui/Carousel'
+import { SEOHead, SITE_URL, SITE_NAME } from '@/components/seo/SEOHead'
 import { portfolioService } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
+
+const homeJsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: 'Impressão 3D profissional personalizada. Orçamento gratuito em até 24h.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SITE_URL}/portfolio`,
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: SITE_NAME,
+    description: 'Serviço de impressão 3D personalizada com materiais PLA, PETG e resina.',
+    url: SITE_URL,
+    image: `${SITE_URL}/logo.jpeg`,
+    priceRange: '$$',
+    areaServed: 'Brasil',
+    serviceType: 'Impressão 3D',
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Serviços de Impressão 3D',
+      itemListElement: [
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Impressão 3D em PLA' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Impressão 3D em PETG' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Impressão 3D em Resina' } },
+      ],
+    },
+  },
+]
 
 const steps = [
   {
@@ -231,6 +267,12 @@ export default function Home() {
 
   return (
     <PageWrapper>
+      <SEOHead
+        title="Impressão 3D Personalizada"
+        description="Dimension.Lab3D — Impressão 3D profissional com PLA, PETG e resina. Orçamento gratuito em até 24h. Envie seu arquivo e receba na sua porta."
+        canonical="/"
+        jsonLd={homeJsonLd}
+      />
 
       {/* ─── HERO ─── */}
       <section

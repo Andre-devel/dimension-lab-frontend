@@ -2,17 +2,58 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Dimension.Lab3D — Impressão 3D profissional. Solicite seu orçamento." />
-    <title>Dimension.Lab3D</title>
-    <!-- Fonts -->
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Primary meta (overridden per-page via react-helmet-async) -->
+    <title>Dimension.Lab3D — Impressão 3D Personalizada</title>
+    <meta name="description" content="Dimension.Lab3D — Impressão 3D profissional com PLA, PETG e resina. Orçamento gratuito em até 24h." />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph base -->
+    <meta property="og:site_name" content="Dimension.Lab3D" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Dimension.Lab3D — Impressão 3D Personalizada" />
+    <meta property="og:description" content="Impressão 3D profissional com PLA, PETG e resina. Orçamento gratuito em até 24h." />
+    <meta property="og:image" content="https://dimensionlab3d.com.br/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://dimensionlab3d.com.br" />
+
+    <!-- Twitter Card base -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Dimension.Lab3D — Impressão 3D Personalizada" />
+    <meta name="twitter:description" content="Impressão 3D profissional com PLA, PETG e resina. Orçamento gratuito em até 24h." />
+    <meta name="twitter:image" content="https://dimensionlab3d.com.br/og-image.jpg" />
+
+    <!-- Canonical base -->
+    <link rel="canonical" href="https://dimensionlab3d.com.br" />
+
+    <!-- Fonts — preconnect para reduzir latência -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Carregamento com display=swap para evitar FOIT -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Space+Grotesk:wght@400;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Google Search Console — substitua o content pelo código fornecido pelo GSC -->
+    <!-- <meta name="google-site-verification" content="SEU_CODIGO_GSC_AQUI" /> -->
+
+    <!-- Google Analytics GA4 — substitua G-XXXXXXXXXX pelo seu Measurement ID -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    -->
   </head>
   <body>
     <div id="root"></div>

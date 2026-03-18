@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { Card } from '@/components/ui/Card'
+import { SEOHead, SITE_URL } from '@/components/seo/SEOHead'
 import { portfolioService } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
 import { fileUrl } from '@/utils/fileUrl'
@@ -15,8 +16,46 @@ export default function PortfolioDetail() {
     portfolioService.getById(id).then(setItem).catch(() => setItem(null))
   }, [id])
 
+  const jsonLd = item
+    ? [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL },
+            { '@type': 'ListItem', position: 2, name: 'Portfólio', item: `${SITE_URL}/portfolio` },
+            { '@type': 'ListItem', position: 3, name: item.title, item: `${SITE_URL}/portfolio/${id}` },
+          ],
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: item.title,
+          description: item.description ?? `${item.title} — impressão 3D em ${item.material}`,
+          image: item.photos.length > 0 ? fileUrl(item.photos[0]) : undefined,
+          category: item.category.name,
+          material: item.material,
+          offers: {
+            '@type': 'Offer',
+            availability: 'https://schema.org/InStock',
+            seller: { '@type': 'Organization', name: 'Dimension.Lab3D' },
+          },
+        },
+      ]
+    : undefined
+
   return (
     <PageWrapper>
+      {item && (
+        <SEOHead
+          title={item.title}
+          description={`${item.title} — impressão 3D em ${item.material}${item.category ? `, categoria ${item.category.name}` : ''}. Veja fotos e detalhes.`}
+          canonical={`/portfolio/${id}`}
+          ogType="article"
+          ogImage={item.photos.length > 0 ? fileUrl(item.photos[0]) : undefined}
+          jsonLd={jsonLd}
+        />
+      )}
       <div className="mx-auto max-w-4xl px-4 py-8">
         <Link to="/portfolio" className="mb-6 inline-block text-sm text-accent-blue hover:underline">
           ← Voltar
@@ -38,6 +77,10 @@ export default function PortfolioDetail() {
                     key={i}
                     src={fileUrl(photo)}
                     alt={`${item.title} - foto ${i + 1}`}
+                    width={600}
+                    height={400}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
                     className="w-full rounded-lg object-cover"
                   />
                 ))}

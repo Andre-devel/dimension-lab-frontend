@@ -8,6 +8,27 @@ import {
   Calendar as CalendarIcon, UploadCloud, User, Phone, Mail,
 } from 'lucide-react'
 import { PageWrapper } from '@/components/layout/PageWrapper'
+import { SEOHead, SITE_URL } from '@/components/seo/SEOHead'
+
+const quoteJsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Solicitar Orçamento', item: `${SITE_URL}/quote` },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Orçamento de Impressão 3D',
+    description: 'Solicite um orçamento gratuito para impressão 3D personalizada. Resposta em até 24h via WhatsApp.',
+    provider: { '@type': 'LocalBusiness', name: 'Dimension.Lab3D', url: SITE_URL },
+    areaServed: 'Brasil',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'BRL', description: 'Orçamento gratuito' },
+  },
+]
 import { CustomSelect } from '@/components/ui/CustomSelect'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { FileUploadZone } from '@/components/ui/FileUploadZone'
@@ -135,6 +156,12 @@ export default function QuoteRequest() {
 
   return (
     <PageWrapper>
+      <SEOHead
+        title="Solicitar Orçamento"
+        description="Solicite um orçamento gratuito de impressão 3D. Envie seu arquivo STL/OBJ, escolha material e cor. Resposta em até 24h no seu WhatsApp."
+        canonical="/quote"
+        jsonLd={quoteJsonLd}
+      />
       <div style={{ padding: '100px 5% 80px' }}>
         <div
           className="grid gap-[60px]"

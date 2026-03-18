@@ -1,8 +1,18 @@
 import { useEffect, useState } from 'react'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { PortfolioCard } from '@/components/shared/PortfolioCard'
+import { SEOHead, SITE_URL } from '@/components/seo/SEOHead'
 import { portfolioService } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
+
+const portfolioJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Portfólio', item: `${SITE_URL}/portfolio` },
+  ],
+}
 
 export default function Portfolio() {
   const [items, setItems] = useState<PortfolioItem[]>([])
@@ -20,6 +30,12 @@ export default function Portfolio() {
 
   return (
     <PageWrapper>
+      <SEOHead
+        title="Portfólio"
+        description="Veja nossos projetos de impressão 3D: miniaturas, peças técnicas, protótipos, cosplay e mais. Materiais PLA, PETG, ASA e resina."
+        canonical="/portfolio"
+        jsonLd={portfolioJsonLd}
+      />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <h1 className="mb-6 text-2xl font-bold text-text-primary">Portfólio</h1>
 
