@@ -41,7 +41,7 @@ export function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[5%] py-[18px] bg-background/85 backdrop-blur-md border-b border-accent-blue/15"
     >
       {/* Logo */}
-      <NavLink to="/" className="flex items-baseline gap-0 font-heading">
+      <NavLink to="/" aria-label="Dimension.Lab3D — Página inicial" className="flex items-baseline gap-0 font-heading">
         <span className="font-bold text-text-primary">DIMENSION</span>
         <span className="text-accent-blue">.LAB3D</span>
       </NavLink>

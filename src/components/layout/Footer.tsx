@@ -60,7 +60,7 @@ export function Footer() {
         </div>
 
         {/* Col 2 — Navegação */}
-        <div className="flex flex-col gap-3">
+        <nav aria-label="Links do rodapé" className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold text-text-primary uppercase tracking-widest mb-1">
             Navegação
           </h3>
@@ -77,7 +77,7 @@ export function Footer() {
               {label}
             </a>
           ))}
-        </div>
+        </nav>
 
         {/* Col 3 — Materiais */}
         {materials.length > 0 && (
