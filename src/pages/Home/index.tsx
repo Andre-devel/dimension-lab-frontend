@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { Carousel } from '@/components/ui/Carousel'
+import { Reveal } from '@/components/ui/Reveal'
 import { SEOHead, SITE_URL, SITE_NAME } from '@/components/seo/SEOHead'
 import { portfolioService } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
@@ -354,28 +355,26 @@ export default function Home() {
       {/* ─── PORTFÓLIO PREVIEW ─── */}
       {(portfolioLoading || portfolioItems.length > 0) && (
         <section style={{ padding: 'clamp(48px, 8vw, 100px) 0', background: 'rgba(10,10,20,0.6)' }}>
-          <div style={{ padding: '0 5%' }} className="mb-10">
+          <Reveal style={{ padding: '0 5%' }} className="mb-10">
             <div className="flex items-center justify-between">
-              <h2 className="font-heading text-2xl lg:text-3xl font-bold text-accent-blue">
-                Galeria
-              </h2>
-              <Link
-                to="/portfolio"
-                className="text-sm text-text-secondary hover:text-accent-blue transition-colors"
-              >
+              <div>
+                <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#06b6d4', marginBottom: 6 }}>
+                  Portfólio
+                </p>
+                <h2 className="font-heading text-2xl lg:text-3xl font-bold text-text-primary">
+                  Trabalhos recentes
+                </h2>
+              </div>
+              <Link to="/portfolio" className="text-sm text-text-secondary hover:text-accent-blue transition-colors">
                 Ver todos →
               </Link>
             </div>
-          </div>
+          </Reveal>
 
           {portfolioLoading ? (
             <div style={{ padding: '0 5%' }} className="flex gap-6 overflow-hidden">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="rounded-card bg-surface-2 animate-pulse flex-shrink-0"
-                  style={{ width: 256, height: 240 }}
-                />
+                <div key={i} className="rounded-card bg-surface-2 animate-pulse flex-shrink-0" style={{ width: 200, height: 280 }} />
               ))}
             </div>
           ) : (
@@ -386,43 +385,46 @@ export default function Home() {
 
       {/* ─── COMO FUNCIONA ─── */}
       <section id="como-funciona" className="bg-surface" style={{ padding: '100px 5%' }}>
-        <p className="text-accent-blue text-xs font-semibold uppercase tracking-[0.15em] mb-3">
-          Processo
-        </p>
-        <h2 className="font-heading text-3xl font-bold text-text-primary mb-3">
-          Como funciona?
-        </h2>
-        <p className="text-text-secondary max-w-[500px] mb-12 leading-relaxed">
-          Do primeiro contato à entrega na sua porta — um processo simples, transparente e
-          focado na sua satisfação.
-        </p>
+        <Reveal>
+          <p className="text-accent-blue text-xs font-semibold uppercase tracking-[0.15em] mb-3">
+            Processo
+          </p>
+          <h2 className="font-heading text-3xl font-bold text-text-primary mb-3">
+            Como funciona?
+          </h2>
+          <p className="text-text-secondary max-w-[500px] mb-12 leading-relaxed">
+            Do primeiro contato à entrega na sua porta — um processo simples, transparente e
+            focado na sua satisfação.
+          </p>
+        </Reveal>
 
         <div
           className="grid gap-6"
           style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}
         >
-          {steps.map(({ number, icon, title, description }) => (
-            <div
-              key={number}
-              className="relative bg-surface-2 rounded-card border border-border p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-glow overflow-hidden"
-            >
-              <span
-                className="absolute top-2 right-4 font-heading font-black select-none pointer-events-none"
-                style={{ fontSize: '5rem', lineHeight: 1, color: 'rgba(77,159,255,0.07)' }}
-              >
-                {number}
-              </span>
-
+          {steps.map(({ number, icon, title, description }, i) => (
+            <Reveal key={number} delay={i * 80}>
               <div
-                className="mb-4 flex h-11 w-11 items-center justify-center rounded-md border border-accent-blue/20 text-xl"
-                style={{ background: 'rgba(0,229,255,.08)' }}
+                className="relative bg-surface-2 rounded-card border border-border p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-glow overflow-hidden"
               >
-                {icon}
-              </div>
+                <span
+                  className="absolute top-2 right-4 font-heading font-black select-none pointer-events-none"
+                  style={{ fontSize: '5rem', lineHeight: 1, color: 'rgba(77,159,255,0.07)' }}
+                >
+                  {number}
+                </span>
 
-              <h3 className="font-semibold text-text-primary mb-2">{title}</h3>
-              <p className="text-text-secondary text-sm leading-relaxed">{description}</p>
-            </div>
+                <div
+                  className="mb-4 flex h-11 w-11 items-center justify-center rounded-md border border-accent-blue/20 text-xl"
+                  style={{ background: 'rgba(0,229,255,.08)' }}
+                >
+                  {icon}
+                </div>
+
+                <h3 className="font-semibold text-text-primary mb-2">{title}</h3>
+                <p className="text-text-secondary text-sm leading-relaxed">{description}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -445,34 +447,36 @@ export default function Home() {
           }}
         />
 
-        <div
-          className="relative z-10 mx-auto max-w-2xl text-center rounded-2xl border border-accent-blue/20 px-6 py-10 lg:p-12"
-          style={{ background: 'rgba(77,159,255,.04)' }}
-        >
-          <h2
-            className="font-black text-text-primary mb-4"
-            style={{ fontSize: 'clamp(1.4rem, 5vw, 2.8rem)' }}
+        <Reveal className="relative z-10 mx-auto max-w-2xl">
+          <div
+            className="text-center rounded-2xl border border-accent-blue/20 px-6 py-10 lg:p-12"
+            style={{ background: 'rgba(77,159,255,.04)' }}
           >
-            Pronto para imprimir sua ideia?
-          </h2>
-          <p className="text-text-secondary mb-8 leading-relaxed max-w-md mx-auto">
-            Orçamento gratuito em até 24h. Sem burocracia, sem surpresas.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              to="/quote"
-              className="rounded-full bg-accent-blue px-6 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
+            <h2
+              className="font-black text-text-primary mb-4"
+              style={{ fontSize: 'clamp(1.4rem, 5vw, 2.8rem)' }}
             >
-              Pedir Orçamento
-            </Link>
-            <Link
-              to="/my-quotes"
-              className="rounded-full border border-border px-6 py-3 font-semibold text-text-secondary transition-all hover:text-text-primary hover:border-accent-blue/50"
-            >
-              Meus pedidos
-            </Link>
+              Pronto para imprimir sua ideia?
+            </h2>
+            <p className="text-text-secondary mb-8 leading-relaxed max-w-md mx-auto">
+              Orçamento gratuito em até 24h. Sem burocracia, sem surpresas.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                to="/quote"
+                className="rounded-full bg-accent-blue px-6 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
+              >
+                Pedir Orçamento
+              </Link>
+              <Link
+                to="/my-quotes"
+                className="rounded-full border border-border px-6 py-3 font-semibold text-text-secondary transition-all hover:text-text-primary hover:border-accent-blue/50"
+              >
+                Meus pedidos
+              </Link>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
 
     </PageWrapper>

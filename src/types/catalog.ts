@@ -7,5 +7,6 @@ export interface Material {
 export interface Color {
   id: string
   name: string
+  hex: string
   enabled: boolean
 }

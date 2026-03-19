@@ -29,8 +29,8 @@ export const colorService = {
     const { data } = await api.get<Color[]>('/api/v1/colors/all')
     return data
   },
-  async create(name: string): Promise<Color> {
-    const { data } = await api.post<Color>('/api/v1/colors', { name })
+  async create(name: string, hex: string): Promise<Color> {
+    const { data } = await api.post<Color>('/api/v1/colors', { name, hex })
     return data
   },
   async toggle(id: string): Promise<Color> {

@@ -8,6 +8,7 @@ interface Props {
   onChange: (value: string) => void
   onBlur?: () => void
   error?: string
+  triggerStyle?: React.CSSProperties
 }
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
@@ -48,7 +49,7 @@ function buildCalendarDays(year: number, month: number): (Date | null)[] {
   return days
 }
 
-export function DatePicker({ id, label, value, onChange, onBlur, error }: Props) {
+export function DatePicker({ id, label, value, onChange, onBlur, error, triggerStyle }: Props) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -112,11 +113,18 @@ export function DatePicker({ id, label, value, onChange, onBlur, error }: Props)
         type="button"
         onClick={() => setOpen(prev => !prev)}
         className={[
-          'flex w-full items-center justify-between rounded-btn border bg-surface px-3 py-2 text-sm outline-none',
-          'focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors',
+          'flex w-full items-center justify-between rounded-btn border text-sm outline-none transition-colors',
           error ? 'border-red-500' : 'border-border',
           open ? 'border-accent-blue ring-1 ring-accent-blue' : '',
         ].join(' ')}
+        style={{
+          background: '#0d1520',
+          borderColor: error ? '#fb7185' : open ? '#06b6d4' : 'rgba(56,189,248,.08)',
+          borderRadius: 10,
+          padding: '11px 14px',
+          color: '#e8edf3',
+          ...triggerStyle,
+        }}
       >
         <span className={value ? 'text-text-primary' : 'text-text-secondary'}>
           {value ? formatDisplay(value) : 'Selecione a data…'}

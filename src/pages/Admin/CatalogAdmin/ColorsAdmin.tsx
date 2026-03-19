@@ -7,6 +7,7 @@ export default function ColorsAdmin() {
   const [colors, setColors] = useState<Color[]>([])
   const [loading, setLoading] = useState(true)
   const [newName, setNewName] = useState('')
+  const [newHex, setNewHex] = useState('#2563EB')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
 
@@ -22,9 +23,10 @@ export default function ColorsAdmin() {
     setCreating(true)
     setError('')
     try {
-      const created = await colorService.create(newName.trim())
+      const created = await colorService.create(newName.trim(), newHex)
       setColors((prev) => [...prev, created])
       setNewName('')
+      setNewHex('#2563EB')
     } catch {
       setError('Erro ao criar cor.')
     } finally {
@@ -47,7 +49,55 @@ export default function ColorsAdmin() {
         <h1 className="text-2xl font-bold text-text-primary mb-6">Cores</h1>
 
         {/* Create form */}
-        <div className="mb-6 flex gap-3">
+        <div className="mb-6 flex gap-3 items-center">
+          {/* Color picker */}
+          <label
+            title="Escolher cor"
+            style={{
+              position: 'relative',
+              width: 40,
+              height: 40,
+              borderRadius: 8,
+              border: '2px solid rgba(56,189,248,.2)',
+              background: newHex,
+              cursor: 'pointer',
+              flexShrink: 0,
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <input
+              type="color"
+              value={newHex}
+              onChange={(e) => setNewHex(e.target.value)}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                opacity: 0,
+                width: '100%',
+                height: '100%',
+                cursor: 'pointer',
+                border: 'none',
+                padding: 0,
+              }}
+            />
+          </label>
+
+          {/* Hex value display */}
+          <span
+            style={{
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: 12,
+              color: '#8899aa',
+              minWidth: 64,
+              userSelect: 'all',
+            }}
+          >
+            {newHex.toUpperCase()}
+          </span>
+
           <input
             type="text"
             value={newName}
@@ -77,7 +127,29 @@ export default function ColorsAdmin() {
                 className="flex items-center justify-between rounded-card border border-border bg-surface px-4 py-3"
               >
                 <div className="flex items-center gap-3">
+                  {/* Color swatch */}
+                  <span
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 6,
+                      background: color.hex,
+                      border: '1px solid rgba(255,255,255,.1)',
+                      display: 'inline-block',
+                      flexShrink: 0,
+                    }}
+                    title={color.hex}
+                  />
                   <span className="text-text-primary font-medium">{color.name}</span>
+                  <span
+                    style={{
+                      fontFamily: 'JetBrains Mono, monospace',
+                      fontSize: 11,
+                      color: '#556677',
+                    }}
+                  >
+                    {color.hex.toUpperCase()}
+                  </span>
                   <span
                     className={[
                       'rounded-badge px-2 py-0.5 text-xs font-medium',

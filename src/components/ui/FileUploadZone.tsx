@@ -72,14 +72,18 @@ export function FileUploadZone({ onFilesChange, accept, error }: Props) {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={[
-          'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-card border-2 border-dashed p-8 transition-colors',
+          'flex cursor-pointer flex-row items-center gap-4 rounded-card border-2 border-dashed transition-colors',
           borderClass,
         ].join(' ')}
+        style={{ padding: '14px 20px' }}
       >
-        <UploadCloud className="h-10 w-10 text-text-secondary" />
-        <p className="text-sm text-text-secondary">
-          Arraste arquivos aqui ou clique para selecionar
-        </p>
+        <UploadCloud className="h-6 w-6 text-text-secondary flex-shrink-0" />
+        <div>
+          <p className="text-sm text-text-secondary">
+            Clique para enviar ou arraste arquivos aqui
+          </p>
+          <p className="text-xs mt-0.5" style={{ color: '#3d4f5f' }}>STL, OBJ, JPG, PNG, MP4</p>
+        </div>
         <input
           ref={inputRef}
           type="file"

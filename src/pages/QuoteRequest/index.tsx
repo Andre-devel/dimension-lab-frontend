@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
-import type { ReactNode } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import {
-  MessageSquare, Layers, Palette, Hash,
-  Calendar as CalendarIcon, UploadCloud, User, Phone, Mail,
-} from 'lucide-react'
+import { Clock, Layers, Box, Truck, MessageCircle } from 'lucide-react'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { SEOHead, SITE_URL } from '@/components/seo/SEOHead'
+import { DatePicker } from '@/components/ui/DatePicker'
+import { FileUploadZone } from '@/components/ui/FileUploadZone'
+import { quoteService } from '@/services/quoteService'
+import { materialService, colorService } from '@/services/catalogService'
+import type { Material, Color } from '@/types/catalog'
+import { useAuthStore } from '@/store/authStore'
 
 const quoteJsonLd = [
   {
@@ -29,13 +31,6 @@ const quoteJsonLd = [
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'BRL', description: 'Orçamento gratuito' },
   },
 ]
-import { CustomSelect } from '@/components/ui/CustomSelect'
-import { DatePicker } from '@/components/ui/DatePicker'
-import { FileUploadZone } from '@/components/ui/FileUploadZone'
-import { quoteService } from '@/services/quoteService'
-import { materialService, colorService } from '@/services/catalogService'
-import type { Material, Color } from '@/types/catalog'
-import { useAuthStore } from '@/store/authStore'
 
 const schema = z.object({
   description: z.string().min(10, 'Mínimo 10 caracteres'),
@@ -51,36 +46,219 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 const ACCEPT = '.jpg,.jpeg,.png,.mp4,.stl,.obj'
+const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL as string | undefined
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+const benefits = [
+  { Icon: Clock,  color: '#22d3ee', bg: 'rgba(34,211,238,.1)',  label: 'Resposta em 24h',       desc: 'Orçamento rápido e detalhado' },
+  { Icon: Layers, color: '#fbbf24', bg: 'rgba(251,191,36,.1)',  label: 'Orçamento gratuito',     desc: 'Sem custo para solicitar' },
+  { Icon: Box,    color: '#60a5fa', bg: 'rgba(96,165,250,.1)',  label: 'Modelagem inclusa',      desc: 'Ajudamos com o arquivo 3D' },
+  { Icon: Truck,  color: '#34d399', bg: 'rgba(52,211,153,.1)',  label: 'Envio nacional',         desc: 'Entregamos em qualquer estado' },
+]
 
-function QLabel({ htmlFor, icon, children }: { htmlFor?: string; icon: ReactNode; children: ReactNode }) {
+const checklist = [
+  { color: '#22d3ee', bg: 'rgba(34,211,238,.1)', strong: 'Envie seu projeto',       desc: 'Preencha o formulário com os detalhes' },
+  { color: '#fbbf24', bg: 'rgba(251,191,36,.1)', strong: 'Análise em até 24h',      desc: 'Avaliamos viabilidade e custo' },
+  { color: '#60a5fa', bg: 'rgba(96,165,250,.1)', strong: 'Receba o orçamento',      desc: 'Valor detalhado via WhatsApp' },
+  { color: '#34d399', bg: 'rgba(52,211,153,.1)', strong: 'Aprovação e produção',    desc: 'Início imediato após confirmação' },
+]
+
+function initials(name?: string | null, email?: string | null) {
+  if (name) return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+  if (email) return email[0].toUpperCase()
+  return '?'
+}
+
+function FieldLabel({ htmlFor, children }: { htmlFor?: string; children: React.ReactNode }) {
   return (
     <label
       htmlFor={htmlFor}
-      className="font-heading flex items-center gap-1.5"
-      style={{
-        fontSize: 10,
-        fontWeight: 500,
-        letterSpacing: '0.18em',
-        textTransform: 'uppercase',
-        color: 'rgba(136,144,181,0.9)',
-      }}
+      style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#8899aa', marginBottom: 6, letterSpacing: '.3px' }}
     >
-      <span style={{ opacity: 0.55, display: 'flex', alignItems: 'center' }}>{icon}</span>
       {children}
     </label>
   )
 }
 
-function qInput(hasError?: boolean): string {
-  return [
-    'q-input w-full rounded-[8px] px-4 py-[13px] text-sm text-text-primary placeholder:text-[#4a5080]',
-    hasError ? '!border-red-500' : '',
-  ].join(' ')
+function StepLabel({ step, title }: { step: string; title: string }) {
+  return (
+    <>
+      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: '#556677', marginBottom: 4 }}>
+        {step}
+      </p>
+      <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#e8edf3', marginBottom: '1.25rem' }}>
+        {title}
+      </h2>
+    </>
+  )
 }
 
-// ────────────────────────────────────────────────────────────────────────────
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  background: '#0d1520',
+  border: '1px solid rgba(56,189,248,.08)',
+  borderRadius: 10,
+  color: '#e8edf3',
+  fontSize: 14,
+  padding: '11px 14px',
+  outline: 'none',
+  fontFamily: 'inherit',
+  transition: 'border-color .2s, box-shadow .2s',
+}
+
+function QInput(props: React.InputHTMLAttributes<HTMLInputElement> & { hasError?: boolean }) {
+  const { hasError, ...rest } = props
+  const [focused, setFocused] = useState(false)
+  return (
+    <input
+      {...rest}
+      style={{
+        ...inputStyle,
+        borderColor: hasError ? '#fb7185' : focused ? '#06b6d4' : 'rgba(56,189,248,.08)',
+        boxShadow: focused ? '0 0 0 3px rgba(6,182,212,.1)' : 'none',
+      }}
+      onFocus={e => { setFocused(true); rest.onFocus?.(e) }}
+      onBlur={e => { setFocused(false); rest.onBlur?.(e) }}
+    />
+  )
+}
+
+function QTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { hasError?: boolean }) {
+  const { hasError, ...rest } = props
+  const [focused, setFocused] = useState(false)
+  return (
+    <textarea
+      {...rest}
+      style={{
+        ...inputStyle,
+        resize: 'vertical',
+        minHeight: 90,
+        borderColor: hasError ? '#fb7185' : focused ? '#06b6d4' : 'rgba(56,189,248,.08)',
+        boxShadow: focused ? '0 0 0 3px rgba(6,182,212,.1)' : 'none',
+      }}
+      onFocus={e => { setFocused(true); rest.onFocus?.(e) }}
+      onBlur={e => { setFocused(false); rest.onBlur?.(e) }}
+    />
+  )
+}
+
+function Chip({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        fontSize: 13, fontWeight: 500,
+        padding: '7px 15px',
+        borderRadius: 6,
+        border: selected ? '1px solid #06b6d4' : '1px solid rgba(56,189,248,.08)',
+        background: selected ? 'rgba(6,182,212,.1)' : '#0d1520',
+        color: selected ? '#22d3ee' : '#8899aa',
+        cursor: 'pointer',
+        transition: 'all .18s',
+        lineHeight: 1,
+      }}
+    >
+      {label}
+    </button>
+  )
+}
+
+function SegmentedControl({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
+  return (
+    <div style={{
+      display: 'flex',
+      background: '#0a0f1a',
+      border: '1px solid rgba(56,189,248,.1)',
+      borderRadius: 10,
+      padding: 3,
+      gap: 2,
+    }}>
+      {options.map(opt => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => onChange(opt)}
+          style={{
+            flex: 1,
+            padding: '8px 12px',
+            borderRadius: 7,
+            border: 'none',
+            background: value === opt ? '#06b6d4' : 'transparent',
+            color: value === opt ? '#fff' : '#8899aa',
+            fontSize: 13,
+            fontWeight: value === opt ? 600 : 500,
+            cursor: 'pointer',
+            transition: 'background .18s, color .18s',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function ColorSwatch({ name, hex, selected, onClick }: { name: string; hex: string | null; selected: boolean; onClick: () => void }) {
+  const isTransparent = name.toLowerCase() === 'transparente'
+
+  if (!hex) {
+    // Multicor
+    return (
+      <button
+        type="button"
+        title={name}
+        onClick={onClick}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          padding: '6px 12px', borderRadius: 20,
+          border: selected ? '2px solid #06b6d4' : '2px solid rgba(56,189,248,.08)',
+          background: selected ? 'rgba(6,182,212,.1)' : '#0d1520',
+          color: selected ? '#22d3ee' : '#8899aa',
+          cursor: 'pointer', fontSize: 13, fontWeight: 500,
+          transition: 'all .18s',
+        }}
+      >
+        <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'conic-gradient(red, yellow, lime, cyan, blue, magenta, red)', flexShrink: 0 }} />
+        {name}
+      </button>
+    )
+  }
+
+  const checkerboard = isTransparent
+    ? {
+        backgroundImage: `
+          linear-gradient(45deg, #444 25%, transparent 25%),
+          linear-gradient(-45deg, #444 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #444 75%),
+          linear-gradient(-45deg, transparent 75%, #444 75%)
+        `,
+        backgroundSize: '8px 8px',
+        backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px',
+        backgroundColor: '#888',
+      }
+    : { background: hex }
+
+  return (
+    <button
+      type="button"
+      title={name}
+      onClick={onClick}
+      style={{
+        width: 38, height: 38, borderRadius: '50%',
+        ...checkerboard,
+        border: selected ? `3px solid ${hex}` : '2px solid rgba(255,255,255,.12)',
+        cursor: 'pointer',
+        transition: 'box-shadow .18s, border-color .18s',
+        boxShadow: selected ? `0 0 0 2px #0c1219, 0 0 0 4px ${hex}` : 'none',
+        outline: 'none',
+        flexShrink: 0,
+      }}
+    />
+  )
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function QuoteRequest() {
   const { isAuthenticated, user, setUser } = useAuthStore()
@@ -103,7 +281,7 @@ export default function QuoteRequest() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { quantity: 1 },
+    defaultValues: { quantity: 1, material: 'PLA' },
   })
 
   async function onSubmit(data: FormValues) {
@@ -129,18 +307,11 @@ export default function QuoteRequest() {
   if (success) {
     return (
       <PageWrapper>
-        <div
-          className="flex items-center justify-center"
-          style={{ minHeight: 'calc(100vh - 80px)', padding: '80px 5%' }}
-        >
+        <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 80px)', padding: '80px 5%' }}>
           <div className="text-center max-w-md">
             <div className="text-6xl mb-6">🎉</div>
-            <h2 className="font-heading text-2xl font-bold text-text-primary mb-3">
-              Orçamento enviado!
-            </h2>
-            <p className="text-text-secondary mb-8">
-              Entraremos em contato em breve.
-            </p>
+            <h2 className="font-heading text-2xl font-bold text-text-primary mb-3">Orçamento enviado!</h2>
+            <p className="text-text-secondary mb-8">Entraremos em contato em breve.</p>
             <button
               type="button"
               onClick={() => setSuccess(false)}
@@ -154,6 +325,11 @@ export default function QuoteRequest() {
     )
   }
 
+  const colorOptions: Array<{ value: string; hex: string | null }> = [
+    { value: 'Multicor', hex: null },
+    ...colors.map(c => ({ value: c.name, hex: c.hex })),
+  ]
+
   return (
     <PageWrapper>
       <SEOHead
@@ -162,171 +338,141 @@ export default function QuoteRequest() {
         canonical="/quote"
         jsonLd={quoteJsonLd}
       />
-      <div style={{ padding: '100px 5% 80px' }}>
+
+      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '3rem 5% 4rem' }}>
+
+        {/* ── Page header ── */}
+        <div className="text-center" style={{ marginBottom: '2.5rem' }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#06b6d4', marginBottom: 8 }}>
+            Orçamento
+          </p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-.5px', color: '#e8edf3', marginBottom: 8 }}>
+            Solicitar Orçamento
+          </h1>
+          <p style={{ fontSize: 14, color: '#8899aa', maxWidth: 440, margin: '0 auto' }}>
+            Preencha os detalhes do seu projeto e receba um orçamento personalizado em até 24 horas.
+          </p>
+        </div>
+
+        {/* ── Benefits strip ── */}
         <div
-          className="grid gap-[60px]"
-          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-2.5"
+          style={{ marginBottom: '2.5rem' }}
         >
-          {/* ── Left — info ───────────────────────────────────────────────── */}
-          <div className="flex flex-col justify-center">
-            <p className="text-accent-blue text-xs font-semibold uppercase tracking-[0.15em] mb-3">
-              Orçamento
-            </p>
-            <h1 className="font-heading text-3xl font-bold text-text-primary mb-4">
-              Solicitar Orçamento
-            </h1>
-            <p className="text-text-secondary mb-8 leading-relaxed">
-              Pronto para dar vida à sua ideia? Preencha o formulário e receba um orçamento
-              personalizado em até 24 horas.
-            </p>
-
-            <div className="flex flex-col gap-4">
-              {[
-                { icon: '⚡', title: 'Resposta em 24h',       desc: 'Orçamento rápido e detalhado' },
-                { icon: '🎨', title: 'Qualquer filamento',    desc: 'PLA, PETG, ABS, Resina, TPU' },
-                { icon: '📐', title: 'Modelagem inclusa',     desc: 'Ajudamos com o arquivo 3D' },
-                { icon: '🚚', title: 'Envio para todo Brasil', desc: 'Entregamos em qualquer estado' },
-              ].map(({ icon, title, desc }) => (
-                <div key={title} className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-accent-blue/10 border border-accent-blue/20 text-lg">
-                    {icon}
-                  </div>
-                  <div>
-                    <p className="text-text-primary font-semibold text-sm">{title}</p>
-                    <p className="text-text-secondary text-xs">{desc}</p>
-                  </div>
-                </div>
-              ))}
+          {benefits.map(({ Icon, color, bg, label, desc }) => (
+            <div
+              key={label}
+              className="flex items-center gap-3 transition-all duration-200 hover:-translate-y-0.5"
+              style={{ background: '#0c1219', border: '1px solid rgba(56,189,248,.08)', borderRadius: 10, padding: '14px 16px' }}
+            >
+              <div style={{ width: 34, height: 34, borderRadius: 6, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Icon size={18} color={color} />
+              </div>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#e8edf3', lineHeight: 1.3 }}>{label}</p>
+                <p className="hidden sm:block" style={{ fontSize: 11, color: '#556677', lineHeight: 1.3, marginTop: 2 }}>{desc}</p>
+              </div>
             </div>
-          </div>
+          ))}
+        </div>
 
-          {/* ── Right — form card ─────────────────────────────────────────── */}
+        {/* ── Main grid: form + sidebar ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
+
+          {/* ── Form card ── */}
           <div
             style={{
-              position: 'relative',
-              background: 'rgba(15,16,35,0.97)',
-              border: '1px solid rgba(30,33,80,0.65)',
+              background: '#0c1219',
+              border: '1px solid rgba(56,189,248,.08)',
               borderRadius: 20,
-              padding: '36px 32px 28px',
+              padding: '2rem',
+              position: 'relative',
               overflow: 'hidden',
             }}
           >
-            {/* Gradient top bar */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-              background: 'linear-gradient(135deg, #00E5FF, #4D9FFF, #8B5CF6)',
-              borderRadius: '20px 20px 0 0',
-              pointerEvents: 'none',
-            }} />
+            {/* top gradient line */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, #06b6d4, #3b82f6, transparent)' }} />
 
-            {/* Corner accent — top right */}
-            <div style={{
-              position: 'absolute', top: 14, right: 14,
-              width: 26, height: 26,
-              borderTop: '1.5px solid rgba(0,229,255,0.25)',
-              borderRight: '1.5px solid rgba(0,229,255,0.25)',
-              borderRadius: '0 6px 0 0',
-              pointerEvents: 'none',
-            }} />
+            <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 
-            {/* Corner accent — bottom left */}
-            <div style={{
-              position: 'absolute', bottom: 14, left: 14,
-              width: 26, height: 26,
-              borderBottom: '1.5px solid rgba(139,92,246,0.25)',
-              borderLeft: '1.5px solid rgba(139,92,246,0.25)',
-              borderRadius: '0 0 0 6px',
-              pointerEvents: 'none',
-            }} />
+              {/* ── Section 1: Project ── */}
+              <div >
+                <StepLabel step="Etapa 01 — Projeto" title="Detalhes do projeto" />
 
-            <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-
-              {/* Description */}
-              <div className="flex flex-col gap-1.5">
-                <QLabel htmlFor="description" icon={<MessageSquare size={11} />}>
-                  Detalhes do projeto
-                </QLabel>
-                <textarea
-                  id="description"
-                  rows={4}
-                  placeholder="Descreva dimensões, acabamento, referências ou qualquer detalhe importante..."
-                  {...register('description')}
-                  className={qInput(!!errors.description) + ' resize-none'}
-                />
-                {errors.description && (
-                  <span className="text-xs text-red-500">{errors.description.message}</span>
-                )}
-              </div>
-
-              {/* Material + Color */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <QLabel htmlFor="material" icon={<Layers size={11} />}>Material</QLabel>
-                  <div className="q-field-override">
-                    <Controller
-                      control={control}
-                      name="material"
-                      render={({ field }) => (
-                        <CustomSelect
-                          id="material"
-                          label=""
-                          value={field.value ?? ''}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          options={materials.map((m) => ({ value: m.name, label: m.name }))}
-                          error={errors.material?.message}
-                        />
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <QLabel htmlFor="color" icon={<Palette size={11} />}>Cor</QLabel>
-                  <div className="q-field-override">
-                    <Controller
-                      control={control}
-                      name="color"
-                      render={({ field }) => (
-                        <CustomSelect
-                          id="color"
-                          label=""
-                          value={field.value ?? ''}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          options={[
-                            { value: 'Multicor', label: '🎨 Multicor (mais de uma cor)' },
-                            ...colors.map((c) => ({ value: c.name, label: c.name })),
-                          ]}
-                          error={errors.color?.message}
-                        />
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Quantity + Deadline */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <QLabel htmlFor="quantity" icon={<Hash size={11} />}>Quantidade</QLabel>
-                  <input
-                    id="quantity"
-                    type="number"
-                    min={1}
-                    className={qInput(!!errors.quantity)}
-                    {...register('quantity', { valueAsNumber: true })}
+                {/* Description */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <FieldLabel htmlFor="description">Descrição <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
+                  <Controller
+                    control={control}
+                    name="description"
+                    render={({ field }) => (
+                      <QTextarea
+                        id="description"
+                        rows={4}
+                        placeholder="Descreva dimensões, acabamento, referências ou qualquer detalhe importante..."
+                        hasError={!!errors.description}
+                        {...field}
+                      />
+                    )}
                   />
-                  {errors.quantity && (
-                    <span className="text-xs text-red-500">{errors.quantity.message}</span>
-                  )}
+                  {errors.description && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.description.message}</p>}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <QLabel htmlFor="desiredDeadline" icon={<CalendarIcon size={11} />}>
-                    Prazo desejado
-                  </QLabel>
-                  <div className="q-field-override">
+                {/* Material segmented control */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <FieldLabel>Material</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="material"
+                    render={({ field }) => (
+                      <SegmentedControl
+                        options={materials.map(m => m.name)}
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                  {errors.material && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.material.message}</p>}
+                </div>
+
+                {/* Color swatches */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <FieldLabel>Cor</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="color"
+                    render={({ field }) => (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                        {colorOptions.map(c => (
+                          <ColorSwatch
+                            key={c.value}
+                            name={c.value}
+                            hex={c.hex}
+                            selected={field.value === c.value}
+                            onClick={() => field.onChange(c.value)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  />
+                  {errors.color && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.color.message}</p>}
+                </div>
+
+                {/* Quantity + Deadline */}
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <div style={{ flex: '0 0 120px' }}>
+                    <FieldLabel htmlFor="quantity">Quantidade <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
+                    <QInput
+                      id="quantity"
+                      type="number"
+                      min={1}
+                      hasError={!!errors.quantity}
+                      {...register('quantity', { valueAsNumber: true })}
+                    />
+                    {errors.quantity && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.quantity.message}</p>}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <FieldLabel htmlFor="desiredDeadline">Prazo desejado</FieldLabel>
                     <Controller
                       control={control}
                       name="desiredDeadline"
@@ -343,148 +489,185 @@ export default function QuoteRequest() {
                     />
                   </div>
                 </div>
-              </div>
 
-              {/* Files */}
-              <div className="flex flex-col gap-1.5">
-                <QLabel icon={<UploadCloud size={11} />}>Arquivos do projeto</QLabel>
-                <FileUploadZone onFilesChange={setFiles} accept={ACCEPT} />
-              </div>
-
-              {/* Customer data */}
-              {isAuthenticated ? (
-                <div className="flex flex-col gap-3">
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    borderRadius: 10,
-                    border: '1px solid rgba(77,159,255,0.2)',
-                    background: 'rgba(77,159,255,0.05)',
-                    padding: '12px 16px',
-                  }}>
-                    <div style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      width: 32, height: 32, flexShrink: 0,
-                      borderRadius: '50%',
-                      background: 'rgba(77,159,255,0.2)',
-                      color: '#4D9FFF', fontSize: 14,
-                    }}>✓</div>
-                    <div>
-                      <p className="text-sm font-semibold text-text-primary">
-                        {user?.name ?? user?.email}
-                      </p>
-                      <p className="text-xs text-text-secondary">
-                        {user?.email}
-                        {user?.whatsapp && (
-                          <span className="ml-2 text-accent-blue">{user.whatsapp}</span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  {!user?.whatsapp && (
-                    <div className="flex flex-col gap-1.5">
-                      <QLabel htmlFor="customerWhatsapp" icon={<Phone size={11} />}>
-                        WhatsApp (com DDD)
-                      </QLabel>
-                      <input
-                        id="customerWhatsapp"
-                        type="tel"
-                        placeholder="(00) 00000-0000"
-                        className={qInput(!!errors.customerWhatsapp)}
-                        {...register('customerWhatsapp')}
-                      />
-                      {errors.customerWhatsapp && (
-                        <span className="text-xs text-red-500">{errors.customerWhatsapp.message}</span>
-                      )}
-                    </div>
-                  )}
+                {/* Files */}
+                <div style={{ marginTop: '1rem' }}>
+                  <FieldLabel>Arquivos do projeto</FieldLabel>
+                  <FileUploadZone onFilesChange={setFiles} accept={ACCEPT} />
                 </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  <p className="font-heading text-[10px] uppercase tracking-[0.15em] text-text-secondary">
-                    Seus dados (opcional)
-                  </p>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="flex flex-col gap-1.5">
-                      <QLabel htmlFor="customerName" icon={<User size={11} />}>Seu nome</QLabel>
-                      <input
+              </div>
+
+              {/* Divider */}
+              <div style={{ margin: '2.25rem 0', height: 1, background: 'linear-gradient(90deg, transparent, rgba(56,189,248,.3), transparent)' }} />
+
+              {/* ── Section 2: Contact ── */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <StepLabel step="Etapa 02 — Contato" title="Seus dados" />
+
+                {isAuthenticated ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {/* User card */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#111a24', border: '1px solid rgba(56,189,248,.08)', borderRadius: 10, padding: '12px 16px' }}>
+                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg, #0891b2, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, color: '#fff', flexShrink: 0 }}>
+                        {initials(user?.name, user?.email)}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: '#e8edf3' }}>{user?.name ?? user?.email}</p>
+                        <p style={{ fontSize: 12, color: '#8899aa', marginTop: 1 }}>
+                          {user?.email}
+                          {user?.whatsapp && <span style={{ marginLeft: 8, color: '#22d3ee' }}>{user.whatsapp}</span>}
+                        </p>
+                      </div>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#34d399', background: 'rgba(16,185,129,.1)', padding: '4px 10px', borderRadius: 6, letterSpacing: '.3px', flexShrink: 0 }}>
+                        Logado
+                      </span>
+                    </div>
+
+                    {!user?.whatsapp && (
+                      <div>
+                        <FieldLabel htmlFor="customerWhatsapp">WhatsApp (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
+                        <QInput
+                          id="customerWhatsapp"
+                          type="tel"
+                          placeholder="(00) 00000-0000"
+                          hasError={!!errors.customerWhatsapp}
+                          {...register('customerWhatsapp')}
+                        />
+                        {errors.customerWhatsapp && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerWhatsapp.message}</p>}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {/* Nome — full width */}
+                    <div>
+                      <FieldLabel htmlFor="customerName">Seu nome</FieldLabel>
+                      <QInput
                         id="customerName"
                         type="text"
                         placeholder="Nome completo"
-                        className={qInput(!!errors.customerName)}
+                        hasError={!!errors.customerName}
                         {...register('customerName')}
                       />
-                      {errors.customerName && (
-                        <span className="text-xs text-red-500">{errors.customerName.message}</span>
-                      )}
+                      {errors.customerName && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerName.message}</p>}
                     </div>
-                    <div className="flex flex-col gap-1.5">
-                      <QLabel htmlFor="customerWhatsapp" icon={<Phone size={11} />}>WhatsApp</QLabel>
-                      <input
-                        id="customerWhatsapp"
-                        type="tel"
-                        placeholder="(00) 00000-0000"
-                        className={qInput(!!errors.customerWhatsapp)}
-                        {...register('customerWhatsapp')}
-                      />
-                      {errors.customerWhatsapp && (
-                        <span className="text-xs text-red-500">{errors.customerWhatsapp.message}</span>
-                      )}
+                    {/* WhatsApp + Email — lado a lado */}
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <div style={{ flex: 1 }}>
+                        <FieldLabel htmlFor="customerWhatsapp">WhatsApp (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
+                        <QInput
+                          id="customerWhatsapp"
+                          type="tel"
+                          placeholder="(00) 00000-0000"
+                          hasError={!!errors.customerWhatsapp}
+                          {...register('customerWhatsapp')}
+                        />
+                        {errors.customerWhatsapp && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerWhatsapp.message}</p>}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <FieldLabel htmlFor="customerEmail">E-mail</FieldLabel>
+                        <QInput
+                          id="customerEmail"
+                          type="email"
+                          placeholder="seu@email.com"
+                          hasError={!!errors.customerEmail}
+                          {...register('customerEmail')}
+                        />
+                        {errors.customerEmail && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerEmail.message}</p>}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-1.5">
-                    <QLabel htmlFor="customerEmail" icon={<Mail size={11} />}>E-mail</QLabel>
-                    <input
-                      id="customerEmail"
-                      type="email"
-                      placeholder="seu@email.com"
-                      className={qInput(!!errors.customerEmail)}
-                      {...register('customerEmail')}
-                    />
-                    {errors.customerEmail && (
-                      <span className="text-xs text-red-500">{errors.customerEmail.message}</span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {submitError && <p className="text-sm text-red-500">{submitError}</p>}
-
-              {/* Divider */}
-              <div
-                className="flex items-center gap-3"
-                style={{ color: 'rgba(74,80,128,0.7)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase' }}
-              >
-                <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(30,33,80,0.9), transparent)' }} />
-                <span className="font-heading">enviar</span>
-                <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(30,33,80,0.9), transparent)' }} />
+                )}
               </div>
+
+              {submitError && <p style={{ fontSize: 13, color: '#fb7185', marginBottom: 12 }}>{submitError}</p>}
 
               {/* Submit */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="q-submit-btn font-heading"
+                style={{
+                  width: '100%', padding: '14px', border: 'none', borderRadius: 10,
+                  fontFamily: 'inherit', fontSize: 15, fontWeight: 600, color: '#fff',
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer', letterSpacing: '.3px',
+                  background: 'linear-gradient(135deg, #0891b2, #3b82f6)',
+                  opacity: isSubmitting ? 0.7 : 1,
+                  transition: 'all .3s',
+                  position: 'relative', overflow: 'hidden',
+                }}
+                onMouseEnter={e => { if (!isSubmitting) { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 30px rgba(6,182,212,.25)' } }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ''; (e.currentTarget as HTMLButtonElement).style.boxShadow = '' }}
               >
                 {isSubmitting ? (
-                  <span className="inline-flex items-center justify-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
                     Enviando...
                   </span>
-                ) : (
-                  'Enviar Orçamento'
-                )}
+                ) : 'Enviar orçamento'}
               </button>
-            </form>
 
-            {/* Status bar */}
-            <div
-              className="flex items-center justify-center gap-1.5"
-              style={{ marginTop: 20, color: 'rgba(74,80,128,0.7)', fontSize: 12, letterSpacing: '0.05em' }}
-            >
-              <span className="q-status-dot" />
-              Aceitando novos pedidos
-            </div>
+              {/* Status */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, fontSize: 12, color: '#556677' }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', animation: 'q-pulse 2s ease infinite', display: 'inline-block' }} />
+                Aceitando novos pedidos
+              </div>
+
+            </form>
           </div>
+
+          {/* ── Sidebar ── */}
+          <aside className="lg:sticky" style={{ top: 80 }}>
+
+            {/* Checklist card */}
+            <div style={{ background: '#0c1219', border: '1px solid rgba(56,189,248,.08)', borderRadius: 20, padding: '1.75rem', marginBottom: '1rem' }}>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: '#06b6d4', marginBottom: 4 }}>
+                Como funciona
+              </p>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e8edf3', marginBottom: '.75rem' }}>
+                Próximos passos
+              </h3>
+              <p style={{ fontSize: 13, color: '#8899aa', lineHeight: 1.65, marginBottom: '1.25rem' }}>
+                Após enviar seu orçamento, nossa equipe analisa os detalhes e retorna com valor, prazo e opções de acabamento.
+              </p>
+
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {checklist.map(({ color, bg, strong, desc }) => (
+                  <li key={strong} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#8899aa', lineHeight: 1.5 }}>
+                    <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, marginTop: 1, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round"><path d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                    <div>
+                      <span style={{ color: '#e8edf3', fontWeight: 600 }}>{strong}</span>
+                      <br />{desc}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Help card */}
+            {WHATSAPP_URL && (
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12, background: '#0c1219', border: '1px solid rgba(56,189,248,.08)', borderRadius: 20, padding: '1.25rem 1.5rem', transition: 'all .25s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(56,189,248,.2)'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(56,189,248,.08)'; (e.currentTarget as HTMLAnchorElement).style.transform = '' }}
+              >
+                <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: 'rgba(34,211,238,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee' }}>
+                  <MessageCircle size={18} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#e8edf3' }}>Precisa de ajuda?</p>
+                  <p style={{ fontSize: 12, color: '#556677' }}>Fale conosco pelo WhatsApp</p>
+                </div>
+                <span style={{ marginLeft: 'auto', color: '#556677', fontSize: 16 }}>→</span>
+              </a>
+            )}
+
+          </aside>
+
         </div>
       </div>
     </PageWrapper>
