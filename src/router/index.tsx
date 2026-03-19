@@ -5,6 +5,8 @@ import Portfolio from '@/pages/Portfolio'
 import PortfolioDetail from '@/pages/PortfolioDetail'
 import QuoteRequest from '@/pages/QuoteRequest'
 import MyQuotes from '@/pages/MyQuotes'
+import Login from '@/pages/Login'
+import Register from '@/pages/Register'
 import AdminDashboard from '@/pages/Admin/Dashboard'
 import AdminQuoteDetail from '@/pages/Admin/QuoteDetail'
 import PortfolioAdmin from '@/pages/Admin/PortfolioAdmin'
@@ -15,6 +17,8 @@ import ColorsAdmin from '@/pages/Admin/CatalogAdmin/ColorsAdmin'
 
 export const router = createBrowserRouter([
   { path: '/',                  element: <Home /> },
+  { path: '/login',             element: <Login /> },
+  { path: '/register',          element: <Register /> },
   { path: '/portfolio',         element: <Portfolio /> },
   { path: '/portfolio/:id',     element: <PortfolioDetail /> },
   { path: '/quote',             element: <QuoteRequest /> },

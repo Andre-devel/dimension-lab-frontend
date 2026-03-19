@@ -69,13 +69,12 @@ export function Navbar() {
           </button>
         ) : (
           <>
-            <button
-              type="button"
-              onClick={() => authService.loginWithGoogle()}
+            <NavLink
+              to="/login"
               className="rounded-full border border-accent-blue px-[22px] py-[9px] text-sm font-semibold text-accent-blue transition-all hover:bg-accent-blue/10"
             >
               Entrar
-            </button>
+            </NavLink>
             <NavLink
               to="/quote"
               className="hidden md:inline-flex rounded-full bg-accent-blue px-[22px] py-[9px] text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"

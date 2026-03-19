@@ -1,57 +1,79 @@
 import { Link } from 'react-router-dom'
-import { Card } from '@/components/ui/Card'
 import type { PortfolioItem } from '@/types/portfolio'
 import { fileUrl } from '@/utils/fileUrl'
 
 interface Props {
   item: PortfolioItem
+  view: 'grid' | 'list'
+  animationDelay?: number
 }
 
-export function PortfolioCard({ item }: Props) {
+export function PortfolioCard({ item, view, animationDelay = 0 }: Props) {
   return (
-    <Link to={`/portfolio/${item.id}`} className="block group">
-      <Card hoverable>
-        <div className="mb-3 w-full rounded overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: '260px' }}>
-          {item.photos.length > 0 ? (
+    <Link
+      to={`/portfolio/${item.id}`}
+      className="pf-card block"
+      style={{ animationDelay: `${animationDelay}s`, textDecoration: 'none' }}
+    >
+      {/* Image */}
+      <div className="pf-card-img">
+        {item.photos.length > 0 ? (
+          <>
             <img
               src={fileUrl(item.photos[0])}
               alt={item.title}
-              width={300}
-              height={533}
+              width={400}
+              height={300}
               loading="lazy"
               decoding="async"
-              className="h-full w-full object-cover"
             />
-          ) : (
-            <div className="h-full w-full bg-surface-2 flex items-center justify-center">
-              <span className="text-xs text-text-secondary">Sem foto</span>
+            <div className="pf-card-overlay">
+              <button className="pf-overlay-btn" tabIndex={-1}>Ver detalhes</button>
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <div className="flex h-full items-center justify-center flex-col gap-2" style={{ color: '#3d4f5f' }}>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+            <span style={{ fontSize: 12 }}>Foto em breve</span>
+          </div>
+        )}
+      </div>
 
-        <h3 className="font-semibold text-text-primary group-hover:text-accent-blue transition-colors">
+      {/* Body */}
+      <div style={{ padding: view === 'list' ? '16px 20px' : '14px 16px 16px', flex: 1 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 600, color: '#e8edf3', marginBottom: 10, lineHeight: 1.3 }}>
           {item.title}
         </h3>
 
-        <div className="mt-2 flex flex-wrap gap-2">
-          <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-text-secondary">
-            {item.category.name}
-          </span>
-          <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-text-secondary">
-            {item.material}
-          </span>
-          {item.complexity && (
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-text-secondary">
-              {item.complexity}
-            </span>
-          )}
-          {item.printTime != null && (
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs text-text-secondary">
-              {item.printTime}h
-            </span>
-          )}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+          <Tag color="amber">{item.category.name}</Tag>
+          <Tag color="cyan">{item.material}</Tag>
+          {item.complexity && <Tag>{item.complexity}</Tag>}
+          {item.printTime != null && <Tag color="blue">{item.printTime}h</Tag>}
         </div>
-      </Card>
+      </div>
     </Link>
   )
+}
+
+function Tag({ children, color }: { children: React.ReactNode; color?: 'cyan' | 'amber' | 'blue' }) {
+  const styles: Record<string, React.CSSProperties> = {
+    cyan:  { background: 'rgba(6,182,212,.08)',  borderColor: 'rgba(6,182,212,.15)',  color: '#22d3ee' },
+    amber: { background: 'rgba(251,191,36,.08)', borderColor: 'rgba(251,191,36,.15)', color: '#fbbf24' },
+    blue:  { background: 'rgba(96,165,250,.08)', borderColor: 'rgba(96,165,250,.15)', color: '#60a5fa' },
+  }
+  const base: React.CSSProperties = {
+    fontSize: 11, fontWeight: 500, letterSpacing: '.3px',
+    padding: '3px 9px', borderRadius: 50,
+    border: '1px solid rgba(56,189,248,.08)',
+    background: 'rgba(255,255,255,.04)',
+    color: '#556677',
+    textTransform: 'uppercase',
+    ...(color ? styles[color] : {}),
+  }
+  return <span style={base}>{children}</span>
 }

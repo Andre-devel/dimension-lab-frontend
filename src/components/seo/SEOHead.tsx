@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async'
 
 export const SITE_URL = 'https://dimensionlab3d.com.br'
 export const SITE_NAME = 'Dimension.Lab3D'
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`
 
 interface SEOHeadProps {
   /** Título da página — sufixo "| Dimension.Lab3D" adicionado automaticamente */

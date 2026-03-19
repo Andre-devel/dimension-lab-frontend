@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import type { PortfolioItem } from '@/types/portfolio'
 import { fileUrl } from '@/utils/fileUrl'
 
-const SCROLL_STEP = 160 + 24 // card width + gap
+const SCROLL_STEP = 180 + 24 // card width + gap
 
 interface Props {
   items: PortfolioItem[]
@@ -58,38 +58,33 @@ export function Carousel({ items }: Props) {
           <Link
             key={item.id}
             to={`/portfolio/${item.id}`}
-            style={{ width: '160px', flexShrink: 0, scrollSnapAlign: 'start', textDecoration: 'none' }}
+            className="pp-card"
+            style={{ width: '180px', flexShrink: 0, scrollSnapAlign: 'start', textDecoration: 'none' }}
           >
-            <div className="rounded-card border border-border bg-surface-2 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-glow group">
-              <div style={{ width: '100%', aspectRatio: '9/16', overflow: 'hidden' }}>
-                {item.photos.length > 0 ? (
-                  <img
-                    src={fileUrl(item.photos[0])}
-                    alt={item.title}
-                    width={160}
-                    height={284}
-                    loading="lazy"
-                    decoding="async"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center bg-surface">
-                    <span className="text-xs text-text-secondary">Sem foto</span>
-                  </div>
-                )}
-              </div>
-              <div style={{ padding: '0.75rem' }}>
-                <h3 className="text-sm font-semibold text-text-primary group-hover:text-accent-blue transition-colors truncate">
-                  {item.title}
-                </h3>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  <span className="rounded-full bg-surface px-2 py-0.5 text-xs text-text-secondary">
-                    {item.category.name}
-                  </span>
-                  <span className="rounded-full bg-surface px-2 py-0.5 text-xs text-text-secondary">
-                    {item.material}
-                  </span>
+            <div className="pp-img" style={{ aspectRatio: '9/16' }}>
+              {item.photos.length > 0 ? (
+                <img
+                  src={fileUrl(item.photos[0])}
+                  alt={item.title}
+                  width={180}
+                  height={320}
+                  loading="lazy"
+                  decoding="async"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center" style={{ color: '#3d4f5f' }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+                  </svg>
                 </div>
+              )}
+            </div>
+            <div className="pp-body">
+              <div className="pp-name">{item.title}</div>
+              <div className="pp-tags">
+                <span className="pp-tag pp-tag-cat">{item.category.name}</span>
+                <span className="pp-tag pp-tag-mat">{item.material}</span>
               </div>
             </div>
           </Link>
