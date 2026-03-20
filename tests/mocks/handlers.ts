@@ -34,7 +34,7 @@ export const handlers = [
         desiredDeadline: '2026-04-15',
         status: 'RECEIVED',
         createdAt: '2026-03-11T00:00:00Z',
-        customer: { id: 'cust-1', name: 'João Silva', email: 'joao@example.com', whatsapp: '11999999999' },
+        customer: { id: 'cust-1', name: 'João Silva', email: 'joao@example.com', phone: '11999999999' },
         files: [],
       },
       {
@@ -66,7 +66,7 @@ export const handlers = [
         desiredDeadline: '2026-04-15',
         status: b.status ?? 'UNDER_REVIEW',
         createdAt: '2026-03-11T00:00:00Z',
-        customer: { id: 'cust-1', name: 'João Silva', email: 'joao@example.com', whatsapp: '11999999999' },
+        customer: { id: 'cust-1', name: 'João Silva', email: 'joao@example.com', phone: '11999999999' },
         files: [],
       })
     }),

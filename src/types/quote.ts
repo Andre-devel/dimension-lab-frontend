@@ -32,7 +32,7 @@ export interface Customer {
   id: string
   name: string
   email: string
-  whatsapp?: string
+  phone?: string
 }
 
 export interface CreateQuotePayload {
@@ -44,5 +44,5 @@ export interface CreateQuotePayload {
   files: File[]
   customerName?: string
   customerEmail?: string
-  customerWhatsapp?: string
+  customerPhone?: string
 }

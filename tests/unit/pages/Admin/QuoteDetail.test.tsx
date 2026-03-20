@@ -28,7 +28,7 @@ const mockQuote = {
   desiredDeadline: '2026-04-15',
   status: 'RECEIVED' as const,
   createdAt: '2026-03-11T00:00:00Z',
-  customer: { id: 'cust-1', name: 'João Silva', email: 'joao@example.com', whatsapp: '11999999999' },
+  customer: { id: 'cust-1', name: 'João Silva', email: 'joao@example.com', phone: '11999999999' },
   files: [
     { id: 'file-1', filePath: 'uploads/model.stl', fileType: 'MODEL_3D' as const },
   ],

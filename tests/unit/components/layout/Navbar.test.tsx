@@ -80,9 +80,9 @@ describe('Navbar', () => {
     expect(quoteLinks[0].closest('a')).toHaveAttribute('href', '/quote')
   })
 
-  it('shows "Entrar" button when not authenticated', () => {
+  it('shows "Entrar" link when not authenticated', () => {
     renderWithRouter(<Navbar />)
-    expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Entrar' })).toBeInTheDocument()
   })
 
   it('shows "Sair" button and "Meus Orçamentos" link when authenticated as CLIENT', () => {
@@ -104,10 +104,9 @@ describe('Navbar', () => {
     expect(screen.getByText('Admin')).toBeInTheDocument()
   })
 
-  it('calls loginWithGoogle when "Entrar" is clicked', () => {
+  it('"Entrar" link points to /login', () => {
     renderWithRouter(<Navbar />)
-    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }))
-    expect(vi.mocked(authService.loginWithGoogle)).toHaveBeenCalledOnce()
+    expect(screen.getByRole('link', { name: 'Entrar' })).toHaveAttribute('href', '/login')
   })
 
 })

@@ -21,13 +21,13 @@ export function Navbar() {
   const { user, isAuthenticated, clearUser } = useAuthStore()
   const navigate = useNavigate()
 
-  const authLink = isAuthenticated
+  const authLinks = isAuthenticated
     ? user?.role === 'ADMIN'
-      ? { label: 'Admin', to: '/admin' }
-      : { label: 'Meus Orçamentos', to: '/my-quotes' }
-    : null
+      ? [{ label: 'Admin', to: '/admin' }, { label: 'Perfil', to: '/profile' }]
+      : [{ label: 'Meus Orçamentos', to: '/my-quotes' }, { label: 'Perfil', to: '/profile' }]
+    : []
 
-  const navLinks = authLink ? [...publicLinks, authLink] : publicLinks
+  const navLinks = [...publicLinks, ...authLinks]
 
   async function handleLogout() {
     await authService.logout()

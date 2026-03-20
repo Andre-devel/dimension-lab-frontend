@@ -24,4 +24,19 @@ export const authService = {
   async logout(): Promise<void> {
     await api.post('/api/v1/auth/logout')
   },
+
+  async checkEmail(email: string): Promise<{ registered: boolean }> {
+    const { data } = await api.get<{ registered: boolean }>('/api/v1/auth/check-email', { params: { email } })
+    return data
+  },
+
+  async checkPhone(phone: string): Promise<{ registered: boolean }> {
+    const { data } = await api.get<{ registered: boolean }>('/api/v1/auth/check-phone', { params: { phone } })
+    return data
+  },
+
+  async updateProfile(name: string, phone: string): Promise<User> {
+    const { data } = await api.patch<User>('/api/v1/auth/profile', { name, phone })
+    return data
+  },
 }

@@ -14,6 +14,8 @@ import NewPortfolioItem from '@/pages/Admin/PortfolioAdmin/NewPortfolioItem'
 import EditPortfolioItem from '@/pages/Admin/PortfolioAdmin/EditPortfolioItem'
 import MaterialsAdmin from '@/pages/Admin/CatalogAdmin/MaterialsAdmin'
 import ColorsAdmin from '@/pages/Admin/CatalogAdmin/ColorsAdmin'
+import SettingsAdmin from '@/pages/Admin/SettingsAdmin'
+import Profile from '@/pages/Profile'
 
 export const router = createBrowserRouter([
   { path: '/',                  element: <Home /> },
@@ -27,6 +29,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute role="CLIENT">
         <MyQuotes />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/profile',
+    element: (
+      <PrivateRoute role="CLIENT">
+        <Profile />
       </PrivateRoute>
     ),
   },
@@ -83,6 +93,14 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute role="ADMIN">
         <ColorsAdmin />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: '/admin/settings',
+    element: (
+      <PrivateRoute role="ADMIN">
+        <SettingsAdmin />
       </PrivateRoute>
     ),
   },

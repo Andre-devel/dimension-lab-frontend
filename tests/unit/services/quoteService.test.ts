@@ -70,13 +70,13 @@ describe('quoteService', () => {
         files: [],
         customerName: 'João',
         customerEmail: 'joao@test.com',
-        customerWhatsapp: '11999999999',
+        customerPhone: '11999999999',
       })
 
       const formData: FormData = (mockedApi.post as ReturnType<typeof vi.fn>).mock.calls[0][1]
       expect(formData.get('customerName')).toBe('João')
       expect(formData.get('customerEmail')).toBe('joao@test.com')
-      expect(formData.get('customerWhatsapp')).toBe('11999999999')
+      expect(formData.get('customerPhone')).toBe('11999999999')
     })
 
     it('throws when the server responds with an error', async () => {

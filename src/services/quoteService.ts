@@ -11,7 +11,7 @@ export const quoteService = {
     form.append('desiredDeadline', payload.desiredDeadline)
     if (payload.customerName)      form.append('customerName',      payload.customerName)
     if (payload.customerEmail)     form.append('customerEmail',     payload.customerEmail)
-    if (payload.customerWhatsapp)  form.append('customerWhatsapp',  payload.customerWhatsapp)
+    if (payload.customerPhone)  form.append('customerPhone',  payload.customerPhone)
     payload.files.forEach((file) => form.append('files', file))
 
     const { data } = await api.post<Quote>('/api/v1/quotes', form, {

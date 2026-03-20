@@ -107,10 +107,10 @@ export default function AdminQuoteDetail() {
                     <dt className="text-xs font-medium uppercase text-text-secondary">E-mail</dt>
                     <dd className="mt-1 text-sm text-text-primary">{quote.customer.email}</dd>
                   </div>
-                  {quote.customer.whatsapp && (
+                  {quote.customer.phone && (
                     <div>
                       <dt className="text-xs font-medium uppercase text-text-secondary">WhatsApp</dt>
-                      <dd className="mt-1 text-sm text-text-primary">{quote.customer.whatsapp}</dd>
+                      <dd className="mt-1 text-sm text-text-primary">{quote.customer.phone}</dd>
                     </div>
                   )}
                 </dl>

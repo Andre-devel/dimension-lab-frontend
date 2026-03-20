@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,6 +8,7 @@ import { SEOHead, SITE_URL } from '@/components/seo/SEOHead'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { FileUploadZone } from '@/components/ui/FileUploadZone'
 import { quoteService } from '@/services/quoteService'
+import { authService } from '@/services/authService'
 import { materialService, colorService } from '@/services/catalogService'
 import type { Material, Color } from '@/types/catalog'
 import { useAuthStore } from '@/store/authStore'
@@ -36,11 +37,11 @@ const schema = z.object({
   description: z.string().min(10, 'Mínimo 10 caracteres'),
   material: z.string().min(1, 'Selecione um material'),
   color: z.string().min(1, 'Selecione uma cor'),
-  quantity: z.number().min(1, 'Mínimo 1 unidade'),
+  quantity: z.coerce.number().min(1, 'Mínimo 1 unidade'),
   desiredDeadline: z.string().min(1, 'Informe o prazo'),
   customerName: z.string().optional(),
   customerEmail: z.string().email('E-mail inválido').optional().or(z.literal('')),
-  customerWhatsapp: z.string().min(10, 'Informe seu WhatsApp com DDD').optional(),
+  customerPhone: z.string().min(10, 'Informe seu WhatsApp com DDD').optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -105,22 +106,26 @@ const inputStyle: React.CSSProperties = {
   transition: 'border-color .2s, box-shadow .2s',
 }
 
-function QInput(props: React.InputHTMLAttributes<HTMLInputElement> & { hasError?: boolean }) {
-  const { hasError, ...rest } = props
-  const [focused, setFocused] = useState(false)
-  return (
-    <input
-      {...rest}
-      style={{
-        ...inputStyle,
-        borderColor: hasError ? '#fb7185' : focused ? '#06b6d4' : 'rgba(56,189,248,.08)',
-        boxShadow: focused ? '0 0 0 3px rgba(6,182,212,.1)' : 'none',
-      }}
-      onFocus={e => { setFocused(true); rest.onFocus?.(e) }}
-      onBlur={e => { setFocused(false); rest.onBlur?.(e) }}
-    />
-  )
-}
+const QInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & { hasError?: boolean }>(
+  function QInput({ hasError, ...rest }, ref) {
+    const [focused, setFocused] = useState(false)
+    return (
+      <input
+        ref={ref}
+        {...rest}
+        style={{
+          ...inputStyle,
+          borderColor: hasError ? '#fb7185' : focused ? '#06b6d4' : 'rgba(56,189,248,.08)',
+          boxShadow: focused ? '0 0 0 3px rgba(6,182,212,.1)' : 'none',
+          ...(rest.type === 'number' ? { MozAppearance: 'textfield' } : {}),
+        }}
+        className={rest.type === 'number' ? '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none' : rest.className}
+        onFocus={e => { setFocused(true); rest.onFocus?.(e) }}
+        onBlur={e => { setFocused(false); rest.onBlur?.(e) }}
+      />
+    )
+  }
+)
 
 function QTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { hasError?: boolean }) {
   const { hasError, ...rest } = props
@@ -286,15 +291,15 @@ export default function QuoteRequest() {
 
   async function onSubmit(data: FormValues) {
     setSubmitError('')
-    const needsWhatsapp = !isAuthenticated || !user?.whatsapp
-    if (needsWhatsapp && (!data.customerWhatsapp || data.customerWhatsapp.length < 10)) {
+    const needsWhatsapp = !isAuthenticated || !user?.phone
+    if (needsWhatsapp && (!data.customerPhone || data.customerPhone.length < 10)) {
       setSubmitError('Informe seu WhatsApp com DDD.')
       return
     }
     try {
       await quoteService.create({ ...data, files })
-      if (isAuthenticated && user && !user.whatsapp && data.customerWhatsapp) {
-        setUser({ ...user, whatsapp: data.customerWhatsapp })
+      if (isAuthenticated && user && !user.phone && data.customerPhone) {
+        setUser({ ...user, phone: data.customerPhone })
       }
       setSuccess(true)
       reset()
@@ -303,6 +308,7 @@ export default function QuoteRequest() {
       setSubmitError('Erro ao enviar orçamento. Tente novamente.')
     }
   }
+
 
   if (success) {
     return (
@@ -462,12 +468,23 @@ export default function QuoteRequest() {
                 <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                   <div style={{ flex: '0 0 120px' }}>
                     <FieldLabel htmlFor="quantity">Quantidade <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
-                    <QInput
-                      id="quantity"
-                      type="number"
-                      min={1}
-                      hasError={!!errors.quantity}
-                      {...register('quantity', { valueAsNumber: true })}
+                    <Controller
+                      control={control}
+                      name="quantity"
+                      render={({ field }) => (
+                        <QInput
+                          id="quantity"
+                          type="number"
+                          min={1}
+                          hasError={!!errors.quantity}
+                          {...field}
+                          value={field.value ?? 1}
+                          onChange={(e) => {
+                            const n = e.target.valueAsNumber
+                            field.onChange(isNaN(n) ? '' : n)
+                          }}
+                        />
+                      )}
                     />
                     {errors.quantity && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.quantity.message}</p>}
                   </div>
@@ -515,7 +532,7 @@ export default function QuoteRequest() {
                         <p style={{ fontSize: 14, fontWeight: 600, color: '#e8edf3' }}>{user?.name ?? user?.email}</p>
                         <p style={{ fontSize: 12, color: '#8899aa', marginTop: 1 }}>
                           {user?.email}
-                          {user?.whatsapp && <span style={{ marginLeft: 8, color: '#22d3ee' }}>{user.whatsapp}</span>}
+                          {user?.phone && <span style={{ marginLeft: 8, color: '#22d3ee' }}>{user.phone}</span>}
                         </p>
                       </div>
                       <span style={{ fontSize: 11, fontWeight: 600, color: '#34d399', background: 'rgba(16,185,129,.1)', padding: '4px 10px', borderRadius: 6, letterSpacing: '.3px', flexShrink: 0 }}>
@@ -523,17 +540,17 @@ export default function QuoteRequest() {
                       </span>
                     </div>
 
-                    {!user?.whatsapp && (
+                    {!user?.phone && (
                       <div>
-                        <FieldLabel htmlFor="customerWhatsapp">WhatsApp (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
+                        <FieldLabel htmlFor="customerPhone">Telefone (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
                         <QInput
-                          id="customerWhatsapp"
+                          id="customerPhone"
                           type="tel"
                           placeholder="(00) 00000-0000"
-                          hasError={!!errors.customerWhatsapp}
-                          {...register('customerWhatsapp')}
+                          hasError={!!errors.customerPhone}
+                          {...register('customerPhone')}
                         />
-                        {errors.customerWhatsapp && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerWhatsapp.message}</p>}
+                        {errors.customerPhone && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerPhone.message}</p>}
                       </div>
                     )}
                   </div>
@@ -551,18 +568,18 @@ export default function QuoteRequest() {
                       />
                       {errors.customerName && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerName.message}</p>}
                     </div>
-                    {/* WhatsApp + Email — lado a lado */}
+                    {/* Telefone + Email — lado a lado */}
                     <div style={{ display: 'flex', gap: 12 }}>
                       <div style={{ flex: 1 }}>
-                        <FieldLabel htmlFor="customerWhatsapp">WhatsApp (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
+                        <FieldLabel htmlFor="customerPhone">Telefone (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
                         <QInput
-                          id="customerWhatsapp"
+                          id="customerPhone"
                           type="tel"
                           placeholder="(00) 00000-0000"
-                          hasError={!!errors.customerWhatsapp}
-                          {...register('customerWhatsapp')}
+                          hasError={!!errors.customerPhone}
+                          {...register('customerPhone')}
                         />
-                        {errors.customerWhatsapp && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerWhatsapp.message}</p>}
+                        {errors.customerPhone && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerPhone.message}</p>}
                       </div>
                       <div style={{ flex: 1 }}>
                         <FieldLabel htmlFor="customerEmail">E-mail</FieldLabel>

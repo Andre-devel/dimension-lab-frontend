@@ -18,6 +18,13 @@ export const materialService = {
     const { data } = await api.patch<Material>(`/api/v1/materials/${id}/toggle`)
     return data
   },
+  async update(id: string, name: string): Promise<Material> {
+    const { data } = await api.put<Material>(`/api/v1/materials/${id}`, { name })
+    return data
+  },
+  async remove(id: string): Promise<void> {
+    await api.delete(`/api/v1/materials/${id}`)
+  },
 }
 
 export const colorService = {
@@ -36,5 +43,12 @@ export const colorService = {
   async toggle(id: string): Promise<Color> {
     const { data } = await api.patch<Color>(`/api/v1/colors/${id}/toggle`)
     return data
+  },
+  async update(id: string, name: string, hex: string): Promise<Color> {
+    const { data } = await api.put<Color>(`/api/v1/colors/${id}`, { name, hex })
+    return data
+  },
+  async remove(id: string): Promise<void> {
+    await api.delete(`/api/v1/colors/${id}`)
   },
 }
