@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
+/* =============================================
+   DESIGN TOKENS — single source of truth
+   Values are "R G B" so Tailwind opacity
+   modifiers work: bg-accent-blue/20
+   ============================================= */
+:root {
+  /* Base palette */
+  --c-background:        10 10 15;      /* #0A0A0F */
+  --c-surface:           18 18 26;      /* #12121A */
+  --c-surface-2:         28 28 46;      /* #1C1C2E */
+  --c-border:            42 42 69;      /* #2A2A45 */
+  --c-accent-blue:       77 159 255;    /* #4D9FFF */
+  --c-accent-purple:     139 92 246;    /* #8B5CF6 */
+  --c-accent-glow:       37 99 235;     /* #2563EB */
+  --c-text-primary:      240 240 255;   /* #F0F0FF */
+  --c-text-secondary:    122 122 154;   /* #7A7A9A */
+
+  /* Composite tokens — for inline styles */
+  --panel-bg:            rgba(14, 17, 32, 0.95);
+  --panel-border:        rgba(255, 255, 255, 0.07);
+  --panel-border-subtle: rgba(255, 255, 255, 0.04);
+  --input-bg:            rgba(20, 21, 48, 0.9);
+  --input-border:        rgba(30, 33, 80, 0.9);
+  --input-bg-focus:      rgba(21, 22, 64, 0.95);
+  --glow-separator:      linear-gradient(90deg, transparent, #00dcc8, transparent);
+}
+
 @layer base {
   html {
     @apply bg-background text-text-primary font-body;
@@ -207,8 +238,10 @@
 
 /* Inputs */
 .q-input {
-  background: rgba(20, 21, 48, 0.9);
-  border: 1.5px solid rgba(30, 33, 80, 0.9);
+  font-family: inherit;
+  font-size: inherit;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
   transition: border-color 0.3s cubic-bezier(.4,0,.2,1),
               box-shadow   0.3s cubic-bezier(.4,0,.2,1),
               background   0.3s;
@@ -217,9 +250,9 @@
   border-color: rgba(42, 48, 112, 1);
 }
 .q-input:focus {
-  border-color: #00E5FF;
-  box-shadow: 0 0 0 3px rgba(0,229,255,0.15), 0 0 20px rgba(0,229,255,0.06);
-  background: rgba(21, 22, 64, 0.95);
+  border-color: rgb(var(--c-accent-blue));
+  box-shadow: 0 0 0 3px rgb(var(--c-accent-blue) / 0.15), 0 0 20px rgb(var(--c-accent-blue) / 0.06);
+  background: var(--input-bg-focus);
   outline: none;
 }
 
@@ -241,7 +274,7 @@
   padding: 16px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #00E5FF 0%, #4D9FFF 40%, #8B5CF6 100%);
+  background: linear-gradient(135deg, #00E5FF 0%, rgb(var(--c-accent-blue)) 40%, rgb(var(--c-accent-purple)) 100%);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -251,11 +284,11 @@
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 200, 255, 0.2);
+  box-shadow: 0 4px 20px rgb(var(--c-accent-blue) / 0.2);
 }
 .q-submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 35px rgba(0, 200, 255, 0.3), 0 0 60px rgba(123, 47, 247, 0.2);
+  box-shadow: 0 8px 35px rgb(var(--c-accent-blue) / 0.3), 0 0 60px rgb(var(--c-accent-purple) / 0.2);
 }
 .q-submit-btn:active:not(:disabled) {
   transform: translateY(0);
@@ -458,4 +491,18 @@
     position: sticky;
     top: 96px;
   }
+}
+
+@keyframes field-shake {
+  0%   { transform: translateX(0); }
+  15%  { transform: translateX(-7px); }
+  30%  { transform: translateX(7px); }
+  45%  { transform: translateX(-5px); }
+  60%  { transform: translateX(5px); }
+  75%  { transform: translateX(-2px); }
+  90%  { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+.field-shake {
+  animation: field-shake 0.42s ease;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { PageWrapper } from '@/components/layout/PageWrapper'
+import { BackButton } from '@/components/ui/BackButton'
 import { portfolioService, type PortfolioItemFormData } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
 import PortfolioItemForm from './PortfolioItemForm'
@@ -35,11 +36,10 @@ export default function EditPortfolioItem() {
   return (
     <PageWrapper>
       <div className="mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-6 flex items-center gap-4">
-          <Link to="/admin/portfolio" className="text-sm text-accent-blue hover:underline">
-            ← Voltar
-          </Link>
-          <h1 className="text-2xl font-bold text-text-primary">Editar Item</h1>
+        <div className="mb-6 flex items-center gap-3">
+          <BackButton to="/admin/portfolio" label="Portfólio" />
+          <div className="h-4 w-px bg-border" />
+          <h1 className="text-xl font-bold text-text-primary">Editar Item</h1>
         </div>
 
         {!item ? (

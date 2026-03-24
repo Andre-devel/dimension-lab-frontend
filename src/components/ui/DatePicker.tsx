@@ -126,10 +126,10 @@ export function DatePicker({ id, label, value, onChange, onBlur, error, triggerS
           ...triggerStyle,
         }}
       >
-        <span className={value ? 'text-text-primary' : 'text-text-secondary'}>
+        <span className={`truncate ${value ? 'text-text-primary' : 'text-text-secondary'}`}>
           {value ? formatDisplay(value) : 'Selecione a data…'}
         </span>
-        <Calendar className="h-4 w-4 shrink-0 text-text-secondary" />
+        <Calendar className="h-4 w-4 shrink-0 ml-2 text-text-secondary" />
       </button>
 
       {/* Calendar panel */}

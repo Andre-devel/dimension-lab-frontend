@@ -4,6 +4,7 @@ export interface SiteSettings {
   whatsapp_url: string
   instagram_url: string
   youtube_url: string
+  whatsapp_admin_number: string
   [key: string]: string
 }
 

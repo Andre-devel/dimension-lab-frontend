@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import { PageWrapper } from '@/components/layout/PageWrapper'
+import { BackButton } from '@/components/ui/BackButton'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/store/authStore'
 
+const labelStyle = { fontSize: '10px', letterSpacing: '0.1em', color: 'rgb(var(--c-text-secondary))' } as const
+
 export default function Profile() {
   const { user, setUser } = useAuthStore()
-  const [name, setName] = useState(user?.name ?? '')
-  const [phone, setWhatsapp] = useState(user?.phone ?? '')
-  const [saving, setSaving] = useState(false)
+  const [name, setName]   = useState(user?.name ?? '')
+  const [phone, setPhone] = useState(user?.phone ?? '')
+  const [saving, setSaving]   = useState(false)
   const [success, setSuccess] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError]     = useState('')
 
   async function handleSave() {
     setSaving(true)
@@ -29,59 +32,83 @@ export default function Profile() {
 
   return (
     <PageWrapper>
-      <div className="mx-auto max-w-md px-4 py-12">
-        <h1 className="text-2xl font-bold text-text-primary mb-8">Meu Perfil</h1>
+      <div className="mx-auto max-w-lg px-4 py-12">
 
-        <div className="flex flex-col gap-5">
-          {/* Email — read-only */}
+        <div className="mb-8">
+          <div className="mb-4">
+            <BackButton />
+          </div>
+          <p className="text-xs font-mono text-text-secondary uppercase tracking-widest mb-1">Conta</p>
+          <h1 className="text-2xl font-bold text-text-primary">Meu Perfil</h1>
+        </div>
+
+        <div className="rounded-2xl p-8 flex flex-col gap-6"
+             style={{ background: 'var(--panel-bg)', border: '1px solid var(--panel-border)' }}>
+
+          <div className="h-px" style={{ background: 'var(--glow-separator)', opacity: 0.18 }} />
+
+          {/* E-mail — somente leitura */}
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+            <label className="block font-mono uppercase mb-2" style={labelStyle}>
               E-mail
+              <span className="ml-2 normal-case tracking-normal"
+                    style={{ fontSize: '9px', color: 'rgb(var(--c-accent-blue) / 0.4)' }}>
+                somente leitura
+              </span>
             </label>
             <input
               type="email"
               value={user?.email ?? ''}
               readOnly
-              className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-secondary cursor-not-allowed outline-none"
+              className="q-input w-full rounded-xl px-4 py-3 text-sm text-text-secondary outline-none opacity-50 cursor-not-allowed"
+              style={{ fontFamily: 'inherit', pointerEvents: 'none' }}
             />
           </div>
 
-          {/* Name */}
+          {/* Nome */}
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1.5">
-              Nome
-            </label>
+            <label className="block font-mono uppercase mb-2" style={labelStyle}>Nome</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-text-primary outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors"
+              placeholder="Seu nome completo"
+              autoComplete="name"
+              className="q-input w-full rounded-xl px-4 py-3 text-sm text-text-primary outline-none placeholder:text-border"
+              style={{ fontFamily: 'inherit' }}
             />
           </div>
 
-          {/* WhatsApp */}
+          {/* Telefone */}
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1.5">
-              WhatsApp
-            </label>
+            <label className="block font-mono uppercase mb-2" style={labelStyle}>Telefone</label>
             <input
               type="tel"
               value={phone}
-              onChange={(e) => setWhatsapp(e.target.value)}
+              onChange={(e) => setPhone(e.target.value)}
               placeholder="Ex: 11999999999"
-              className="w-full rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-text-primary outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors"
+              autoComplete="tel"
+              className="q-input w-full rounded-xl px-4 py-3 text-sm text-text-primary outline-none placeholder:text-border"
+              style={{ fontFamily: 'inherit' }}
             />
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
-          {success && <p className="text-sm text-green-400">Salvo com sucesso.</p>}
+          <div className="h-px bg-border/20" />
 
-          <button
-            onClick={handleSave}
-            disabled={saving || !name.trim()}
-            className="rounded-md bg-accent-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {saving ? 'Salvando...' : 'Salvar'}
+          {error && (
+            <div className="rounded-xl px-4 py-3 text-xs text-red-400 bg-red-500/10 border border-red-500/20">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="rounded-xl px-4 py-3 text-xs text-emerald-400 flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20">
+              <span>✓</span> Perfil salvo com sucesso.
+            </div>
+          )}
+
+          <button onClick={handleSave} disabled={saving || !name.trim()} className="q-submit-btn">
+            {saving ? 'Salvando…' : 'Salvar alterações'}
           </button>
         </div>
       </div>

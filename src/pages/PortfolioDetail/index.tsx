@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { PageWrapper } from '@/components/layout/PageWrapper'
+import { BackButton } from '@/components/ui/BackButton'
 import { Reveal } from '@/components/ui/Reveal'
 import { SEOHead, SITE_URL } from '@/components/seo/SEOHead'
 import { portfolioService } from '@/services/portfolioService'
@@ -189,6 +190,9 @@ export default function PortfolioDetail() {
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 5% 5rem' }}>
 
+        <div style={{ marginBottom: '1.5rem' }}>
+          <BackButton to="/portfolio" label="Portfólio" />
+        </div>
 
         {/* ── States ── */}
         {item === undefined ? (

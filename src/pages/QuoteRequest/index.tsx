@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { BackButton } from '@/components/ui/BackButton'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -33,15 +34,31 @@ const quoteJsonLd = [
   },
 ]
 
+function maskPhone(raw: string): string {
+  const d = raw.replace(/\D/g, '').slice(0, 11)
+  if (d.length === 0) return ''
+  if (d.length <= 2) return `(${d}`
+  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
+}
+
+function digitsOnly(value: string): string {
+  return value.replace(/\D/g, '')
+}
+
 const schema = z.object({
-  description: z.string().min(10, 'Mínimo 10 caracteres'),
-  material: z.string().min(1, 'Selecione um material'),
-  color: z.string().min(1, 'Selecione uma cor'),
-  quantity: z.coerce.number().min(1, 'Mínimo 1 unidade'),
-  desiredDeadline: z.string().min(1, 'Informe o prazo'),
+  description: z.string().optional(),
+  material: z.string({ required_error: 'Selecione um material' }).min(1, 'Selecione um material'),
+  color: z.string({ required_error: 'Selecione uma cor' }).min(1, 'Selecione uma cor'),
+  quantity: z.coerce.number({ invalid_type_error: 'Informe a quantidade' }).min(1, 'Mínimo 1 unidade'),
+  desiredDeadline: z.string().optional(),
   customerName: z.string().optional(),
   customerEmail: z.string().email('E-mail inválido').optional().or(z.literal('')),
-  customerPhone: z.string().min(10, 'Informe seu WhatsApp com DDD').optional(),
+  customerPhone: z.string()
+    .refine(v => !v || digitsOnly(v).length >= 10, 'Número inválido, informe com DDD')
+    .refine(v => !v || digitsOnly(v).length <= 11, 'Número inválido')
+    .optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -250,7 +267,7 @@ function ColorSwatch({ name, hex, selected, onClick }: { name: string; hex: stri
       title={name}
       onClick={onClick}
       style={{
-        width: 38, height: 38, borderRadius: '50%',
+        width: 32, height: 32, borderRadius: '50%',
         ...checkerboard,
         border: selected ? `3px solid ${hex}` : '2px solid rgba(255,255,255,.12)',
         cursor: 'pointer',
@@ -270,6 +287,21 @@ export default function QuoteRequest() {
   const [files, setFiles] = useState<File[]>([])
   const [success, setSuccess] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [projectError, setProjectError] = useState('')
+  const [shakingFields, setShakingFields] = useState<Set<string>>(new Set())
+
+  function triggerShake(fields: string[], focusId?: string) {
+    setShakingFields(new Set())
+    requestAnimationFrame(() => {
+      setShakingFields(new Set(fields))
+      setTimeout(() => setShakingFields(new Set()), 450)
+    })
+    if (focusId) requestAnimationFrame(() => document.getElementById(focusId)?.focus())
+  }
+
+  function sc(field: string) {
+    return shakingFields.has(field) ? 'field-shake' : undefined
+  }
   const [materials, setMaterials] = useState<Material[]>([])
   const [colors, setColors] = useState<Color[]>([])
 
@@ -282,30 +314,64 @@ export default function QuoteRequest() {
     register,
     control,
     handleSubmit,
+    setError,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { quantity: 1, material: 'PLA' },
+    defaultValues: { quantity: 1, material: 'PLA', color: '', desiredDeadline: '' },
   })
 
   async function onSubmit(data: FormValues) {
     setSubmitError('')
+    setProjectError('')
+
+    const desc = data.description?.trim() ?? ''
+    if (!desc && files.length === 0) {
+      setProjectError('Informe uma descrição ou envie pelo menos um arquivo do projeto.')
+      triggerShake(['_project'], 'description')
+      return
+    }
+    if (desc && desc.length < 10) {
+      setProjectError('A descrição precisa ter pelo menos 10 caracteres.')
+      triggerShake(['_project'], 'description')
+      return
+    }
+
+    if (!isAuthenticated) {
+      const contactErrors: string[] = []
+      if (!data.customerName?.trim()) {
+        setError('customerName', { message: 'Informe seu nome' })
+        contactErrors.push('customerName')
+      }
+      if (!data.customerEmail?.trim()) {
+        setError('customerEmail', { message: 'Informe seu e-mail' })
+        contactErrors.push('customerEmail')
+      }
+      if (contactErrors.length > 0) {
+        triggerShake(contactErrors, contactErrors[0])
+        return
+      }
+    }
+
     const needsWhatsapp = !isAuthenticated || !user?.phone
-    if (needsWhatsapp && (!data.customerPhone || data.customerPhone.length < 10)) {
+    if (needsWhatsapp && (!data.customerPhone || digitsOnly(data.customerPhone).length < 10)) {
       setSubmitError('Informe seu WhatsApp com DDD.')
+      triggerShake(['customerPhone'], 'customerPhone')
       return
     }
     try {
-      await quoteService.create({ ...data, files })
+      await quoteService.create({ ...data, customerPhone: data.customerPhone ? digitsOnly(data.customerPhone) : undefined, files })
       if (isAuthenticated && user && !user.phone && data.customerPhone) {
         setUser({ ...user, phone: data.customerPhone })
       }
       setSuccess(true)
       reset()
       setFiles([])
-    } catch {
-      setSubmitError('Erro ao enviar orçamento. Tente novamente.')
+    } catch (err: unknown) {
+      const data = (err as { response?: { data?: { message?: string; details?: string[] } } })?.response?.data
+      const msg = data?.details?.[0] ?? data?.message ?? 'Erro ao enviar orçamento. Tente novamente.'
+      setSubmitError(msg)
     }
   }
 
@@ -347,6 +413,10 @@ export default function QuoteRequest() {
 
       <div style={{ maxWidth: 1120, margin: '0 auto', padding: '3rem 5% 4rem' }}>
 
+        <div style={{ marginBottom: '1.5rem' }}>
+          <BackButton />
+        </div>
+
         {/* ── Page header ── */}
         <div className="text-center" style={{ marginBottom: '2.5rem' }}>
           <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#06b6d4', marginBottom: 8 }}>
@@ -387,11 +457,11 @@ export default function QuoteRequest() {
 
           {/* ── Form card ── */}
           <div
+            className="p-5 sm:p-8"
             style={{
               background: '#0c1219',
               border: '1px solid rgba(56,189,248,.08)',
               borderRadius: 20,
-              padding: '2rem',
               position: 'relative',
               overflow: 'hidden',
             }}
@@ -399,33 +469,54 @@ export default function QuoteRequest() {
             {/* top gradient line */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, #06b6d4, #3b82f6, transparent)' }} />
 
-            <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <form onSubmit={handleSubmit(onSubmit, (errs) => {
+              const fields = Object.keys(errs)
+              const focusMap: Record<string, string> = { description: 'description', quantity: 'quantity', desiredDeadline: 'desiredDeadline', customerName: 'customerName', customerEmail: 'customerEmail', customerPhone: 'customerPhone' }
+              triggerShake(fields, focusMap[fields[0]])
+            })} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 
               {/* ── Section 1: Project ── */}
               <div >
                 <StepLabel step="Etapa 01 — Projeto" title="Detalhes do projeto" />
 
-                {/* Description */}
-                <div style={{ marginBottom: '1rem' }}>
-                  <FieldLabel htmlFor="description">Descrição <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
-                  <Controller
-                    control={control}
-                    name="description"
-                    render={({ field }) => (
-                      <QTextarea
-                        id="description"
-                        rows={4}
-                        placeholder="Descreva dimensões, acabamento, referências ou qualquer detalhe importante..."
-                        hasError={!!errors.description}
-                        {...field}
-                      />
-                    )}
-                  />
-                  {errors.description && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.description.message}</p>}
+                {/* Description + Files (ao menos um obrigatório) */}
+                <div className={sc('_project')} style={{ marginBottom: '1rem', background: 'rgba(56,189,248,.03)', border: '1px solid rgba(56,189,248,.07)', borderRadius: 12, padding: '1rem' }}>
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <FieldLabel htmlFor="description">Descrição do projeto</FieldLabel>
+                    <Controller
+                      control={control}
+                      name="description"
+                      render={({ field }) => (
+                        <QTextarea
+                          id="description"
+                          rows={3}
+                          placeholder="Descreva dimensões, acabamento, referências ou qualquer detalhe importante..."
+                          hasError={!!projectError}
+                          {...field}
+                        />
+                      )}
+                    />
+                  </div>
+
+                  {/* OR divider */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.75rem 0' }}>
+                    <div style={{ flex: 1, height: 1, background: 'rgba(56,189,248,.1)' }} />
+                    <span style={{ fontSize: 11, color: '#556677', fontFamily: 'JetBrains Mono, monospace', letterSpacing: 1 }}>OU</span>
+                    <div style={{ flex: 1, height: 1, background: 'rgba(56,189,248,.1)' }} />
+                  </div>
+
+                  <div>
+                    <FieldLabel>Arquivos do projeto</FieldLabel>
+                    <FileUploadZone onFilesChange={(f) => { setFiles(f); if (f.length > 0) setProjectError('') }} accept={ACCEPT} />
+                  </div>
+
+                  {projectError && (
+                    <p style={{ fontSize: 12, color: '#fb7185', marginTop: 8 }}>{projectError}</p>
+                  )}
                 </div>
 
                 {/* Material segmented control */}
-                <div style={{ marginBottom: '1rem' }}>
+                <div className={sc('material')} style={{ marginBottom: '1rem' }}>
                   <FieldLabel>Material</FieldLabel>
                   <Controller
                     control={control}
@@ -442,13 +533,13 @@ export default function QuoteRequest() {
                 </div>
 
                 {/* Color swatches */}
-                <div style={{ marginBottom: '1rem' }}>
+                <div className={sc('color')} style={{ marginBottom: '1rem' }}>
                   <FieldLabel>Cor</FieldLabel>
                   <Controller
                     control={control}
                     name="color"
                     render={({ field }) => (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
                         {colorOptions.map(c => (
                           <ColorSwatch
                             key={c.value}
@@ -466,7 +557,7 @@ export default function QuoteRequest() {
 
                 {/* Quantity + Deadline */}
                 <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                  <div style={{ flex: '0 0 120px' }}>
+                  <div className={sc('quantity')} style={{ flex: '0 0 120px' }}>
                     <FieldLabel htmlFor="quantity">Quantidade <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
                     <Controller
                       control={control}
@@ -488,7 +579,7 @@ export default function QuoteRequest() {
                     />
                     {errors.quantity && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.quantity.message}</p>}
                   </div>
-                  <div style={{ flex: 1 }}>
+                  <div className={sc('desiredDeadline')} style={{ flex: 1 }}>
                     <FieldLabel htmlFor="desiredDeadline">Prazo desejado</FieldLabel>
                     <Controller
                       control={control}
@@ -507,11 +598,6 @@ export default function QuoteRequest() {
                   </div>
                 </div>
 
-                {/* Files */}
-                <div style={{ marginTop: '1rem' }}>
-                  <FieldLabel>Arquivos do projeto</FieldLabel>
-                  <FileUploadZone onFilesChange={setFiles} accept={ACCEPT} />
-                </div>
               </div>
 
               {/* Divider */}
@@ -529,11 +615,9 @@ export default function QuoteRequest() {
                         {initials(user?.name, user?.email)}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: '#e8edf3' }}>{user?.name ?? user?.email}</p>
-                        <p style={{ fontSize: 12, color: '#8899aa', marginTop: 1 }}>
-                          {user?.email}
-                          {user?.phone && <span style={{ marginLeft: 8, color: '#22d3ee' }}>{user.phone}</span>}
-                        </p>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: '#e8edf3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name ?? user?.email}</p>
+                        <p style={{ fontSize: 12, color: '#8899aa', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
+                        {user?.phone && <p style={{ fontSize: 12, color: '#22d3ee', marginTop: 1 }}>{user.phone}</p>}
                       </div>
                       <span style={{ fontSize: 11, fontWeight: 600, color: '#34d399', background: 'rgba(16,185,129,.1)', padding: '4px 10px', borderRadius: 6, letterSpacing: '.3px', flexShrink: 0 }}>
                         Logado
@@ -541,14 +625,22 @@ export default function QuoteRequest() {
                     </div>
 
                     {!user?.phone && (
-                      <div>
+                      <div className={sc('customerPhone')}>
                         <FieldLabel htmlFor="customerPhone">Telefone (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
-                        <QInput
-                          id="customerPhone"
-                          type="tel"
-                          placeholder="(00) 00000-0000"
-                          hasError={!!errors.customerPhone}
-                          {...register('customerPhone')}
+                        <Controller
+                          control={control}
+                          name="customerPhone"
+                          render={({ field }) => (
+                            <QInput
+                              id="customerPhone"
+                              type="tel"
+                              placeholder="(00) 00000-0000"
+                              hasError={!!errors.customerPhone}
+                              {...field}
+                              value={field.value ?? ''}
+                              onChange={(e) => field.onChange(maskPhone(e.target.value))}
+                            />
+                          )}
                         />
                         {errors.customerPhone && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerPhone.message}</p>}
                       </div>
@@ -557,7 +649,7 @@ export default function QuoteRequest() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {/* Nome — full width */}
-                    <div>
+                    <div className={sc('customerName')}>
                       <FieldLabel htmlFor="customerName">Seu nome</FieldLabel>
                       <QInput
                         id="customerName"
@@ -570,18 +662,26 @@ export default function QuoteRequest() {
                     </div>
                     {/* Telefone + Email — lado a lado */}
                     <div style={{ display: 'flex', gap: 12 }}>
-                      <div style={{ flex: 1 }}>
+                      <div className={sc('customerPhone')} style={{ flex: 1 }}>
                         <FieldLabel htmlFor="customerPhone">Telefone (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
-                        <QInput
-                          id="customerPhone"
-                          type="tel"
-                          placeholder="(00) 00000-0000"
-                          hasError={!!errors.customerPhone}
-                          {...register('customerPhone')}
+                        <Controller
+                          control={control}
+                          name="customerPhone"
+                          render={({ field }) => (
+                            <QInput
+                              id="customerPhone"
+                              type="tel"
+                              placeholder="(00) 00000-0000"
+                              hasError={!!errors.customerPhone}
+                              {...field}
+                              value={field.value ?? ''}
+                              onChange={(e) => field.onChange(maskPhone(e.target.value))}
+                            />
+                          )}
                         />
                         {errors.customerPhone && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerPhone.message}</p>}
                       </div>
-                      <div style={{ flex: 1 }}>
+                      <div className={sc('customerEmail')} style={{ flex: 1 }}>
                         <FieldLabel htmlFor="customerEmail">E-mail</FieldLabel>
                         <QInput
                           id="customerEmail"
