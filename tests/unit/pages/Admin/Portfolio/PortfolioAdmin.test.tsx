@@ -59,7 +59,7 @@ describe('PortfolioAdmin page', () => {
 
   it('shows loading state initially', () => {
     renderPage()
-    expect(screen.getByText('Carregando...')).toBeInTheDocument()
+    expect(screen.getByText('Carregando…')).toBeInTheDocument()
   })
 
   it('renders all items including hidden after load', async () => {
@@ -89,7 +89,7 @@ describe('PortfolioAdmin page', () => {
     renderPage()
     await waitFor(() => screen.getAllByText('Vaso Decorativo'))
 
-    const toggleButtons = screen.getAllByTitle(/ocultar|exibir/i)
+    const toggleButtons = screen.getAllByRole('button', { name: /ocultar|exibir/i })
     fireEvent.click(toggleButtons[0])
 
     await waitFor(() => {
@@ -103,7 +103,7 @@ describe('PortfolioAdmin page', () => {
     renderPage()
     await waitFor(() => screen.getAllByText('Vaso Decorativo'))
 
-    const deleteButtons = screen.getAllByTitle('Excluir')
+    const deleteButtons = screen.getAllByRole('button', { name: 'Excluir' })
     fireEvent.click(deleteButtons[0])
 
     await waitFor(() => {
@@ -116,7 +116,7 @@ describe('PortfolioAdmin page', () => {
     renderPage()
     await waitFor(() => screen.getAllByText('Vaso Decorativo'))
 
-    const deleteButtons = screen.getAllByTitle('Excluir')
+    const deleteButtons = screen.getAllByRole('button', { name: 'Excluir' })
     fireEvent.click(deleteButtons[0])
 
     expect(portfolioService.remove).not.toHaveBeenCalled()

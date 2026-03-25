@@ -59,7 +59,7 @@ describe('MyQuotes page', () => {
   it('shows loading state initially', () => {
     vi.mocked(quoteService.listMine).mockImplementation(() => new Promise(() => {}))
     renderWithRouter(<MyQuotes />)
-    expect(screen.getByText('Carregando...')).toBeInTheDocument()
+    expect(screen.getByText('Carregando orçamentos…')).toBeInTheDocument()
   })
 
   it('renders quote descriptions after loading', async () => {
@@ -84,7 +84,7 @@ describe('MyQuotes page', () => {
     vi.mocked(quoteService.listMine).mockResolvedValue([])
     renderWithRouter(<MyQuotes />)
     await waitFor(() => {
-      expect(screen.getByText('Você ainda não enviou nenhum orçamento.')).toBeInTheDocument()
+      expect(screen.getByText('Nenhum orçamento ainda')).toBeInTheDocument()
     })
   })
 
@@ -101,8 +101,8 @@ describe('MyQuotes page', () => {
     vi.mocked(quoteService.listMine).mockResolvedValue(mockQuotes)
     renderWithRouter(<MyQuotes />)
     await waitFor(() => {
-      expect(screen.getByText('PLA · 1x · Padrão')).toBeInTheDocument()
-      expect(screen.getByText('PETG · 2x · Lixado')).toBeInTheDocument()
+      expect(screen.getByText('1x')).toBeInTheDocument()
+      expect(screen.getByText('2x')).toBeInTheDocument()
     })
   })
 })

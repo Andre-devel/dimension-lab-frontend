@@ -56,7 +56,7 @@ export default function AdminDashboard() {
               Painel de Controle
             </p>
             <h1 className="text-2xl font-bold text-text-primary">
-              Admin Dashboard
+              Painel Admin
             </h1>
           </div>
 
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
         {loading ? (
           <div className="flex items-center gap-3 py-12 text-text-secondary text-sm">
             <div className="w-4 h-4 rounded-full border-2 border-[#4D9FFF] border-t-transparent animate-spin" />
-            Carregando orçamentos…
+            Carregando...
           </div>
         ) : filtered.length === 0 ? (
           <div className="rounded-2xl p-12 text-center"

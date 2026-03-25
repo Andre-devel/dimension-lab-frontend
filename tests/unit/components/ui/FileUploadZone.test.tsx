@@ -12,7 +12,7 @@ describe('FileUploadZone', () => {
 
   it('renders upload zone with correct text', () => {
     render(<FileUploadZone onFilesChange={mockOnFilesChange} />)
-    expect(screen.getByText('Arraste arquivos aqui ou clique para selecionar')).toBeInTheDocument()
+    expect(screen.getByText('Clique para enviar ou arraste arquivos aqui')).toBeInTheDocument()
   })
 
   it('has role button and correct aria-label', () => {

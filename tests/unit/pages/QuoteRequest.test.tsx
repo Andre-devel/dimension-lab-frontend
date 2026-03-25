@@ -10,10 +10,38 @@ vi.mock('@/services/quoteService', () => ({
   },
 }))
 
+vi.mock('@/services/catalogService', () => ({
+  materialService: { listActive: vi.fn().mockResolvedValue([]) },
+  colorService:    { listActive: vi.fn().mockResolvedValue([]) },
+}))
+
+vi.mock('@/store/authStore', () => ({
+  useAuthStore: vi.fn().mockReturnValue({
+    isAuthenticated: false,
+    user: null,
+    setUser: vi.fn(),
+  }),
+}))
+
+vi.mock('@/components/seo/SEOHead', () => ({
+  SEOHead: () => null,
+  SITE_URL: 'https://test.com',
+}))
+
 import { quoteService } from '@/services/quoteService'
 
 function renderWithRouter(ui: React.ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>)
+}
+
+/** Fill the minimum valid form: description + color + contact. */
+async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(screen.getByLabelText('Descrição do projeto'), 'A valid description here')
+  // 'Multicor' is always available (hardcoded first option)
+  await user.click(screen.getByRole('button', { name: 'Multicor' }))
+  await user.type(screen.getByLabelText('Seu nome'), 'Test User')
+  await user.type(screen.getByLabelText('E-mail'), 'test@test.com')
+  await user.type(screen.getByLabelText(/Telefone/i), '(11) 99999-9999')
 }
 
 describe('QuoteRequest page', () => {
@@ -26,79 +54,63 @@ describe('QuoteRequest page', () => {
     expect(screen.getByText('Solicitar Orçamento')).toBeInTheDocument()
   })
 
-  it('renders all required form fields', () => {
+  it('renders required form fields', () => {
     renderWithRouter(<QuoteRequest />)
     expect(screen.getByLabelText('Descrição do projeto')).toBeInTheDocument()
-    expect(screen.getByLabelText('Material')).toBeInTheDocument()
-    expect(screen.getByLabelText('Cor')).toBeInTheDocument()
-    expect(screen.getByLabelText('Quantidade')).toBeInTheDocument()
-    expect(screen.getByLabelText('Acabamento')).toBeInTheDocument()
-    expect(screen.getByLabelText('Prazo desejado')).toBeInTheDocument()
+    expect(screen.getByLabelText(/Quantidade/i)).toBeInTheDocument()
     expect(screen.getByLabelText('Seu nome')).toBeInTheDocument()
-    expect(screen.getByLabelText('Seu e-mail')).toBeInTheDocument()
-    expect(screen.getByLabelText('WhatsApp (com DDD)')).toBeInTheDocument()
+    expect(screen.getByLabelText('E-mail')).toBeInTheDocument()
+    expect(screen.getByLabelText(/Telefone/i)).toBeInTheDocument()
   })
 
-  it('shows validation errors when submitting empty form', async () => {
+  it('shows validation error when description is too short', async () => {
     const user = userEvent.setup()
     renderWithRouter(<QuoteRequest />)
-    const submitBtn = screen.getByRole('button', { name: /Enviar Orçamento/i })
-    await user.click(submitBtn)
+    // Select color so zod validation passes, then submit with short description
+    await user.click(screen.getByRole('button', { name: 'Multicor' }))
+    await user.type(screen.getByLabelText('Descrição do projeto'), 'Short')
+    await user.click(screen.getByRole('button', { name: /Enviar orçamento/i }))
     await waitFor(() => {
-      expect(screen.getByText('Mínimo 10 caracteres')).toBeInTheDocument()
+      expect(screen.getByText('A descrição precisa ter pelo menos 10 caracteres.')).toBeInTheDocument()
     })
   })
 
-  it('shows error for description shorter than 10 chars', async () => {
+  it('shows validation error when submitting without description', async () => {
     const user = userEvent.setup()
     renderWithRouter(<QuoteRequest />)
-    const descriptionField = screen.getByLabelText('Descrição do projeto')
-    await user.type(descriptionField, 'Short')
-    const submitBtn = screen.getByRole('button', { name: /Enviar Orçamento/i })
-    await user.click(submitBtn)
+    // Select color so zod validation passes, then submit with empty description
+    await user.click(screen.getByRole('button', { name: 'Multicor' }))
+    await user.click(screen.getByRole('button', { name: /Enviar orçamento/i }))
     await waitFor(() => {
-      expect(screen.getByText('Mínimo 10 caracteres')).toBeInTheDocument()
+      expect(screen.getByText('Informe uma descrição ou envie pelo menos um arquivo do projeto.')).toBeInTheDocument()
     })
   })
 
   it('calls quoteService.create with correct data on valid submit', async () => {
     const user = userEvent.setup()
-    const mockCreate = vi.mocked(quoteService.create)
-    mockCreate.mockResolvedValueOnce({
+    vi.mocked(quoteService.create).mockResolvedValueOnce({
       id: '1',
       description: 'A valid description here',
       material: 'PLA',
-      color: 'Branco',
-      quantity: 2,
-      finish: 'Padrão',
-      desiredDeadline: '2026-04-01',
+      color: 'Multicor',
+      quantity: 1,
+      finish: '',
+      desiredDeadline: '',
       status: 'RECEIVED',
       createdAt: '2026-03-11T00:00:00Z',
       files: [],
-    })
+    } as any)
 
     renderWithRouter(<QuoteRequest />)
-
-    await user.type(screen.getByLabelText('Descrição do projeto'), 'A valid description here')
-    await user.selectOptions(screen.getByLabelText('Material'), 'PLA')
-    await user.type(screen.getByLabelText('Cor'), 'Branco')
-    await user.clear(screen.getByLabelText('Quantidade'))
-    await user.type(screen.getByLabelText('Quantidade'), '2')
-    await user.selectOptions(screen.getByLabelText('Acabamento'), 'Padrão')
-    await user.type(screen.getByLabelText('Prazo desejado'), '2026-04-01')
-
-    const submitBtn = screen.getByRole('button', { name: /Enviar Orçamento/i })
-    await user.click(submitBtn)
+    await fillValidForm(user)
+    await user.click(screen.getByRole('button', { name: /Enviar orçamento/i }))
 
     await waitFor(() => {
-      expect(mockCreate).toHaveBeenCalledWith(
+      expect(vi.mocked(quoteService.create)).toHaveBeenCalledWith(
         expect.objectContaining({
           description: 'A valid description here',
+          color: 'Multicor',
           material: 'PLA',
-          color: 'Branco',
-          quantity: 2,
-          finish: 'Padrão',
-          desiredDeadline: '2026-04-01',
         })
       )
     })
@@ -106,109 +118,68 @@ describe('QuoteRequest page', () => {
 
   it('shows success message after successful submit', async () => {
     const user = userEvent.setup()
-    const mockCreate = vi.mocked(quoteService.create)
-    mockCreate.mockResolvedValueOnce({
+    vi.mocked(quoteService.create).mockResolvedValueOnce({
       id: '1',
       description: 'A valid description here',
       material: 'PLA',
-      color: 'Branco',
-      quantity: 2,
-      finish: 'Padrão',
-      desiredDeadline: '2026-04-01',
+      color: 'Multicor',
+      quantity: 1,
+      finish: '',
+      desiredDeadline: '',
       status: 'RECEIVED',
       createdAt: '2026-03-11T00:00:00Z',
       files: [],
-    })
+    } as any)
 
     renderWithRouter(<QuoteRequest />)
-
-    await user.type(screen.getByLabelText('Descrição do projeto'), 'A valid description here')
-    await user.selectOptions(screen.getByLabelText('Material'), 'PLA')
-    await user.type(screen.getByLabelText('Cor'), 'Branco')
-    await user.clear(screen.getByLabelText('Quantidade'))
-    await user.type(screen.getByLabelText('Quantidade'), '2')
-    await user.selectOptions(screen.getByLabelText('Acabamento'), 'Padrão')
-    await user.type(screen.getByLabelText('Prazo desejado'), '2026-04-01')
-
-    await user.click(screen.getByRole('button', { name: /Enviar Orçamento/i }))
+    await fillValidForm(user)
+    await user.click(screen.getByRole('button', { name: /Enviar orçamento/i }))
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Orçamento enviado com sucesso! Entraremos em contato em breve.')
-      ).toBeInTheDocument()
+      expect(screen.getByText('Orçamento enviado!')).toBeInTheDocument()
+      expect(screen.getByText('Entraremos em contato em breve.')).toBeInTheDocument()
     })
   })
 
   it('shows error message when service throws', async () => {
     const user = userEvent.setup()
-    const mockCreate = vi.mocked(quoteService.create)
-    mockCreate.mockRejectedValueOnce(new Error('Server error'))
+    vi.mocked(quoteService.create).mockRejectedValueOnce(new Error('Server error'))
 
     renderWithRouter(<QuoteRequest />)
-
-    await user.type(screen.getByLabelText('Descrição do projeto'), 'A valid description here')
-    await user.selectOptions(screen.getByLabelText('Material'), 'PLA')
-    await user.type(screen.getByLabelText('Cor'), 'Branco')
-    await user.clear(screen.getByLabelText('Quantidade'))
-    await user.type(screen.getByLabelText('Quantidade'), '2')
-    await user.selectOptions(screen.getByLabelText('Acabamento'), 'Padrão')
-    await user.type(screen.getByLabelText('Prazo desejado'), '2026-04-01')
-
-    await user.click(screen.getByRole('button', { name: /Enviar Orçamento/i }))
+    await fillValidForm(user)
+    await user.click(screen.getByRole('button', { name: /Enviar orçamento/i }))
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Erro ao enviar orçamento. Tente novamente.')
-      ).toBeInTheDocument()
+      expect(screen.getByText('Erro ao enviar orçamento. Tente novamente.')).toBeInTheDocument()
     })
   })
 
-  it('submit button shows loading state during submission', async () => {
+  it('submit button is disabled during submission', async () => {
     const user = userEvent.setup()
-    const mockCreate = vi.mocked(quoteService.create)
     let resolvePromise!: () => void
-    mockCreate.mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolvePromise = () =>
-            resolve({
-              id: '1',
-              description: 'A valid description here',
-              material: 'PLA',
-              color: 'Branco',
-              quantity: 2,
-              finish: 'Padrão',
-              desiredDeadline: '2026-04-01',
-              status: 'RECEIVED',
-              createdAt: '2026-03-11T00:00:00Z',
-              files: [],
-            })
-        })
+    vi.mocked(quoteService.create).mockImplementationOnce(
+      () => new Promise((resolve) => {
+        resolvePromise = () => resolve({
+          id: '1', description: 'A valid description here',
+          material: 'PLA', color: 'Multicor', quantity: 1,
+          finish: '', desiredDeadline: '', status: 'RECEIVED',
+          createdAt: '2026-03-11T00:00:00Z', files: [],
+        } as any)
+      })
     )
 
     renderWithRouter(<QuoteRequest />)
-
-    await user.type(screen.getByLabelText('Descrição do projeto'), 'A valid description here')
-    await user.selectOptions(screen.getByLabelText('Material'), 'PLA')
-    await user.type(screen.getByLabelText('Cor'), 'Branco')
-    await user.clear(screen.getByLabelText('Quantidade'))
-    await user.type(screen.getByLabelText('Quantidade'), '2')
-    await user.selectOptions(screen.getByLabelText('Acabamento'), 'Padrão')
-    await user.type(screen.getByLabelText('Prazo desejado'), '2026-04-01')
-
-    await user.click(screen.getByRole('button', { name: /Enviar Orçamento/i }))
+    await fillValidForm(user)
+    await user.click(screen.getByRole('button', { name: /Enviar orçamento/i }))
 
     await waitFor(() => {
-      const btn = screen.getByRole('button', { name: /Enviar Orçamento/i })
-      expect(btn).toBeDisabled()
+      expect(screen.getByRole('button', { name: /Enviando/i })).toBeDisabled()
     })
 
     resolvePromise()
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Orçamento enviado com sucesso! Entraremos em contato em breve.')
-      ).toBeInTheDocument()
+      expect(screen.getByText('Orçamento enviado!')).toBeInTheDocument()
     })
   })
 })

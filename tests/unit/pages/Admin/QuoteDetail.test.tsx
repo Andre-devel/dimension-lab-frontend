@@ -43,16 +43,18 @@ describe('AdminQuoteDetail page', () => {
     vi.clearAllMocks()
   })
 
-  it('renders "Detalhes do Orçamento" heading', async () => {
+  it('renders "Detalhes do Pedido" heading', async () => {
     vi.mocked(quoteService.listAll).mockResolvedValueOnce([mockQuote])
     renderWithRouter(<AdminQuoteDetail />)
-    expect(screen.getByText('Detalhes do Orçamento')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Detalhes do Pedido')).toBeInTheDocument()
+    })
   })
 
   it('shows back link "← Voltar" to /admin', async () => {
     vi.mocked(quoteService.listAll).mockResolvedValueOnce([mockQuote])
     renderWithRouter(<AdminQuoteDetail />)
-    const backLink = screen.getByRole('link', { name: /← Voltar/i })
+    const backLink = screen.getByRole('link', { name: /← Dashboard/i })
     expect(backLink).toHaveAttribute('href', '/admin')
   })
 
@@ -72,12 +74,12 @@ describe('AdminQuoteDetail page', () => {
     })
   })
 
-  it('shows status update select and save button', async () => {
+  it('shows status update buttons and save button', async () => {
     vi.mocked(quoteService.listAll).mockResolvedValueOnce([mockQuote])
     renderWithRouter(<AdminQuoteDetail />)
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /Salvar/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Em análise/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Salvar status/i })).toBeInTheDocument()
     })
   })
 
@@ -90,10 +92,10 @@ describe('AdminQuoteDetail page', () => {
     })
     renderWithRouter(<AdminQuoteDetail />)
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Em análise/i })).toBeInTheDocument()
     })
-    await user.selectOptions(screen.getByRole('combobox'), 'UNDER_REVIEW')
-    await user.click(screen.getByRole('button', { name: /Salvar/i }))
+    await user.click(screen.getByRole('button', { name: /Em análise/i }))
+    await user.click(screen.getByRole('button', { name: /Salvar status/i }))
     await waitFor(() => {
       expect(vi.mocked(quoteService.updateStatus)).toHaveBeenCalledWith('quote-1', 'UNDER_REVIEW')
     })
@@ -108,10 +110,10 @@ describe('AdminQuoteDetail page', () => {
     })
     renderWithRouter(<AdminQuoteDetail />)
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Aprovado/i })).toBeInTheDocument()
     })
-    await user.selectOptions(screen.getByRole('combobox'), 'APPROVED')
-    await user.click(screen.getByRole('button', { name: /Salvar/i }))
+    await user.click(screen.getByRole('button', { name: /Aprovado/i }))
+    await user.click(screen.getByRole('button', { name: /Salvar status/i }))
     await waitFor(() => {
       expect(screen.getByText('Status atualizado com sucesso!')).toBeInTheDocument()
     })

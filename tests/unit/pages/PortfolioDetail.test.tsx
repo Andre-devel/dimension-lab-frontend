@@ -5,7 +5,13 @@ import { vi } from 'vitest'
 vi.mock('@/services/portfolioService', () => ({
   portfolioService: {
     getById: vi.fn(),
+    list: vi.fn().mockResolvedValue([]),
   },
+}))
+
+vi.mock('@/components/seo/SEOHead', () => ({
+  SEOHead: () => null,
+  SITE_URL: 'https://test.com',
 }))
 
 vi.mock('react-router-dom', async () => {
@@ -35,10 +41,11 @@ function renderPage() {
 describe('PortfolioDetail page', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('shows loading state initially', () => {
+  it('shows loading skeleton initially', () => {
     vi.mocked(portfolioService.getById).mockImplementation(() => new Promise(() => {}))
     renderPage()
-    expect(screen.getByText(/carregando/i)).toBeInTheDocument()
+    // During loading, item title is not yet shown
+    expect(screen.queryByText('Suporte para câmera')).not.toBeInTheDocument()
   })
 
   it('renders item title after loading', async () => {
@@ -69,7 +76,7 @@ describe('PortfolioDetail page', () => {
   it('renders back link to /portfolio', async () => {
     vi.mocked(portfolioService.getById).mockResolvedValueOnce(mockItem)
     renderPage()
-    const backLink = screen.getByRole('link', { name: /voltar/i })
+    const backLink = screen.getByRole('link', { name: '← Portfólio' })
     expect(backLink).toHaveAttribute('href', '/portfolio')
   })
 })

@@ -4,6 +4,20 @@ import axios from 'axios'
 // Capture the response interceptor registered on the axios instance
 const interceptorError = vi.fn()
 
+vi.mock('@/store/authStore', () => ({
+  useAuthStore: Object.assign(
+    vi.fn().mockReturnValue({ isAuthenticated: true, clearUser: vi.fn() }),
+    { getState: vi.fn().mockReturnValue({ isAuthenticated: true, clearUser: vi.fn() }) },
+  ),
+}))
+
+vi.mock('@/store/toastStore', () => ({
+  useToastStore: Object.assign(
+    vi.fn().mockReturnValue({ show: vi.fn() }),
+    { getState: vi.fn().mockReturnValue({ show: vi.fn() }) },
+  ),
+}))
+
 vi.mock('axios', () => {
   const instance = {
     interceptors: {

@@ -9,6 +9,11 @@ vi.mock('@/services/portfolioService', () => ({
   },
 }))
 
+vi.mock('@/components/seo/SEOHead', () => ({
+  SEOHead: () => null,
+  SITE_URL: 'https://test.com',
+}))
+
 import { portfolioService } from '@/services/portfolioService'
 import Portfolio from '@/pages/Portfolio'
 
@@ -42,10 +47,12 @@ function renderPage() {
 describe('Portfolio page', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('shows loading state initially', () => {
+  it('shows loading skeleton initially', () => {
     vi.mocked(portfolioService.list).mockImplementation(() => new Promise(() => {}))
     renderPage()
-    expect(screen.getByText(/carregando/i)).toBeInTheDocument()
+    // During loading, items haven't rendered yet
+    expect(screen.queryByText('Suporte para câmera')).not.toBeInTheDocument()
+    expect(screen.queryByText('Vaso decorativo')).not.toBeInTheDocument()
   })
 
   it('renders all items after loading', async () => {
@@ -61,16 +68,16 @@ describe('Portfolio page', () => {
     vi.mocked(portfolioService.list).mockResolvedValueOnce([])
     renderPage()
     await waitFor(() => {
-      expect(screen.getByText(/nenhum item/i)).toBeInTheDocument()
+      expect(screen.getByText(/nenhum projeto encontrado/i)).toBeInTheDocument()
     })
   })
 
-  it('filters items by material', async () => {
+  it('filters items by category', async () => {
     const user = userEvent.setup()
     vi.mocked(portfolioService.list).mockResolvedValueOnce(mockItems)
     renderPage()
     await waitFor(() => expect(screen.getByText('Suporte para câmera')).toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: 'PETG' }))
+    await user.click(screen.getByRole('button', { name: /^Decorativo/ }))
     await waitFor(() => {
       expect(screen.queryByText('Suporte para câmera')).not.toBeInTheDocument()
       expect(screen.getByText('Vaso decorativo')).toBeInTheDocument()
@@ -82,8 +89,8 @@ describe('Portfolio page', () => {
     vi.mocked(portfolioService.list).mockResolvedValueOnce(mockItems)
     renderPage()
     await waitFor(() => expect(screen.getByText('Suporte para câmera')).toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: 'PETG' }))
-    await user.click(screen.getByRole('button', { name: 'Todos' }))
+    await user.click(screen.getByRole('button', { name: /^Decorativo/ }))
+    await user.click(screen.getByRole('button', { name: /^Todos/ }))
     await waitFor(() => {
       expect(screen.getByText('Suporte para câmera')).toBeInTheDocument()
       expect(screen.getByText('Vaso decorativo')).toBeInTheDocument()
