@@ -7,6 +7,7 @@ export interface Category {
 export interface PortfolioItem {
   id: string
   title: string
+  description?: string
   category: Category
   material: string
   printTime: number | null

@@ -11,7 +11,6 @@ import { DatePicker } from '@/components/ui/DatePicker'
 import { FileUploadZone } from '@/components/ui/FileUploadZone'
 import { quoteService } from '@/services/quoteService'
 import { fileUrl } from '@/utils/fileUrl'
-import { authService } from '@/services/authService'
 import { materialService, colorService } from '@/services/catalogService'
 import type { Material, Color } from '@/types/catalog'
 import { useAuthStore } from '@/store/authStore'
@@ -172,27 +171,6 @@ function QTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { 
   )
 }
 
-function Chip({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        fontSize: 13, fontWeight: 500,
-        padding: '7px 15px',
-        borderRadius: 6,
-        border: selected ? '1px solid #06b6d4' : '1px solid rgba(56,189,248,.08)',
-        background: selected ? 'rgba(6,182,212,.1)' : '#0d1520',
-        color: selected ? '#22d3ee' : '#8899aa',
-        cursor: 'pointer',
-        transition: 'all .18s',
-        lineHeight: 1,
-      }}
-    >
-      {label}
-    </button>
-  )
-}
 
 function SegmentedControl({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
   return (
@@ -374,6 +352,8 @@ export default function QuoteRequest() {
     try {
       await quoteService.create({
         ...data,
+        description: data.description ?? '',
+        desiredDeadline: data.desiredDeadline ?? '',
         customerName: isAuthenticated ? user?.name : data.customerName,
         customerEmail: isAuthenticated ? user?.email : data.customerEmail,
         customerPhone: data.customerPhone ? digitsOnly(data.customerPhone) : undefined,

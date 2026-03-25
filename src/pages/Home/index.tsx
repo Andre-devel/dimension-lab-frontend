@@ -154,7 +154,7 @@ export default function Home() {
     let mouseX = -9999, mouseY = -9999
 
     function onMouseMove(e: MouseEvent) {
-      const rect = wrap.getBoundingClientRect()
+      const rect = wrap!.getBoundingClientRect()
       mouseX = e.clientX - rect.left
       mouseY = e.clientY - rect.top
     }
@@ -164,9 +164,9 @@ export default function Home() {
     canvas.addEventListener('mouseleave', onMouseLeave)
 
     function resize() {
-      const rect = wrap.getBoundingClientRect()
+      const rect = wrap!.getBoundingClientRect()
       W = rect.width; H = rect.height
-      canvas.width = W * DPR; canvas.height = H * DPR
+      canvas!.width = W * DPR; canvas!.height = H * DPR
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
       cx = W / 2; cy = H / 2
       genCube()

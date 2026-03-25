@@ -182,7 +182,7 @@ export default function PortfolioDetail() {
 
       {lightbox && item && item.photos.length > 0 && (
         <Lightbox
-          src={fileUrl(item.photos[selectedPhoto])}
+          src={fileUrl(item.photos[selectedPhoto]) ?? ''}
           alt={`${item.title} — foto ${selectedPhoto + 1}`}
           onClose={() => setLightbox(false)}
         />
