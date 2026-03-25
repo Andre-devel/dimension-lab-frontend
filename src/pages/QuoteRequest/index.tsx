@@ -586,8 +586,8 @@ export default function QuoteRequest() {
                 </div>
 
                 {/* Quantity + Deadline */}
-                <div className="flex flex-col sm:flex-row gap-3 items-start">
-                  <div className={`${sc('quantity')} sm:w-[120px] w-full`}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  <div className={sc('quantity')} style={{ flex: '0 0 120px' }}>
                     <FieldLabel htmlFor="quantity">Quantidade <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
                     <Controller
                       control={control}
@@ -609,7 +609,7 @@ export default function QuoteRequest() {
                     />
                     {errors.quantity && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.quantity.message}</p>}
                   </div>
-                  <div className={`${sc('desiredDeadline')} flex-1 w-full`}>
+                  <div className={sc('desiredDeadline')} style={{ flex: 1, minWidth: 240 }}>
                     <FieldLabel htmlFor="desiredDeadline">Prazo desejado</FieldLabel>
                     <Controller
                       control={control}
