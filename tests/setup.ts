@@ -12,3 +12,6 @@ global.IntersectionObserver = class {
   disconnect() {}
   unobserve() {}
 } as unknown as typeof IntersectionObserver
+
+// jsdom does not implement scrollBy — stub it for components that use Carousel
+Element.prototype.scrollBy = function () {}
