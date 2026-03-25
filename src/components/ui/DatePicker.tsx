@@ -134,7 +134,7 @@ export function DatePicker({ id, label, value, onChange, onBlur, error, triggerS
 
       {/* Calendar panel */}
       {open && (
-        <div className="absolute top-full left-0 z-50 mt-1 w-72 rounded-btn border border-border bg-surface shadow-lg p-3">
+        <div className="absolute top-full left-0 z-50 mt-1 w-full sm:w-72 rounded-btn border border-border bg-surface shadow-lg p-3">
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <button
