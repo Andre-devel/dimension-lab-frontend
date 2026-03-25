@@ -12,6 +12,19 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
+          'vendor-form':   ['react-hook-form', 'zod'],
+          'vendor-state':  ['zustand'],
+          'vendor-http':   ['axios'],
+          'vendor-ui':     ['lucide-react'],
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

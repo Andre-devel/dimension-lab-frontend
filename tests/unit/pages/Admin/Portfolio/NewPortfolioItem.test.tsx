@@ -8,6 +8,17 @@ vi.mock('@/services/portfolioService', () => ({
   },
 }))
 
+vi.mock('@/services/catalogService', () => ({
+  materialService: {
+    listAll: vi.fn().mockResolvedValue([{ id: 'm1', name: 'PLA', enabled: true }]),
+    listActive: vi.fn().mockResolvedValue([{ id: 'm1', name: 'PLA', enabled: true }]),
+  },
+  colorService: {
+    listAll: vi.fn().mockResolvedValue([]),
+    listActive: vi.fn().mockResolvedValue([]),
+  },
+}))
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
   return { ...actual, useNavigate: vi.fn().mockReturnValue(vi.fn()) }
@@ -43,6 +54,8 @@ describe('NewPortfolioItem page', () => {
     })
 
     render(<MemoryRouter><NewPortfolioItem /></MemoryRouter>)
+    await waitFor(() => screen.getByRole('option', { name: 'PLA' }))
+
     fireEvent.change(screen.getByLabelText(/título/i), { target: { value: 'Vaso' } })
     fireEvent.change(screen.getByLabelText(/categoria/i), { target: { value: 'Deco' } })
     fireEvent.change(screen.getByLabelText(/material/i), { target: { value: 'PLA' } })

@@ -22,6 +22,7 @@ html {
   --c-accent-glow:       37 99 235;     /* #2563EB */
   --c-text-primary:      240 240 255;   /* #F0F0FF */
   --c-text-secondary:    122 122 154;   /* #7A7A9A */
+  --c-error:             239 68 68;     /* #EF4444 */
 
   /* Composite tokens — for inline styles */
   --panel-bg:            rgba(14, 17, 32, 0.95);

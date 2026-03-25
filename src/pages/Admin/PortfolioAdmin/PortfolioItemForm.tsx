@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import type { PortfolioItemFormData } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
+import { materialService } from '@/services/catalogService'
+import type { Material } from '@/types/catalog'
 
 interface Props {
   initialData?: PortfolioItem
@@ -16,10 +18,15 @@ export default function PortfolioItemForm({ initialData, onSubmit, saving }: Pro
     initialData?.printTime != null ? String(initialData.printTime) : ''
   )
   const [complexity, setComplexity] = useState(initialData?.complexity ?? '')
+  const [materials, setMaterials] = useState<Material[]>([])
   const [photoFiles, setPhotoFiles] = useState<File[]>([])
   const [modelFile, setModelFile] = useState<File | null>(null)
   const photosInputRef = useRef<HTMLInputElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    materialService.listAll().then(setMaterials).catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (initialData) {
@@ -80,15 +87,20 @@ export default function PortfolioItemForm({ initialData, onSubmit, saving }: Pro
 
       <div>
         <label htmlFor="material" className={labelClass}>Material *</label>
-        <input
+        <select
           id="material"
-          type="text"
           value={material}
           onChange={(e) => setMaterial(e.target.value)}
           required
           className={fieldClass}
-          placeholder="Ex: PLA"
-        />
+        >
+          <option value="">Selecione um material</option>
+          {materials.map((m) => (
+            <option key={m.id} value={m.name}>
+              {m.name}{!m.enabled ? ' (inativo)' : ''}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

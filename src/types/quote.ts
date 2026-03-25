@@ -45,4 +45,5 @@ export interface CreateQuotePayload {
   customerName?: string
   customerEmail?: string
   customerPhone?: string
+  portfolioItemId?: string
 }

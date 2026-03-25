@@ -3,6 +3,20 @@ import { MemoryRouter } from 'react-router-dom'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import PortfolioItemForm from '@/pages/Admin/PortfolioAdmin/PortfolioItemForm'
 
+vi.mock('@/services/catalogService', () => ({
+  materialService: {
+    listAll: vi.fn().mockResolvedValue([
+      { id: 'm1', name: 'PLA', enabled: true },
+      { id: 'm2', name: 'PETG', enabled: true },
+    ]),
+    listActive: vi.fn().mockResolvedValue([]),
+  },
+  colorService: {
+    listAll: vi.fn().mockResolvedValue([]),
+    listActive: vi.fn().mockResolvedValue([]),
+  },
+}))
+
 const mockOnSubmit = vi.fn()
 
 beforeEach(() => {
@@ -33,6 +47,8 @@ describe('PortfolioItemForm', () => {
 
   it('calls onSubmit with form data when submitted', async () => {
     renderForm()
+    await waitFor(() => screen.getByRole('option', { name: 'PLA' }))
+
     fireEvent.change(screen.getByLabelText(/título/i), { target: { value: 'Vaso' } })
     fireEvent.change(screen.getByLabelText(/categoria/i), { target: { value: 'Decorativo' } })
     fireEvent.change(screen.getByLabelText(/material/i), { target: { value: 'PLA' } })
@@ -56,7 +72,7 @@ describe('PortfolioItemForm', () => {
     expect(mockOnSubmit).not.toHaveBeenCalled()
   })
 
-  it('pre-fills form when initialData is provided', () => {
+  it('pre-fills form when initialData is provided', async () => {
     renderForm({
       id: 'item-1',
       title: 'Vaso Decorativo',
@@ -69,6 +85,8 @@ describe('PortfolioItemForm', () => {
     })
     expect(screen.getByDisplayValue('Vaso Decorativo')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Decorativo')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('PLA')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('PLA')).toBeInTheDocument()
+    })
   })
 })

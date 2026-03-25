@@ -326,7 +326,7 @@ export default function Home() {
           >
             <Link
               to="/quote"
-              className="rounded-full bg-accent-blue px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow whitespace-nowrap"
+              className="rounded-full bg-accent-blue px-5 py-2.5 text-sm font-semibold text-background transition-all hover:-translate-y-0.5 hover:shadow-glow whitespace-nowrap"
             >
               Pedir Orçamento
             </Link>
@@ -464,7 +464,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 to="/quote"
-                className="rounded-full bg-accent-blue px-6 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
+                className="rounded-full bg-accent-blue px-6 py-3 font-semibold text-background transition-all hover:-translate-y-0.5 hover:shadow-glow"
               >
                 Pedir Orçamento
               </Link>

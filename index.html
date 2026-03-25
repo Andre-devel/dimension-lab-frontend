@@ -40,7 +40,9 @@
     <!-- Fonts — preconnect para reduzir latência -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Carregamento com display=swap para evitar FOIT -->
+    <!-- Preload dos arquivos woff2 para eliminar CLS e render-blocking -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v35/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1ny_CmBoWgzfDYlpw.woff2" as="font" type="font/woff2" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&display=swap"
       rel="stylesheet"

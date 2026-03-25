@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { BackButton } from '@/components/ui/BackButton'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -9,10 +10,18 @@ import { SEOHead, SITE_URL } from '@/components/seo/SEOHead'
 import { DatePicker } from '@/components/ui/DatePicker'
 import { FileUploadZone } from '@/components/ui/FileUploadZone'
 import { quoteService } from '@/services/quoteService'
+import { fileUrl } from '@/utils/fileUrl'
 import { authService } from '@/services/authService'
 import { materialService, colorService } from '@/services/catalogService'
 import type { Material, Color } from '@/types/catalog'
 import { useAuthStore } from '@/store/authStore'
+
+interface PortfolioRef {
+  id: string
+  title: string
+  material: string
+  photo: string | null
+}
 
 const quoteJsonLd = [
   {
@@ -284,6 +293,8 @@ function ColorSwatch({ name, hex, selected, onClick }: { name: string; hex: stri
 
 export default function QuoteRequest() {
   const { isAuthenticated, user, setUser } = useAuthStore()
+  const location = useLocation()
+  const portfolioRef = (location.state as { portfolioItem?: PortfolioRef } | null)?.portfolioItem ?? null
   const [files, setFiles] = useState<File[]>([])
   const [success, setSuccess] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -319,7 +330,7 @@ export default function QuoteRequest() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { quantity: 1, material: 'PLA', color: '', desiredDeadline: '' },
+    defaultValues: { quantity: 1, material: portfolioRef?.material ?? 'PLA', color: '', desiredDeadline: '' },
   })
 
   async function onSubmit(data: FormValues) {
@@ -327,7 +338,7 @@ export default function QuoteRequest() {
     setProjectError('')
 
     const desc = data.description?.trim() ?? ''
-    if (!desc && files.length === 0) {
+    if (!desc && files.length === 0 && !portfolioRef) {
       setProjectError('Informe uma descrição ou envie pelo menos um arquivo do projeto.')
       triggerShake(['_project'], 'description')
       return
@@ -361,7 +372,14 @@ export default function QuoteRequest() {
       return
     }
     try {
-      await quoteService.create({ ...data, customerPhone: data.customerPhone ? digitsOnly(data.customerPhone) : undefined, files })
+      await quoteService.create({
+        ...data,
+        customerName: isAuthenticated ? user?.name : data.customerName,
+        customerEmail: isAuthenticated ? user?.email : data.customerEmail,
+        customerPhone: data.customerPhone ? digitsOnly(data.customerPhone) : undefined,
+        files,
+        portfolioItemId: portfolioRef?.id,
+      })
       if (isAuthenticated && user && !user.phone && data.customerPhone) {
         setUser({ ...user, phone: data.customerPhone })
       }
@@ -505,10 +523,42 @@ export default function QuoteRequest() {
                     <div style={{ flex: 1, height: 1, background: 'rgba(56,189,248,.1)' }} />
                   </div>
 
-                  <div>
-                    <FieldLabel>Arquivos do projeto</FieldLabel>
-                    <FileUploadZone onFilesChange={(f) => { setFiles(f); if (f.length > 0) setProjectError('') }} accept={ACCEPT} />
-                  </div>
+                  {portfolioRef ? (
+                    <div>
+                      <FieldLabel>Referência do portfólio</FieldLabel>
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 14,
+                        background: 'rgba(6,182,212,.06)',
+                        border: '1px solid rgba(6,182,212,.2)',
+                        borderRadius: 10, padding: '12px 14px',
+                      }}>
+                        {portfolioRef.photo && (
+                          <img
+                            src={fileUrl(portfolioRef.photo)}
+                            alt={portfolioRef.title}
+                            style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }}
+                          />
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: '#e8edf3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {portfolioRef.title}
+                          </p>
+                          <p style={{ fontSize: 12, color: '#06b6d4', marginTop: 2 }}>{portfolioRef.material}</p>
+                        </div>
+                        <Link
+                          to={`/portfolio/${portfolioRef.id}`}
+                          style={{ fontSize: 11, color: '#8899aa', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
+                        >
+                          Ver item →
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <FieldLabel>Arquivos do projeto</FieldLabel>
+                      <FileUploadZone onFilesChange={(f) => { setFiles(f); if (f.length > 0) setProjectError('') }} accept={ACCEPT} />
+                    </div>
+                  )}
 
                   {projectError && (
                     <p style={{ fontSize: 12, color: '#fb7185', marginTop: 8 }}>{projectError}</p>

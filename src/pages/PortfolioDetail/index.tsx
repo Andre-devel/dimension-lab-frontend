@@ -370,6 +370,7 @@ export default function PortfolioDetail() {
                   </p>
                   <Link
                     to="/quote"
+                    state={{ portfolioItem: { id: item.id, title: item.title, material: item.material, photo: item.photos[0] ?? null } }}
                     style={{
                       display: 'block', textAlign: 'center',
                       padding: '12px 24px', borderRadius: 50,
@@ -421,7 +422,7 @@ export default function PortfolioDetail() {
                     {copied ? 'Copiado!' : 'Copiar link'}
                   </button>
                   <a
-                    href={waLink}
+                    href={`https://wa.me/?text=${encodeURIComponent(window.location.href)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

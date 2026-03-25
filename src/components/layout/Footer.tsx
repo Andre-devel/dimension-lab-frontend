@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react'
 import { materialService } from '@/services/catalogService'
-
-const WHATSAPP = import.meta.env.VITE_WHATSAPP_URL as string | undefined
-const INSTAGRAM = import.meta.env.VITE_INSTAGRAM_URL as string | undefined
-const YOUTUBE   = import.meta.env.VITE_YOUTUBE_URL   as string | undefined
+import { settingsService } from '@/services/settingsService'
 
 function IconWhatsApp() {
   return (
@@ -29,20 +26,30 @@ function IconYouTube() {
   )
 }
 
-const socials = [
-  { label: 'WhatsApp', Icon: IconWhatsApp, href: WHATSAPP },
-  { label: 'Instagram', Icon: IconInstagram, href: INSTAGRAM },
-  { label: 'YouTube',   Icon: IconYouTube,   href: YOUTUBE },
-].filter((s) => s.href)
-
 export function Footer() {
   const [materials, setMaterials] = useState<string[]>([])
+  const [whatsapp, setWhatsapp] = useState<string>('')
+  const [instagram, setInstagram] = useState<string>('')
+  const [youtube, setYoutube] = useState<string>('')
 
   useEffect(() => {
     materialService.listActive()
       .then((list) => setMaterials(list.map((m) => m.name)))
       .catch(() => {})
+    settingsService.getAll()
+      .then((s) => {
+        setWhatsapp(s.whatsapp_url ?? '')
+        setInstagram(s.instagram_url ?? '')
+        setYoutube(s.youtube_url ?? '')
+      })
+      .catch(() => {})
   }, [])
+
+  const socials = [
+    { label: 'WhatsApp', Icon: IconWhatsApp, href: whatsapp },
+    { label: 'Instagram', Icon: IconInstagram, href: instagram },
+    { label: 'YouTube',   Icon: IconYouTube,   href: youtube },
+  ].filter((s) => s.href)
 
   return (
     <footer className="bg-surface border-t border-border px-[5%] pt-10 md:pt-14">

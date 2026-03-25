@@ -8,6 +8,17 @@ vi.mock('@/services/portfolioService', () => ({
   },
 }))
 
+vi.mock('@/services/catalogService', () => ({
+  materialService: {
+    listAll: vi.fn().mockResolvedValue([{ id: 'm1', name: 'PLA', enabled: true }]),
+    listActive: vi.fn().mockResolvedValue([{ id: 'm1', name: 'PLA', enabled: true }]),
+  },
+  colorService: {
+    listAll: vi.fn().mockResolvedValue([]),
+    listActive: vi.fn().mockResolvedValue([]),
+  },
+}))
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
   return {
@@ -46,17 +57,15 @@ describe('EditPortfolioItem page', () => {
 
   it('loads and pre-fills form with existing item', async () => {
     render(<MemoryRouter><EditPortfolioItem /></MemoryRouter>)
-    await waitFor(() => {
-      expect(screen.getByDisplayValue('Vaso Decorativo')).toBeInTheDocument()
-      expect(screen.getByDisplayValue('PLA')).toBeInTheDocument()
-    })
+    await waitFor(() => expect(screen.getByDisplayValue('Vaso Decorativo')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByDisplayValue('PLA')).toBeInTheDocument())
   })
 
   it('navigates to /admin/portfolio after successful update', async () => {
     vi.mocked(portfolioService.update).mockResolvedValue(mockItem)
 
     render(<MemoryRouter><EditPortfolioItem /></MemoryRouter>)
-    await waitFor(() => screen.getByDisplayValue('Vaso Decorativo'))
+    await waitFor(() => screen.getByRole('option', { name: 'PLA' }))
 
     fireEvent.click(screen.getByRole('button', { name: /salvar/i }))
 

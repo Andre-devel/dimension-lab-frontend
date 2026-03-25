@@ -5,14 +5,20 @@ import { vi } from 'vitest'
 
 vi.mock('@/services/settingsService', () => ({
   settingsService: {
-    getAll: vi.fn(),
+    getAll: vi.fn().mockResolvedValue({}),
     update: vi.fn(),
   },
 }))
 
 vi.mock('@/services/catalogService', () => ({
-  materialService: { listActive: vi.fn().mockResolvedValue([]) },
-  colorService: { listActive: vi.fn().mockResolvedValue([]) },
+  materialService: {
+    listActive: vi.fn().mockResolvedValue([]),
+    listAll: vi.fn().mockResolvedValue([]),
+  },
+  colorService: {
+    listActive: vi.fn().mockResolvedValue([]),
+    listAll: vi.fn().mockResolvedValue([]),
+  },
 }))
 
 import { settingsService } from '@/services/settingsService'
@@ -36,19 +42,18 @@ describe('SettingsAdmin', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('renders title "Configurações"', async () => {
-    vi.mocked(settingsService.getAll).mockResolvedValueOnce(mockSettings)
     renderPage()
     expect(screen.getByText('Configurações')).toBeInTheDocument()
   })
 
   it('shows loading state initially', () => {
-    vi.mocked(settingsService.getAll).mockImplementationOnce(() => new Promise(() => {}))
+    vi.mocked(settingsService.getAll).mockImplementation(() => new Promise(() => {}))
     renderPage()
     expect(screen.getByText('Carregando...')).toBeInTheDocument()
   })
 
   it('renders inputs with current values', async () => {
-    vi.mocked(settingsService.getAll).mockResolvedValueOnce(mockSettings)
+    vi.mocked(settingsService.getAll).mockResolvedValue(mockSettings)
     renderPage()
     await waitFor(() => {
       expect(screen.getByDisplayValue('https://wa.me/5511999999999')).toBeInTheDocument()
@@ -58,7 +63,7 @@ describe('SettingsAdmin', () => {
 
   it('saves updated setting on button click', async () => {
     const user = userEvent.setup()
-    vi.mocked(settingsService.getAll).mockResolvedValueOnce(mockSettings)
+    vi.mocked(settingsService.getAll).mockResolvedValue(mockSettings)
     vi.mocked(settingsService.update).mockResolvedValueOnce({
       key: 'whatsapp_url',
       value: 'https://wa.me/5599999999999',
@@ -82,7 +87,7 @@ describe('SettingsAdmin', () => {
 
   it('shows success feedback after save', async () => {
     const user = userEvent.setup()
-    vi.mocked(settingsService.getAll).mockResolvedValueOnce(mockSettings)
+    vi.mocked(settingsService.getAll).mockResolvedValue(mockSettings)
     vi.mocked(settingsService.update).mockResolvedValueOnce({
       key: 'instagram_url',
       value: 'https://instagram.com/dimensionlab3d',

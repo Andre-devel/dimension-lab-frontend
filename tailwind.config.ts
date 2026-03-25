@@ -16,6 +16,7 @@ export default {
         'accent-glow':    'rgb(var(--c-accent-glow)   / <alpha-value>)',
         'text-primary':   'rgb(var(--c-text-primary)  / <alpha-value>)',
         'text-secondary': 'rgb(var(--c-text-secondary)/ <alpha-value>)',
+        'error':          'rgb(var(--c-error)         / <alpha-value>)',
       },
       fontFamily: {
         heading: ['Orbitron', 'Space Grotesk', 'sans-serif'],
