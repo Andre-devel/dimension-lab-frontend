@@ -86,11 +86,11 @@ describe('authService', () => {
 
   describe('loginWithGoogle', () => {
     it('sets window.location.href to google oauth url', () => {
-      const originalLocation = window.location
-      Object.defineProperty(window, 'location', { value: { href: '' }, writable: true })
+      const location = { href: '' }
+      vi.stubGlobal('location', location)
       authService.loginWithGoogle()
-      expect(window.location.href).toContain('/oauth2/authorization/google')
-      Object.defineProperty(window, 'location', { value: originalLocation, writable: true })
+      expect(location.href).toContain('/oauth2/authorization/google')
+      vi.unstubAllGlobals()
     })
   })
 })
