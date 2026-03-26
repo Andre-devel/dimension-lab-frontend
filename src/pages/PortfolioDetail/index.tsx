@@ -5,6 +5,7 @@ import { BackButton } from '@/components/ui/BackButton'
 import { Reveal } from '@/components/ui/Reveal'
 import { SEOHead, SITE_URL } from '@/components/seo/SEOHead'
 import { portfolioService } from '@/services/portfolioService'
+import { settingsService } from '@/services/settingsService'
 import type { PortfolioItem } from '@/types/portfolio'
 import { fileUrl } from '@/utils/fileUrl'
 
@@ -111,6 +112,7 @@ export default function PortfolioDetail() {
   const navigate = useNavigate()
   const [item, setItem] = useState<PortfolioItem | null | undefined>(undefined)
   const [allItems, setAllItems] = useState<PortfolioItem[]>([])
+  const [botNumber, setBotNumber] = useState('')
   const [selectedPhoto, setSelectedPhoto] = useState(0)
   const [lightbox, setLightbox] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -123,6 +125,7 @@ export default function PortfolioDetail() {
       setSelectedPhoto(0)
     }).catch(() => setItem(null))
     portfolioService.list().then(setAllItems)
+    settingsService.getAll().then(s => setBotNumber(s.bot_number ?? ''))
   }, [id])
 
   const related = item
@@ -135,8 +138,8 @@ export default function PortfolioDetail() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const waLink = item
-    ? `https://wa.me/5511999999999?text=${encodeURIComponent(`Olá! Vi o projeto "${item.title}" no portfólio e gostaria de saber mais.`)}`
+  const waLink = item && botNumber
+    ? `https://wa.me/${botNumber}?text=${encodeURIComponent(`Olá! Vi o projeto "${item.title}" no portfólio e gostaria de saber mais.`)}`
     : '#'
 
   const jsonLd = item

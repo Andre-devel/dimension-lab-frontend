@@ -8,6 +8,7 @@ const SETTING_LABELS: Record<string, string> = {
   instagram_url: 'Instagram URL',
   youtube_url: 'YouTube URL',
   whatsapp_admin_number: 'Número WhatsApp do Admin',
+  bot_number: 'Número do Bot (WhatsApp)',
 }
 
 const SETTING_DESCRIPTIONS: Record<string, string> = {
@@ -15,12 +16,13 @@ const SETTING_DESCRIPTIONS: Record<string, string> = {
   instagram_url: 'Link do Instagram exibido no site.',
   youtube_url: 'Link do YouTube exibido no site.',
   whatsapp_admin_number: 'Número que recebe notificações de novos orçamentos (ex: 5511999999999).',
+  bot_number: 'Número do bot conectado à Evolution API — usado no link "Falar via WhatsApp" do portfólio (ex: 5511999999999).',
 }
 
-const SETTING_KEYS = ['whatsapp_url', 'instagram_url', 'youtube_url', 'whatsapp_admin_number']
+const SETTING_KEYS = ['whatsapp_url', 'instagram_url', 'youtube_url', 'whatsapp_admin_number', 'bot_number']
 
 export default function SettingsAdmin() {
-  const [values, setValues] = useState<SiteSettings>({ whatsapp_url: '', instagram_url: '', youtube_url: '', whatsapp_admin_number: '' })
+  const [values, setValues] = useState<SiteSettings>({ whatsapp_url: '', instagram_url: '', youtube_url: '', whatsapp_admin_number: '', bot_number: '' })
   const [loading, setLoading] = useState(true)
   const [saved, setSaved] = useState<string | null>(null)
   const [error, setError] = useState('')
@@ -72,10 +74,10 @@ export default function SettingsAdmin() {
                 )}
                 <div className="flex gap-3">
                   <input
-                    type={key === 'whatsapp_admin_number' ? 'tel' : 'url'}
+                    type={key === 'whatsapp_admin_number' || key === 'bot_number' ? 'tel' : 'url'}
                     value={values[key] ?? ''}
                     onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
-                    placeholder={key === 'whatsapp_admin_number' ? '5511999999999' : 'https://...'}
+                    placeholder={key === 'whatsapp_admin_number' || key === 'bot_number' ? '5511999999999' : 'https://...'}
                     className="flex-1 rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-text-primary outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors"
                     onKeyDown={(e) => e.key === 'Enter' && handleSave(key)}
                   />

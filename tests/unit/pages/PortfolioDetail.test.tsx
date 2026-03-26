@@ -9,6 +9,12 @@ vi.mock('@/services/portfolioService', () => ({
   },
 }))
 
+vi.mock('@/services/settingsService', () => ({
+  settingsService: {
+    getAll: vi.fn().mockResolvedValue({ whatsapp_url: '', instagram_url: '', youtube_url: '', whatsapp_admin_number: '', bot_number: '5511999999999' }),
+  },
+}))
+
 vi.mock('@/components/seo/SEOHead', () => ({
   SEOHead: () => null,
   SITE_URL: 'https://test.com',
@@ -78,5 +84,14 @@ describe('PortfolioDetail page', () => {
     renderPage()
     const backLink = screen.getByRole('link', { name: '← Portfólio' })
     expect(backLink).toHaveAttribute('href', '/portfolio')
+  })
+
+  it('uses bot_number from settings in WhatsApp link', async () => {
+    vi.mocked(portfolioService.getById).mockResolvedValueOnce(mockItem)
+    renderPage()
+    await waitFor(() => {
+      const waLink = screen.getByRole('link', { name: /whatsapp/i })
+      expect(waLink).toHaveAttribute('href', expect.stringContaining('wa.me/5511999999999'))
+    })
   })
 })
