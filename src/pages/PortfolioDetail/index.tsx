@@ -8,6 +8,7 @@ import { portfolioService } from '@/services/portfolioService'
 import { settingsService } from '@/services/settingsService'
 import type { PortfolioItem } from '@/types/portfolio'
 import { fileUrl } from '@/utils/fileUrl'
+import { trackEvent } from '@/utils/analytics'
 
 /* ── Lightbox ─────────────────────────────────────── */
 function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
@@ -123,6 +124,7 @@ export default function PortfolioDetail() {
     portfolioService.getById(id).then(data => {
       setItem(data)
       setSelectedPhoto(0)
+      trackEvent('portfolio_item_viewed', { item_id: data.id, item_title: data.title, category: data.category.name, material: data.material })
     }).catch(() => setItem(null))
     portfolioService.list().then(setAllItems)
     settingsService.getAll().then(s => setBotNumber(s.bot_number ?? ''))

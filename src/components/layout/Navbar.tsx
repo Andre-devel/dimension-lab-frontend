@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { Menu } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { authService } from '@/services/authService'
+import { trackEvent } from '@/utils/analytics'
 
 const publicLinks = [
   { label: 'Home', to: '/' },
@@ -31,6 +32,7 @@ export function Navbar() {
 
   async function handleLogout() {
     await authService.logout()
+    trackEvent('logout')
     clearUser()
     navigate('/')
   }
@@ -63,7 +65,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={handleLogout}
-            className="rounded-full border border-accent-blue px-[22px] py-[9px] text-sm font-semibold text-accent-blue transition-all hover:bg-accent-blue/10"
+            className="hidden md:inline-flex rounded-full border border-accent-blue px-[22px] py-[9px] text-sm font-semibold text-accent-blue transition-all hover:bg-accent-blue/10"
           >
             Sair
           </button>
@@ -114,6 +116,17 @@ export function Navbar() {
                 </NavLink>
               </li>
             ))}
+            {isAuthenticated && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => { setMobileOpen(false); handleLogout() }}
+                  className="text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  Sair
+                </button>
+              </li>
+            )}
           </ul>
         </nav>
       )}

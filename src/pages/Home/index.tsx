@@ -277,14 +277,14 @@ export default function Home() {
 
       {/* ─── HERO ─── */}
       <section
-        className="relative flex flex-col lg:flex-row lg:items-center lg:min-h-[calc(100vh-64px)] overflow-hidden"
+        className="relative flex flex-col lg:flex-row lg:items-center lg:justify-center lg:min-h-[calc(100vh-64px)] overflow-hidden"
         style={{ padding: '40px 5% 40px' }}
       >
         <div className="hero-grid" />
         <div className="hero-bg" />
 
         {/* Left */}
-        <div className="relative z-10 flex-1 max-w-[620px]">
+        <div className="relative z-10 max-w-[620px]">
           <div
             className="hero-badge"
             style={{ animation: 'fadeUp .6s ease 0s both' }}

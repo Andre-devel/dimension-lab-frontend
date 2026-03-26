@@ -14,6 +14,7 @@ import { fileUrl } from '@/utils/fileUrl'
 import { materialService, colorService } from '@/services/catalogService'
 import type { Material, Color } from '@/types/catalog'
 import { useAuthStore } from '@/store/authStore'
+import { trackEvent } from '@/utils/analytics'
 
 interface PortfolioRef {
   id: string
@@ -367,6 +368,7 @@ export default function QuoteRequest() {
       if (isAuthenticated && user && !user.phone && data.customerPhone) {
         setUser({ ...user, phone: data.customerPhone })
       }
+      trackEvent('quote_submitted', { authenticated: isAuthenticated })
       setSuccess(true)
       reset()
       setFiles([])

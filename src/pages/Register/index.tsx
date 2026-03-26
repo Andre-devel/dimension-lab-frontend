@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/store/authStore'
 import { SEOHead } from '@/components/seo/SEOHead'
+import { trackEvent } from '@/utils/analytics'
 
 const schema = z.object({
   name:     z.string().min(2, 'Informe seu nome'),
@@ -27,6 +28,7 @@ export default function Register() {
     try {
       const user = await authService.register(data.name, data.email, data.password)
       setUser(user)
+      trackEvent('sign_up', { method: 'email' })
       navigate('/')
     } catch (err: any) {
       setServerError(err?.response?.data?.message ?? 'Erro ao criar conta. Tente novamente.')

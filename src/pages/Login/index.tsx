@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/store/authStore'
 import { SEOHead } from '@/components/seo/SEOHead'
+import { trackEvent } from '@/utils/analytics'
 
 const schema = z.object({
   email:    z.string().email('E-mail inválido'),
@@ -26,6 +27,7 @@ export default function Login() {
     try {
       const user = await authService.login(data.email, data.password)
       setUser(user)
+      trackEvent('login', { method: 'email' })
       navigate(user.role === 'ADMIN' ? '/admin' : '/my-quotes')
     } catch (err: any) {
       setServerError(err?.response?.data?.message ?? 'E-mail ou senha inválidos')
