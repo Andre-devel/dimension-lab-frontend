@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { StatusBadge } from '@/components/ui/Badge'
 import { BackButton } from '@/components/ui/BackButton'
+import { Link } from 'react-router-dom'
 import { quoteService } from '@/services/quoteService'
 import type { Quote, QuoteStatus } from '@/types/quote'
 import { QUOTE_STATUS_LABELS, QUOTE_STATUS_COLORS } from '@/constants/quoteStatus'
@@ -221,6 +222,31 @@ export default function AdminQuoteDetail() {
                   </div>
                 )}
               </div>
+
+              {/* Referência do portfólio */}
+              {quote.portfolioItemId && (
+                <div className="rounded-2xl p-6"
+                     style={{ background: '#0e1118', border: '1px solid var(--panel-border)' }}>
+                  <h2 className="text-xs font-bold text-text-primary uppercase tracking-widest mb-5 font-mono">
+                    Referência do Portfólio
+                  </h2>
+                  <div className="h-px mb-5" style={{
+                    background: 'linear-gradient(90deg, transparent, #00dcc8, transparent)',
+                    opacity: 0.18,
+                  }} />
+                  <Link
+                    to={`/portfolio/${quote.portfolioItemId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 text-sm text-[#4D9FFF] hover:underline break-all"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    Ver item no portfólio
+                  </Link>
+                </div>
+              )}
 
               {/* Atualizar status */}
               <div className="rounded-2xl p-6"

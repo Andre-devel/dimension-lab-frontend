@@ -15,3 +15,6 @@ global.IntersectionObserver = class {
 
 // jsdom does not implement scrollBy — stub it for components that use Carousel
 Element.prototype.scrollBy = function () {}
+
+// jsdom does not implement scrollIntoView — stub it for QuoteRequest color field
+Element.prototype.scrollIntoView = function () {}

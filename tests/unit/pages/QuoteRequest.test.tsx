@@ -141,6 +141,50 @@ describe('QuoteRequest page', () => {
     })
   })
 
+  it('does not require description when portfolioRef is provided', async () => {
+    const user = userEvent.setup()
+    vi.mocked(quoteService.create).mockResolvedValueOnce({
+      id: '1', description: '', material: 'PLA', color: 'Multicor', quantity: 1,
+      finish: '', desiredDeadline: '', status: 'RECEIVED',
+      createdAt: '2026-03-11T00:00:00Z', files: [],
+    } as any)
+
+    render(
+      <MemoryRouter
+        initialEntries={[{ pathname: '/quote', state: { portfolioItem: { id: 'pid-1', title: 'Test Item', material: 'PLA', photo: null } } }]}
+      >
+        <QuoteRequest />
+      </MemoryRouter>
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Multicor' }))
+    await user.type(screen.getByLabelText('Seu nome'), 'Test User')
+    await user.type(screen.getByLabelText('E-mail'), 'test@test.com')
+    await user.type(screen.getByLabelText(/Telefone/i), '(11) 99999-9999')
+    await user.click(screen.getByRole('button', { name: /Enviar orçamento/i }))
+
+    await waitFor(() => {
+      expect(vi.mocked(quoteService.create)).toHaveBeenCalled()
+    })
+    expect(screen.queryByText('Informe uma descrição ou envie pelo menos um arquivo do projeto.')).not.toBeInTheDocument()
+  })
+
+  it('shows color validation error when color is not selected', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<QuoteRequest />)
+
+    // Fill everything except color
+    await user.type(screen.getByLabelText('Descrição do projeto'), 'A valid description here')
+    await user.type(screen.getByLabelText('Seu nome'), 'Test User')
+    await user.type(screen.getByLabelText('E-mail'), 'test@test.com')
+    await user.type(screen.getByLabelText(/Telefone/i), '(11) 99999-9999')
+    await user.click(screen.getByRole('button', { name: /Enviar orçamento/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Selecione uma cor')).toBeInTheDocument()
+    })
+  })
+
   it('shows error message when service throws', async () => {
     const user = userEvent.setup()
     vi.mocked(quoteService.create).mockRejectedValueOnce(new Error('Server error'))

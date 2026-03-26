@@ -285,7 +285,11 @@ export default function QuoteRequest() {
       setShakingFields(new Set(fields))
       setTimeout(() => setShakingFields(new Set()), 450)
     })
-    if (focusId) requestAnimationFrame(() => document.getElementById(focusId)?.focus())
+    if (focusId) requestAnimationFrame(() => {
+      const el = document.getElementById(focusId)
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el?.focus()
+    })
   }
 
   function sc(field: string) {
@@ -469,7 +473,7 @@ export default function QuoteRequest() {
 
             <form onSubmit={handleSubmit(onSubmit, (errs) => {
               const fields = Object.keys(errs)
-              const focusMap: Record<string, string> = { description: 'description', quantity: 'quantity', desiredDeadline: 'desiredDeadline', customerName: 'customerName', customerEmail: 'customerEmail', customerPhone: 'customerPhone' }
+              const focusMap: Record<string, string> = { description: 'description', color: 'color-field', quantity: 'quantity', desiredDeadline: 'desiredDeadline', customerName: 'customerName', customerEmail: 'customerEmail', customerPhone: 'customerPhone' }
               triggerShake(fields, focusMap[fields[0]])
             })} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 
@@ -563,7 +567,7 @@ export default function QuoteRequest() {
                 </div>
 
                 {/* Color swatches */}
-                <div className={sc('color')} style={{ marginBottom: '1rem' }}>
+                <div id="color-field" className={sc('color')} style={{ marginBottom: '1rem' }}>
                   <FieldLabel>Cor</FieldLabel>
                   <Controller
                     control={control}

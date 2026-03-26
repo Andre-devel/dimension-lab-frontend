@@ -26,6 +26,7 @@ export interface Quote {
   createdAt: string
   files: QuoteFile[]
   customer?: Customer
+  portfolioItemId?: string
 }
 
 export interface Customer {
