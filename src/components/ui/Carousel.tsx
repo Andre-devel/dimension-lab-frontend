@@ -73,7 +73,7 @@ export function Carousel({ items }: Props) {
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
               ) : (
-                <div className="flex h-full items-center justify-center" style={{ color: '#3d4f5f' }}>
+                <div className="flex h-full items-center justify-center" style={{ color: 'rgb(var(--c-text-muted))' }}>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
                     <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
                   </svg>
@@ -131,10 +131,10 @@ function CarouselArrow({ direction, visible, onClick, 'aria-label': label }: Arr
         width: '40px',
         height: '40px',
         borderRadius: '50%',
-        border: '1px solid rgba(77,159,255,0.35)',
-        background: 'rgba(10,10,20,0.75)',
+        border: '1px solid rgb(var(--c-accent-blue) / 0.35)',
+        background: 'rgb(var(--c-background) / 0.75)',
         backdropFilter: 'blur(8px)',
-        color: '#4D9FFF',
+        color: 'rgb(var(--c-accent-blue))',
         cursor: 'pointer',
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? 'auto' : 'none',
@@ -143,12 +143,12 @@ function CarouselArrow({ direction, visible, onClick, 'aria-label': label }: Arr
       }}
       onMouseEnter={e => {
         const el = e.currentTarget
-        el.style.borderColor = 'rgba(77,159,255,0.9)'
-        el.style.boxShadow = '0 0 12px rgba(77,159,255,0.35)'
+        el.style.borderColor = 'rgb(var(--c-accent-blue) / 0.9)'
+        el.style.boxShadow = '0 0 12px rgb(var(--c-accent-blue) / 0.35)'
       }}
       onMouseLeave={e => {
         const el = e.currentTarget
-        el.style.borderColor = 'rgba(77,159,255,0.35)'
+        el.style.borderColor = 'rgb(var(--c-accent-blue) / 0.35)'
         el.style.boxShadow = 'none'
       }}
     >

@@ -118,11 +118,11 @@ export function DatePicker({ id, label, value, onChange, onBlur, error, triggerS
           open ? 'border-accent-blue ring-1 ring-accent-blue' : '',
         ].join(' ')}
         style={{
-          background: '#0d1520',
-          borderColor: error ? '#fb7185' : open ? '#06b6d4' : 'rgba(56,189,248,.08)',
+          background: 'rgb(var(--c-surface))',
+          borderColor: error ? 'rgb(var(--c-error))' : open ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-accent-teal) / .08)',
           borderRadius: 10,
           padding: '11px 14px',
-          color: '#e8edf3',
+          color: 'rgb(var(--c-text-bright))',
           ...triggerStyle,
         }}
       >

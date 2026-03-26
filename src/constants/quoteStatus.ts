@@ -11,13 +11,13 @@ export const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
 }
 
 export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
-  RECEIVED:     '#4D9FFF',
-  UNDER_REVIEW: '#F59E0B',
-  APPROVED:     '#8B5CF6',
-  PRINTING:     '#2563EB',
-  READY:        '#10B981',
-  DELIVERED:    '#4A4A6A',
-  CANCELLED:    '#6B7280',
+  RECEIVED:     'rgb(var(--c-accent-blue))',
+  UNDER_REVIEW: 'rgb(var(--c-accent-amber))',
+  APPROVED:     'rgb(var(--c-accent-purple))',
+  PRINTING:     'rgb(var(--c-accent-glow))',
+  READY:        'rgb(var(--c-accent-green))',
+  DELIVERED:    'rgb(var(--c-status-delivered))',
+  CANCELLED:    'rgb(var(--c-text-secondary))',
 }
 
 export const MATERIALS = ['PLA', 'ABS', 'PETG', 'TPU', 'Resina'] as const

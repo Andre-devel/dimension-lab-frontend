@@ -51,7 +51,7 @@ export default function PortfolioAdmin() {
             className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-widest
                        text-white transition-all duration-200 self-start sm:self-auto hover:-translate-y-0.5"
             style={{
-              background: 'linear-gradient(135deg, #00E5FF 0%, rgb(var(--c-accent-blue)) 40%, rgb(var(--c-accent-purple)) 100%)',
+              background: 'linear-gradient(135deg, rgb(var(--c-accent-cyan)) 0%, rgb(var(--c-accent-blue)) 40%, rgb(var(--c-accent-purple)) 100%)',
               boxShadow: '0 4px 16px rgb(var(--c-accent-blue) / 0.2)',
             }}
           >
@@ -76,7 +76,7 @@ export default function PortfolioAdmin() {
           <>
             {/* Desktop table */}
             <div className="hidden md:block rounded-2xl overflow-hidden"
-                 style={{ border: '1px solid var(--panel-border)', background: '#0e1118' }}>
+                 style={{ border: '1px solid var(--panel-border)', background: 'rgb(var(--c-surface))' }}>
               <table className="min-w-full">
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -93,7 +93,7 @@ export default function PortfolioAdmin() {
                     <tr
                       key={item.id}
                       style={{ borderBottom: i < items.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = '#141e30')}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgb(var(--c-surface-2))')}
                       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                       className="transition-colors duration-100"
                     >

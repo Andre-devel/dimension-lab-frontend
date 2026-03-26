@@ -19,10 +19,18 @@ html {
   --c-border:            42 42 69;      /* #2A2A45 */
   --c-accent-blue:       77 159 255;    /* #4D9FFF */
   --c-accent-purple:     139 92 246;    /* #8B5CF6 */
+  --c-accent-cyan:       0 229 255;     /* #00E5FF */
   --c-accent-glow:       37 99 235;     /* #2563EB */
   --c-text-primary:      240 240 255;   /* #F0F0FF */
   --c-text-secondary:    122 122 154;   /* #7A7A9A */
   --c-error:             239 68 68;     /* #EF4444 */
+  --c-accent-teal:       6 182 212;     /* #06B6D4 */
+  --c-accent-amber:      245 158 11;    /* #F59E0B */
+  --c-accent-green:      16 185 129;    /* #10B981 */
+  --c-text-bright:       232 237 243;   /* #E8EDF3 */
+  --c-text-muted:        61 79 95;      /* #3D4F5F */
+  --c-status-delivered:  74 74 106;     /* #4A4A6A */
+  --c-white:             255 255 255;   /* #FFFFFF */
 
   /* Composite tokens — for inline styles */
   --panel-bg:            rgba(14, 17, 32, 0.95);
@@ -269,14 +277,19 @@ html {
   border-color: rgba(42, 48, 112, 1) !important;
 }
 
+/* Submit / CTA gradient — shared gradient for buttons and links */
+.q-gradient-bg {
+  background: linear-gradient(135deg, rgb(var(--c-accent-cyan)) 0%, rgb(var(--c-accent-blue)) 40%, rgb(var(--c-accent-purple)) 100%);
+}
+
 /* Submit button */
 .q-submit-btn {
   width: 100%;
   padding: 16px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #00E5FF 0%, rgb(var(--c-accent-blue)) 40%, rgb(var(--c-accent-purple)) 100%);
-  color: #fff;
+  background: linear-gradient(135deg, rgb(var(--c-accent-cyan)) 0%, rgb(var(--c-accent-blue)) 40%, rgb(var(--c-accent-purple)) 100%);
+  color: rgb(var(--c-text-primary));
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -303,13 +316,36 @@ html {
   position: absolute;
   top: -50%; left: -60%;
   width: 40%; height: 200%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+  background: linear-gradient(90deg, transparent, rgb(var(--c-white) / .12), transparent);
   transform: skewX(-20deg);
   animation: q-shimmer 3s ease-in-out infinite;
 }
 @keyframes q-shimmer {
   0%       { left: -60% }
   40%, 100% { left: 120% }
+}
+
+/* CTA link — same visual as q-submit-btn but inline (for <a> / <Link>) */
+.q-cta-link {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgb(var(--c-accent-cyan)) 0%, rgb(var(--c-accent-blue)) 40%, rgb(var(--c-accent-purple)) 100%);
+  color: rgb(var(--c-text-primary));
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 20px rgb(var(--c-accent-blue) / 0.2);
+  white-space: nowrap;
+}
+.q-cta-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 35px rgb(var(--c-accent-blue) / 0.3), 0 0 60px rgb(var(--c-accent-purple) / 0.2);
+}
+.q-cta-link:active {
+  transform: translateY(0);
 }
 
 /* Status dot */

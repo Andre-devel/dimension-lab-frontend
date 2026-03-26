@@ -277,8 +277,8 @@ export default function Home() {
 
       {/* ─── HERO ─── */}
       <section
-        className="relative flex flex-col lg:flex-row lg:items-center lg:justify-center lg:min-h-[calc(100vh-64px)] overflow-hidden"
-        style={{ padding: '40px 5% 40px' }}
+        className="relative flex flex-col lg:flex-row lg:items-center lg:justify-center overflow-hidden"
+        style={{ padding: 'clamp(16px, 4vw, 40px) 5%' }}
       >
         <div className="hero-grid" />
         <div className="hero-bg" />
@@ -295,21 +295,30 @@ export default function Home() {
 
           <h1
             className="font-heading font-black leading-tight mb-5"
-            style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', animation: 'fadeUp .6s ease .1s both' }}
+            style={{ fontSize: 'clamp(1.7rem, 5vw, 3.8rem)', animation: 'fadeUp .6s ease .1s both' }}
           >
-            Sua ideia,{' '}
-            <br className="hidden sm:block" />
-            na pressa com{' '}
-            <br className="hidden sm:block" />
-            <span
-              style={{
-                background: 'linear-gradient(100deg, #00E5FF, #4D9FFF, #8B5CF6)',
+            {/* Mobile */}
+            <span className="sm:hidden">
+              Impressão 3D{' '}
+              <span style={{
+                background: 'linear-gradient(100deg, rgb(var(--c-accent-cyan)), rgb(var(--c-accent-blue)), rgb(var(--c-accent-purple)))',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-              }}
-            >
-              precisão total
+              }}>sob medida.</span>
+            </span>
+            {/* Desktop */}
+            <span className="hidden sm:inline">
+              Seu projeto em 3D,{' '}
+              <br />
+              orçamento em 24h{' '}
+              <br />
+              <span style={{
+                background: 'linear-gradient(100deg, rgb(var(--c-accent-cyan)), rgb(var(--c-accent-blue)), rgb(var(--c-accent-purple)))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>e entrega no prazo.</span>
             </span>
           </h1>
 
@@ -317,16 +326,17 @@ export default function Home() {
             className="text-text-secondary mb-8 max-w-[480px] text-lg leading-relaxed"
             style={{ animation: 'fadeUp .6s ease .2s both' }}
           >
-            Envie seu arquivo, acompanhe em tempo real e receba em até 24h.
+            Envie seu arquivo, acompanhe em tempo real e receba no prazo combinado.
           </p>
 
           <div
-            className="flex gap-3"
+            className="flex gap-3 w-fit"
             style={{ animation: 'fadeUp .6s ease .3s both' }}
           >
             <Link
               to="/quote"
-              className="rounded-full bg-accent-blue px-5 py-2.5 text-sm font-semibold text-background transition-all hover:-translate-y-0.5 hover:shadow-glow whitespace-nowrap"
+              className="rounded-full px-5 py-2.5 text-sm font-semibold text-white whitespace-nowrap transition-all hover:-translate-y-0.5 hover:shadow-glow"
+              style={{ background: 'linear-gradient(135deg, rgb(var(--c-accent-cyan)), rgb(var(--c-accent-blue)) 50%, rgb(var(--c-accent-purple)))' }}
             >
               Pedir Orçamento
             </Link>
@@ -339,11 +349,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Desktop — canvas cubo partículas */}
+        {/* Canvas cubo partículas */}
         <div
           ref={wrapRef}
-          className="hidden lg:relative lg:flex lg:flex-none lg:ml-10 lg:h-[480px]"
-          style={{ flex: '0 0 480px' }}
+          className="relative w-full h-[240px] lg:mt-0 lg:flex-none lg:ml-10 lg:h-[480px] lg:w-[480px]"
         >
           <canvas
             ref={canvasRef}
@@ -354,14 +363,14 @@ export default function Home() {
 
       {/* ─── PORTFÓLIO PREVIEW ─── */}
       {(portfolioLoading || portfolioItems.length > 0) && (
-        <section style={{ padding: 'clamp(48px, 8vw, 100px) 0', background: 'rgba(10,10,20,0.6)' }}>
+        <section style={{ padding: 'clamp(48px, 8vw, 100px) 0', background: 'rgb(var(--c-background) / 0.6)' }}>
           <Reveal style={{ padding: '0 5%' }} className="mb-10">
             <div className="flex items-center justify-between">
               <div>
-                <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#06b6d4', marginBottom: 6 }}>
+                <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgb(var(--c-accent-teal))', marginBottom: 6 }}>
                   Portfólio
                 </p>
-                <h2 className="font-heading text-2xl lg:text-3xl font-bold text-text-primary">
+                <h2 className="hidden sm:block font-heading text-2xl lg:text-3xl font-bold text-text-primary">
                   Trabalhos recentes
                 </h2>
               </div>
@@ -384,7 +393,7 @@ export default function Home() {
       )}
 
       {/* ─── COMO FUNCIONA ─── */}
-      <section id="como-funciona" className="bg-surface" style={{ padding: '100px 5%' }}>
+      <section id="como-funciona" className="bg-surface" style={{ padding: 'clamp(40px, 8vw, 100px) 5%' }}>
         <Reveal>
           <p className="text-accent-blue text-xs font-semibold uppercase tracking-[0.15em] mb-3">
             Processo
@@ -409,14 +418,14 @@ export default function Home() {
               >
                 <span
                   className="absolute top-2 right-4 font-heading font-black select-none pointer-events-none"
-                  style={{ fontSize: '5rem', lineHeight: 1, color: 'rgba(77,159,255,0.07)' }}
+                  style={{ fontSize: '5rem', lineHeight: 1, color: 'rgb(var(--c-accent-blue) / 0.07)' }}
                 >
                   {number}
                 </span>
 
                 <div
                   className="mb-4 flex h-11 w-11 items-center justify-center rounded-md border border-accent-blue/20 text-xl"
-                  style={{ background: 'rgba(0,229,255,.08)' }}
+                  style={{ background: 'rgb(var(--c-accent-cyan) / .08)' }}
                 >
                   {icon}
                 </div>
@@ -441,7 +450,7 @@ export default function Home() {
             top: '50%', left: '50%',
             transform: 'translate(-50%,-50%)',
             width: 600, height: 600,
-            background: 'radial-gradient(circle, rgba(77,159,255,.12) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgb(var(--c-accent-blue) / .12) 0%, transparent 70%)',
             pointerEvents: 'none',
             animation: 'orbFloat 8s ease-in-out infinite',
           }}
@@ -450,7 +459,7 @@ export default function Home() {
         <Reveal className="relative z-10 mx-auto max-w-2xl">
           <div
             className="text-center rounded-2xl border border-accent-blue/20 px-6 py-10 lg:p-12"
-            style={{ background: 'rgba(77,159,255,.04)' }}
+            style={{ background: 'rgb(var(--c-accent-blue) / .04)' }}
           >
             <h2
               className="font-black text-text-primary mb-4"
@@ -464,7 +473,8 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 to="/quote"
-                className="rounded-full bg-accent-blue px-6 py-3 font-semibold text-background transition-all hover:-translate-y-0.5 hover:shadow-glow"
+                className="rounded-full px-6 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-glow"
+                style={{ background: 'linear-gradient(135deg, rgb(var(--c-accent-cyan)), rgb(var(--c-accent-blue)) 50%, rgb(var(--c-accent-purple)))' }}
               >
                 Pedir Orçamento
               </Link>

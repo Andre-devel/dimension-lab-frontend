@@ -32,7 +32,7 @@ export function PortfolioCard({ item, view, animationDelay = 0 }: Props) {
             </div>
           </>
         ) : (
-          <div className="flex h-full items-center justify-center flex-col gap-2" style={{ color: '#3d4f5f' }}>
+          <div className="flex h-full items-center justify-center flex-col gap-2" style={{ color: 'rgb(var(--c-text-muted))' }}>
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
               <rect x="3" y="3" width="18" height="18" rx="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
@@ -45,7 +45,7 @@ export function PortfolioCard({ item, view, animationDelay = 0 }: Props) {
 
       {/* Body */}
       <div style={{ padding: view === 'list' ? '16px 20px' : '14px 16px 16px', flex: 1 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600, color: '#e8edf3', marginBottom: 10, lineHeight: 1.3 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 600, color: 'rgb(var(--c-text-bright))', marginBottom: 10, lineHeight: 1.3 }}>
           {item.title}
         </h3>
 
@@ -62,16 +62,16 @@ export function PortfolioCard({ item, view, animationDelay = 0 }: Props) {
 
 function Tag({ children, color }: { children: React.ReactNode; color?: 'cyan' | 'amber' | 'blue' }) {
   const styles: Record<string, React.CSSProperties> = {
-    cyan:  { background: 'rgba(6,182,212,.08)',  borderColor: 'rgba(6,182,212,.15)',  color: '#22d3ee' },
-    amber: { background: 'rgba(251,191,36,.08)', borderColor: 'rgba(251,191,36,.15)', color: '#fbbf24' },
-    blue:  { background: 'rgba(96,165,250,.08)', borderColor: 'rgba(96,165,250,.15)', color: '#60a5fa' },
+    cyan:  { background: 'rgb(var(--c-accent-teal) / .08)',  borderColor: 'rgb(var(--c-accent-teal) / .15)',  color: 'rgb(var(--c-accent-teal))' },
+    amber: { background: 'rgb(var(--c-accent-amber) / .08)', borderColor: 'rgb(var(--c-accent-amber) / .15)', color: 'rgb(var(--c-accent-amber))' },
+    blue:  { background: 'rgb(var(--c-accent-blue) / .08)', borderColor: 'rgb(var(--c-accent-blue) / .15)', color: 'rgb(var(--c-accent-blue))' },
   }
   const base: React.CSSProperties = {
     fontSize: 11, fontWeight: 500, letterSpacing: '.3px',
     padding: '3px 9px', borderRadius: 50,
-    border: '1px solid rgba(56,189,248,.08)',
+    border: '1px solid rgb(var(--c-accent-teal) / .08)',
     background: 'rgba(255,255,255,.04)',
-    color: '#556677',
+    color: 'rgb(var(--c-text-secondary))',
     textTransform: 'uppercase',
     ...(color ? styles[color] : {}),
   }

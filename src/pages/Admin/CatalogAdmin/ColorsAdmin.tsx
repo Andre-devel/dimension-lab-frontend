@@ -106,7 +106,7 @@ export default function ColorsAdmin() {
               width: 40,
               height: 40,
               borderRadius: 8,
-              border: '2px solid rgba(56,189,248,.2)',
+              border: '2px solid rgb(var(--c-accent-teal) / .2)',
               background: newHex,
               cursor: 'pointer',
               flexShrink: 0,
@@ -138,7 +138,7 @@ export default function ColorsAdmin() {
             style={{
               fontFamily: 'JetBrains Mono, monospace',
               fontSize: 12,
-              color: '#8899aa',
+              color: 'rgb(var(--c-text-secondary))',
               minWidth: 64,
               userSelect: 'all',
             }}
@@ -184,7 +184,7 @@ export default function ColorsAdmin() {
                         width: 32,
                         height: 32,
                         borderRadius: 6,
-                        border: '2px solid rgba(56,189,248,.3)',
+                        border: '2px solid rgb(var(--c-accent-teal) / .3)',
                         background: editingHex,
                         cursor: 'pointer',
                         flexShrink: 0,
@@ -253,7 +253,7 @@ export default function ColorsAdmin() {
                         style={{
                           fontFamily: 'JetBrains Mono, monospace',
                           fontSize: 11,
-                          color: '#556677',
+                          color: 'rgb(var(--c-text-secondary))',
                         }}
                       >
                         {color.hex.toUpperCase()}

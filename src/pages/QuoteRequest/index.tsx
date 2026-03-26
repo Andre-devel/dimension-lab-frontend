@@ -76,17 +76,17 @@ const ACCEPT = '.jpg,.jpeg,.png,.mp4,.stl,.obj'
 const WHATSAPP_URL = import.meta.env.VITE_WHATSAPP_URL as string | undefined
 
 const benefits = [
-  { Icon: Clock,  color: '#22d3ee', bg: 'rgba(34,211,238,.1)',  label: 'Resposta em 24h',       desc: 'Orçamento rápido e detalhado' },
-  { Icon: Layers, color: '#fbbf24', bg: 'rgba(251,191,36,.1)',  label: 'Orçamento gratuito',     desc: 'Sem custo para solicitar' },
-  { Icon: Box,    color: '#60a5fa', bg: 'rgba(96,165,250,.1)',  label: 'Modelagem inclusa',      desc: 'Ajudamos com o arquivo 3D' },
-  { Icon: Truck,  color: '#34d399', bg: 'rgba(52,211,153,.1)',  label: 'Envio nacional',         desc: 'Entregamos em qualquer estado' },
+  { Icon: Clock,  color: 'rgb(var(--c-accent-teal))', bg: 'rgb(var(--c-accent-teal) / .1)',  label: 'Resposta em 24h',       desc: 'Orçamento rápido e detalhado' },
+  { Icon: Layers, color: 'rgb(var(--c-accent-amber))', bg: 'rgb(var(--c-accent-amber) / .1)',  label: 'Orçamento gratuito',     desc: 'Sem custo para solicitar' },
+  { Icon: Box,    color: 'rgb(var(--c-accent-blue))', bg: 'rgb(var(--c-accent-blue) / .1)',  label: 'Modelagem inclusa',      desc: 'Ajudamos com o arquivo 3D' },
+  { Icon: Truck,  color: 'rgb(var(--c-accent-green))', bg: 'rgb(var(--c-accent-green) / .1)',  label: 'Envio nacional',         desc: 'Entregamos em qualquer estado' },
 ]
 
 const checklist = [
-  { color: '#22d3ee', bg: 'rgba(34,211,238,.1)', strong: 'Envie seu projeto',       desc: 'Preencha o formulário com os detalhes' },
-  { color: '#fbbf24', bg: 'rgba(251,191,36,.1)', strong: 'Análise em até 24h',      desc: 'Avaliamos viabilidade e custo' },
-  { color: '#60a5fa', bg: 'rgba(96,165,250,.1)', strong: 'Receba o orçamento',      desc: 'Valor detalhado via WhatsApp' },
-  { color: '#34d399', bg: 'rgba(52,211,153,.1)', strong: 'Aprovação e produção',    desc: 'Início imediato após confirmação' },
+  { color: 'rgb(var(--c-accent-teal))', bg: 'rgb(var(--c-accent-teal) / .1)', strong: 'Envie seu projeto',       desc: 'Preencha o formulário com os detalhes' },
+  { color: 'rgb(var(--c-accent-amber))', bg: 'rgb(var(--c-accent-amber) / .1)', strong: 'Análise em até 24h',      desc: 'Avaliamos viabilidade e custo' },
+  { color: 'rgb(var(--c-accent-blue))', bg: 'rgb(var(--c-accent-blue) / .1)', strong: 'Receba o orçamento',      desc: 'Valor detalhado via WhatsApp' },
+  { color: 'rgb(var(--c-accent-green))', bg: 'rgb(var(--c-accent-green) / .1)', strong: 'Aprovação e produção',    desc: 'Início imediato após confirmação' },
 ]
 
 function initials(name?: string | null, email?: string | null) {
@@ -99,7 +99,7 @@ function FieldLabel({ htmlFor, children }: { htmlFor?: string; children: React.R
   return (
     <label
       htmlFor={htmlFor}
-      style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#8899aa', marginBottom: 6, letterSpacing: '.3px' }}
+      style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'rgb(var(--c-text-secondary))', marginBottom: 6, letterSpacing: '.3px' }}
     >
       {children}
     </label>
@@ -109,10 +109,10 @@ function FieldLabel({ htmlFor, children }: { htmlFor?: string; children: React.R
 function StepLabel({ step, title }: { step: string; title: string }) {
   return (
     <>
-      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: '#556677', marginBottom: 4 }}>
+      <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: 'rgb(var(--c-text-secondary))', marginBottom: 4 }}>
         {step}
       </p>
-      <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#e8edf3', marginBottom: '1.25rem' }}>
+      <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'rgb(var(--c-text-bright))', marginBottom: '1.25rem' }}>
         {title}
       </h2>
     </>
@@ -121,10 +121,10 @@ function StepLabel({ step, title }: { step: string; title: string }) {
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  background: '#0d1520',
-  border: '1px solid rgba(56,189,248,.08)',
+  background: 'rgb(var(--c-surface))',
+  border: '1px solid rgb(var(--c-accent-teal) / .08)',
   borderRadius: 10,
-  color: '#e8edf3',
+  color: 'rgb(var(--c-text-bright))',
   fontSize: 14,
   padding: '11px 14px',
   outline: 'none',
@@ -141,8 +141,8 @@ const QInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTML
         {...rest}
         style={{
           ...inputStyle,
-          borderColor: hasError ? '#fb7185' : focused ? '#06b6d4' : 'rgba(56,189,248,.08)',
-          boxShadow: focused ? '0 0 0 3px rgba(6,182,212,.1)' : 'none',
+          borderColor: hasError ? 'rgb(var(--c-error))' : focused ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-accent-teal) / .08)',
+          boxShadow: focused ? '0 0 0 3px rgb(var(--c-accent-teal) / .1)' : 'none',
           ...(rest.type === 'number' ? { MozAppearance: 'textfield' } : {}),
         }}
         className={rest.type === 'number' ? '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none' : rest.className}
@@ -163,8 +163,8 @@ function QTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { 
         ...inputStyle,
         resize: 'vertical',
         minHeight: 90,
-        borderColor: hasError ? '#fb7185' : focused ? '#06b6d4' : 'rgba(56,189,248,.08)',
-        boxShadow: focused ? '0 0 0 3px rgba(6,182,212,.1)' : 'none',
+        borderColor: hasError ? 'rgb(var(--c-error))' : focused ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-accent-teal) / .08)',
+        boxShadow: focused ? '0 0 0 3px rgb(var(--c-accent-teal) / .1)' : 'none',
       }}
       onFocus={e => { setFocused(true); rest.onFocus?.(e) }}
       onBlur={e => { setFocused(false); rest.onBlur?.(e) }}
@@ -177,8 +177,8 @@ function SegmentedControl({ options, value, onChange }: { options: string[]; val
   return (
     <div style={{
       display: 'flex',
-      background: '#0a0f1a',
-      border: '1px solid rgba(56,189,248,.1)',
+      background: 'rgb(var(--c-surface))',
+      border: '1px solid rgb(var(--c-accent-teal) / .1)',
       borderRadius: 10,
       padding: 3,
       gap: 2,
@@ -193,8 +193,8 @@ function SegmentedControl({ options, value, onChange }: { options: string[]; val
             padding: '8px 12px',
             borderRadius: 7,
             border: 'none',
-            background: value === opt ? '#06b6d4' : 'transparent',
-            color: value === opt ? '#fff' : '#8899aa',
+            background: value === opt ? 'rgb(var(--c-accent-teal))' : 'transparent',
+            color: value === opt ? '#fff' : 'rgb(var(--c-text-secondary))',
             fontSize: 13,
             fontWeight: value === opt ? 600 : 500,
             cursor: 'pointer',
@@ -222,9 +222,9 @@ function ColorSwatch({ name, hex, selected, onClick }: { name: string; hex: stri
         style={{
           display: 'flex', alignItems: 'center', gap: 6,
           padding: '6px 12px', borderRadius: 20,
-          border: selected ? '2px solid #06b6d4' : '2px solid rgba(56,189,248,.08)',
-          background: selected ? 'rgba(6,182,212,.1)' : '#0d1520',
-          color: selected ? '#22d3ee' : '#8899aa',
+          border: selected ? '2px solid rgb(var(--c-accent-teal))' : '2px solid rgb(var(--c-accent-teal) / .08)',
+          background: selected ? 'rgb(var(--c-accent-teal) / .1)' : 'rgb(var(--c-surface))',
+          color: selected ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
           cursor: 'pointer', fontSize: 13, fontWeight: 500,
           transition: 'all .18s',
         }}
@@ -245,7 +245,7 @@ function ColorSwatch({ name, hex, selected, onClick }: { name: string; hex: stri
         `,
         backgroundSize: '8px 8px',
         backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px',
-        backgroundColor: '#888',
+        backgroundColor: 'rgb(var(--c-text-secondary))',
       }
     : { background: hex }
 
@@ -257,10 +257,10 @@ function ColorSwatch({ name, hex, selected, onClick }: { name: string; hex: stri
       style={{
         width: 32, height: 32, borderRadius: '50%',
         ...checkerboard,
-        border: selected ? `3px solid ${hex}` : '2px solid rgba(255,255,255,.12)',
+        border: selected ? `3px solid ${hex}` : '2px solid rgb(var(--c-white) / .12)',
         cursor: 'pointer',
         transition: 'box-shadow .18s, border-color .18s',
-        boxShadow: selected ? `0 0 0 2px #0c1219, 0 0 0 4px ${hex}` : 'none',
+        boxShadow: selected ? `0 0 0 2px rgb(var(--c-surface)), 0 0 0 4px ${hex}` : 'none',
         outline: 'none',
         flexShrink: 0,
       }}
@@ -423,13 +423,13 @@ export default function QuoteRequest() {
 
         {/* ── Page header ── */}
         <div className="text-center" style={{ marginBottom: '2.5rem' }}>
-          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#06b6d4', marginBottom: 8 }}>
+          <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgb(var(--c-accent-teal))', marginBottom: 8 }}>
             Orçamento
           </p>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-.5px', color: '#e8edf3', marginBottom: 8 }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-.5px', color: 'rgb(var(--c-text-bright))', marginBottom: 8 }}>
             Solicitar Orçamento
           </h1>
-          <p style={{ fontSize: 14, color: '#8899aa', maxWidth: 440, margin: '0 auto' }}>
+          <p style={{ fontSize: 14, color: 'rgb(var(--c-text-secondary))', maxWidth: 440, margin: '0 auto' }}>
             Preencha os detalhes do seu projeto e receba um orçamento personalizado em até 24 horas.
           </p>
         </div>
@@ -443,14 +443,14 @@ export default function QuoteRequest() {
             <div
               key={label}
               className="flex items-center gap-3 transition-all duration-200 hover:-translate-y-0.5"
-              style={{ background: '#0c1219', border: '1px solid rgba(56,189,248,.08)', borderRadius: 10, padding: '14px 16px' }}
+              style={{ background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)', borderRadius: 10, padding: '14px 16px' }}
             >
               <div style={{ width: 34, height: 34, borderRadius: 6, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Icon size={18} color={color} />
               </div>
               <div>
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#e8edf3', lineHeight: 1.3 }}>{label}</p>
-                <p className="hidden sm:block" style={{ fontSize: 11, color: '#556677', lineHeight: 1.3, marginTop: 2 }}>{desc}</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'rgb(var(--c-text-bright))', lineHeight: 1.3 }}>{label}</p>
+                <p className="hidden sm:block" style={{ fontSize: 11, color: 'rgb(var(--c-text-secondary))', lineHeight: 1.3, marginTop: 2 }}>{desc}</p>
               </div>
             </div>
           ))}
@@ -463,15 +463,15 @@ export default function QuoteRequest() {
           <div
             className="p-5 sm:p-8"
             style={{
-              background: '#0c1219',
-              border: '1px solid rgba(56,189,248,.08)',
+              background: 'rgb(var(--c-surface))',
+              border: '1px solid rgb(var(--c-accent-teal) / .08)',
               borderRadius: 20,
               position: 'relative',
               overflow: 'hidden',
             }}
           >
             {/* top gradient line */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, #06b6d4, #3b82f6, transparent)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, rgb(var(--c-accent-teal)), rgb(var(--c-accent-glow)), transparent)' }} />
 
             <form onSubmit={handleSubmit(onSubmit, (errs) => {
               const fields = Object.keys(errs)
@@ -484,7 +484,7 @@ export default function QuoteRequest() {
                 <StepLabel step="Etapa 01 — Projeto" title="Detalhes do projeto" />
 
                 {/* Description + Files (ao menos um obrigatório) */}
-                <div className={sc('_project')} style={{ marginBottom: '1rem', background: 'rgba(56,189,248,.03)', border: '1px solid rgba(56,189,248,.07)', borderRadius: 12, padding: '1rem' }}>
+                <div className={sc('_project')} style={{ marginBottom: '1rem', background: 'rgb(var(--c-accent-teal) / .03)', border: '1px solid rgb(var(--c-accent-teal) / .07)', borderRadius: 12, padding: '1rem' }}>
                   <div style={{ marginBottom: '0.75rem' }}>
                     <FieldLabel htmlFor="description">Descrição do projeto</FieldLabel>
                     <Controller
@@ -504,9 +504,9 @@ export default function QuoteRequest() {
 
                   {/* OR divider */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.75rem 0' }}>
-                    <div style={{ flex: 1, height: 1, background: 'rgba(56,189,248,.1)' }} />
-                    <span style={{ fontSize: 11, color: '#556677', fontFamily: 'JetBrains Mono, monospace', letterSpacing: 1 }}>OU</span>
-                    <div style={{ flex: 1, height: 1, background: 'rgba(56,189,248,.1)' }} />
+                    <div style={{ flex: 1, height: 1, background: 'rgb(var(--c-accent-teal) / .1)' }} />
+                    <span style={{ fontSize: 11, color: 'rgb(var(--c-text-secondary))', fontFamily: 'JetBrains Mono, monospace', letterSpacing: 1 }}>OU</span>
+                    <div style={{ flex: 1, height: 1, background: 'rgb(var(--c-accent-teal) / .1)' }} />
                   </div>
 
                   {portfolioRef ? (
@@ -514,8 +514,8 @@ export default function QuoteRequest() {
                       <FieldLabel>Referência do portfólio</FieldLabel>
                       <div style={{
                         display: 'flex', alignItems: 'center', gap: 14,
-                        background: 'rgba(6,182,212,.06)',
-                        border: '1px solid rgba(6,182,212,.2)',
+                        background: 'rgb(var(--c-accent-teal) / .06)',
+                        border: '1px solid rgb(var(--c-accent-teal) / .2)',
                         borderRadius: 10, padding: '12px 14px',
                       }}>
                         {portfolioRef.photo && (
@@ -526,14 +526,14 @@ export default function QuoteRequest() {
                           />
                         )}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: 13, fontWeight: 600, color: '#e8edf3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: 'rgb(var(--c-text-bright))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {portfolioRef.title}
                           </p>
-                          <p style={{ fontSize: 12, color: '#06b6d4', marginTop: 2 }}>{portfolioRef.material}</p>
+                          <p style={{ fontSize: 12, color: 'rgb(var(--c-accent-teal))', marginTop: 2 }}>{portfolioRef.material}</p>
                         </div>
                         <Link
                           to={`/portfolio/${portfolioRef.id}`}
-                          style={{ fontSize: 11, color: '#8899aa', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
+                          style={{ fontSize: 11, color: 'rgb(var(--c-text-secondary))', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
                         >
                           Ver item →
                         </Link>
@@ -547,7 +547,7 @@ export default function QuoteRequest() {
                   )}
 
                   {projectError && (
-                    <p style={{ fontSize: 12, color: '#fb7185', marginTop: 8 }}>{projectError}</p>
+                    <p style={{ fontSize: 12, color: 'rgb(var(--c-error))', marginTop: 8 }}>{projectError}</p>
                   )}
                 </div>
 
@@ -565,7 +565,7 @@ export default function QuoteRequest() {
                       />
                     )}
                   />
-                  {errors.material && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.material.message}</p>}
+                  {errors.material && <p style={{ fontSize: 12, color: 'rgb(var(--c-error))', marginTop: 4 }}>{errors.material.message}</p>}
                 </div>
 
                 {/* Color swatches */}
@@ -588,13 +588,13 @@ export default function QuoteRequest() {
                       </div>
                     )}
                   />
-                  {errors.color && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.color.message}</p>}
+                  {errors.color && <p style={{ fontSize: 12, color: 'rgb(var(--c-error))', marginTop: 4 }}>{errors.color.message}</p>}
                 </div>
 
                 {/* Quantity + Deadline */}
                 <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
                   <div className={sc('quantity')} style={{ flex: '0 0 120px' }}>
-                    <FieldLabel htmlFor="quantity">Quantidade <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
+                    <FieldLabel htmlFor="quantity">Quantidade <span style={{ color: 'rgb(var(--c-accent-teal))' }}>*</span></FieldLabel>
                     <Controller
                       control={control}
                       name="quantity"
@@ -613,7 +613,7 @@ export default function QuoteRequest() {
                         />
                       )}
                     />
-                    {errors.quantity && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.quantity.message}</p>}
+                    {errors.quantity && <p style={{ fontSize: 12, color: 'rgb(var(--c-error))', marginTop: 4 }}>{errors.quantity.message}</p>}
                   </div>
                   <div className={sc('desiredDeadline')} style={{ flex: 1, minWidth: 240 }}>
                     <FieldLabel htmlFor="desiredDeadline">Prazo desejado</FieldLabel>
@@ -637,7 +637,7 @@ export default function QuoteRequest() {
               </div>
 
               {/* Divider */}
-              <div style={{ margin: '2.25rem 0', height: 1, background: 'linear-gradient(90deg, transparent, rgba(56,189,248,.3), transparent)' }} />
+              <div style={{ margin: '2.25rem 0', height: 1, background: 'linear-gradient(90deg, transparent, rgb(var(--c-accent-teal) / .3), transparent)' }} />
 
               {/* ── Section 2: Contact ── */}
               <div style={{ marginBottom: '1.5rem' }}>
@@ -646,23 +646,23 @@ export default function QuoteRequest() {
                 {isAuthenticated ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {/* User card */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#111a24', border: '1px solid rgba(56,189,248,.08)', borderRadius: 10, padding: '12px 16px' }}>
-                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg, #0891b2, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, color: '#fff', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)', borderRadius: 10, padding: '12px 16px' }}>
+                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg, rgb(var(--c-accent-teal)), rgb(var(--c-accent-glow)))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, color: 'rgb(var(--c-white))', flexShrink: 0 }}>
                         {initials(user?.name, user?.email)}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: '#e8edf3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name ?? user?.email}</p>
-                        <p style={{ fontSize: 12, color: '#8899aa', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
-                        {user?.phone && <p style={{ fontSize: 12, color: '#22d3ee', marginTop: 1 }}>{user.phone}</p>}
+                        <p style={{ fontSize: 14, fontWeight: 600, color: 'rgb(var(--c-text-bright))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name ?? user?.email}</p>
+                        <p style={{ fontSize: 12, color: 'rgb(var(--c-text-secondary))', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
+                        {user?.phone && <p style={{ fontSize: 12, color: 'rgb(var(--c-accent-teal))', marginTop: 1 }}>{user.phone}</p>}
                       </div>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#34d399', background: 'rgba(16,185,129,.1)', padding: '4px 10px', borderRadius: 6, letterSpacing: '.3px', flexShrink: 0 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: 'rgb(var(--c-accent-green))', background: 'rgb(var(--c-accent-green) / .1)', padding: '4px 10px', borderRadius: 6, letterSpacing: '.3px', flexShrink: 0 }}>
                         Logado
                       </span>
                     </div>
 
                     {!user?.phone && (
                       <div className={sc('customerPhone')}>
-                        <FieldLabel htmlFor="customerPhone">Telefone (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
+                        <FieldLabel htmlFor="customerPhone">Telefone (com DDD) <span style={{ color: 'rgb(var(--c-accent-teal))' }}>*</span></FieldLabel>
                         <Controller
                           control={control}
                           name="customerPhone"
@@ -678,7 +678,7 @@ export default function QuoteRequest() {
                             />
                           )}
                         />
-                        {errors.customerPhone && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerPhone.message}</p>}
+                        {errors.customerPhone && <p style={{ fontSize: 12, color: 'rgb(var(--c-error))', marginTop: 4 }}>{errors.customerPhone.message}</p>}
                       </div>
                     )}
                   </div>
@@ -694,12 +694,12 @@ export default function QuoteRequest() {
                         hasError={!!errors.customerName}
                         {...register('customerName')}
                       />
-                      {errors.customerName && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerName.message}</p>}
+                      {errors.customerName && <p style={{ fontSize: 12, color: 'rgb(var(--c-error))', marginTop: 4 }}>{errors.customerName.message}</p>}
                     </div>
                     {/* Telefone + Email — lado a lado */}
                     <div style={{ display: 'flex', gap: 12 }}>
                       <div className={sc('customerPhone')} style={{ flex: 1 }}>
-                        <FieldLabel htmlFor="customerPhone">Telefone (com DDD) <span style={{ color: '#06b6d4' }}>*</span></FieldLabel>
+                        <FieldLabel htmlFor="customerPhone">Telefone (com DDD) <span style={{ color: 'rgb(var(--c-accent-teal))' }}>*</span></FieldLabel>
                         <Controller
                           control={control}
                           name="customerPhone"
@@ -715,7 +715,7 @@ export default function QuoteRequest() {
                             />
                           )}
                         />
-                        {errors.customerPhone && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerPhone.message}</p>}
+                        {errors.customerPhone && <p style={{ fontSize: 12, color: 'rgb(var(--c-error))', marginTop: 4 }}>{errors.customerPhone.message}</p>}
                       </div>
                       <div className={sc('customerEmail')} style={{ flex: 1 }}>
                         <FieldLabel htmlFor="customerEmail">E-mail</FieldLabel>
@@ -726,14 +726,14 @@ export default function QuoteRequest() {
                           hasError={!!errors.customerEmail}
                           {...register('customerEmail')}
                         />
-                        {errors.customerEmail && <p style={{ fontSize: 12, color: '#fb7185', marginTop: 4 }}>{errors.customerEmail.message}</p>}
+                        {errors.customerEmail && <p style={{ fontSize: 12, color: 'rgb(var(--c-error))', marginTop: 4 }}>{errors.customerEmail.message}</p>}
                       </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {submitError && <p style={{ fontSize: 13, color: '#fb7185', marginBottom: 12 }}>{submitError}</p>}
+              {submitError && <p style={{ fontSize: 13, color: 'rgb(var(--c-error))', marginBottom: 12 }}>{submitError}</p>}
 
               {/* Submit */}
               <button
@@ -741,27 +741,27 @@ export default function QuoteRequest() {
                 disabled={isSubmitting}
                 style={{
                   width: '100%', padding: '14px', border: 'none', borderRadius: 10,
-                  fontFamily: 'inherit', fontSize: 15, fontWeight: 600, color: '#fff',
+                  fontFamily: 'inherit', fontSize: 15, fontWeight: 600, color: 'rgb(var(--c-white))',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer', letterSpacing: '.3px',
-                  background: 'linear-gradient(135deg, #0891b2, #3b82f6)',
+                  background: 'linear-gradient(135deg, rgb(var(--c-accent-teal)), rgb(var(--c-accent-glow)))',
                   opacity: isSubmitting ? 0.7 : 1,
                   transition: 'all .3s',
                   position: 'relative', overflow: 'hidden',
                 }}
-                onMouseEnter={e => { if (!isSubmitting) { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 30px rgba(6,182,212,.25)' } }}
+                onMouseEnter={e => { if (!isSubmitting) { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 30px rgb(var(--c-accent-teal) / .25)' } }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ''; (e.currentTarget as HTMLButtonElement).style.boxShadow = '' }}
               >
                 {isSubmitting ? (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
+                    <span style={{ width: 16, height: 16, border: '2px solid rgb(var(--c-white) / .3)', borderTopColor: 'rgb(var(--c-white))', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
                     Enviando...
                   </span>
                 ) : 'Enviar orçamento'}
               </button>
 
               {/* Status */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, fontSize: 12, color: '#556677' }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', animation: 'q-pulse 2s ease infinite', display: 'inline-block' }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, fontSize: 12, color: 'rgb(var(--c-text-secondary))' }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(var(--c-accent-green))', animation: 'q-pulse 2s ease infinite', display: 'inline-block' }} />
                 Aceitando novos pedidos
               </div>
 
@@ -772,25 +772,25 @@ export default function QuoteRequest() {
           <aside className="lg:sticky" style={{ top: 80 }}>
 
             {/* Checklist card */}
-            <div style={{ background: '#0c1219', border: '1px solid rgba(56,189,248,.08)', borderRadius: 20, padding: '1.75rem', marginBottom: '1rem' }}>
-              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: '#06b6d4', marginBottom: 4 }}>
+            <div style={{ background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)', borderRadius: 20, padding: '1.75rem', marginBottom: '1rem' }}>
+              <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: 'rgb(var(--c-accent-teal))', marginBottom: 4 }}>
                 Como funciona
               </p>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e8edf3', marginBottom: '.75rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'rgb(var(--c-text-bright))', marginBottom: '.75rem' }}>
                 Próximos passos
               </h3>
-              <p style={{ fontSize: 13, color: '#8899aa', lineHeight: 1.65, marginBottom: '1.25rem' }}>
+              <p style={{ fontSize: 13, color: 'rgb(var(--c-text-secondary))', lineHeight: 1.65, marginBottom: '1.25rem' }}>
                 Após enviar seu orçamento, nossa equipe analisa os detalhes e retorna com valor, prazo e opções de acabamento.
               </p>
 
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {checklist.map(({ color, bg, strong, desc }) => (
-                  <li key={strong} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#8899aa', lineHeight: 1.5 }}>
+                  <li key={strong} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: 'rgb(var(--c-text-secondary))', lineHeight: 1.5 }}>
                     <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, marginTop: 1, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round"><path d="M5 13l4 4L19 7" /></svg>
                     </div>
                     <div>
-                      <span style={{ color: '#e8edf3', fontWeight: 600 }}>{strong}</span>
+                      <span style={{ color: 'rgb(var(--c-text-bright))', fontWeight: 600 }}>{strong}</span>
                       <br />{desc}
                     </div>
                   </li>
@@ -804,18 +804,18 @@ export default function QuoteRequest() {
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12, background: '#0c1219', border: '1px solid rgba(56,189,248,.08)', borderRadius: 20, padding: '1.25rem 1.5rem', transition: 'all .25s' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(56,189,248,.2)'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(56,189,248,.08)'; (e.currentTarget as HTMLAnchorElement).style.transform = '' }}
+                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12, background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)', borderRadius: 20, padding: '1.25rem 1.5rem', transition: 'all .25s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgb(var(--c-accent-teal) / .2)'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgb(var(--c-accent-teal) / .08)'; (e.currentTarget as HTMLAnchorElement).style.transform = '' }}
               >
-                <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: 'rgba(34,211,238,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22d3ee' }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: 'rgb(var(--c-accent-teal) / .08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgb(var(--c-accent-teal))' }}>
                   <MessageCircle size={18} />
                 </div>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#e8edf3' }}>Precisa de ajuda?</p>
-                  <p style={{ fontSize: 12, color: '#556677' }}>Fale conosco pelo WhatsApp</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'rgb(var(--c-text-bright))' }}>Precisa de ajuda?</p>
+                  <p style={{ fontSize: 12, color: 'rgb(var(--c-text-secondary))' }}>Fale conosco pelo WhatsApp</p>
                 </div>
-                <span style={{ marginLeft: 'auto', color: '#556677', fontSize: 16 }}>→</span>
+                <span style={{ marginLeft: 'auto', color: 'rgb(var(--c-text-secondary))', fontSize: 16 }}>→</span>
               </a>
             )}
 

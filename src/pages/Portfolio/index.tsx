@@ -76,13 +76,13 @@ export default function Portfolio() {
         <Reveal>
         <div className="flex flex-wrap items-end justify-between gap-6" style={{ marginBottom: '2rem' }}>
           <div style={{ maxWidth: 520 }}>
-            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#06b6d4', marginBottom: 6 }}>
+            <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgb(var(--c-accent-teal))', marginBottom: 6 }}>
               Portfólio
             </p>
-            <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, letterSpacing: '-.5px', color: '#e8edf3', marginBottom: 8 }}>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, letterSpacing: '-.5px', color: 'rgb(var(--c-text-bright))', marginBottom: 8 }}>
               Nossos projetos
             </h1>
-            <p style={{ fontSize: 14, color: '#8899aa', lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: 'rgb(var(--c-text-secondary))', lineHeight: 1.7 }}>
               Conheça alguns dos trabalhos que já realizamos. Cada peça é única, feita sob medida com impressão 3D de alta qualidade.
             </p>
           </div>
@@ -95,8 +95,8 @@ export default function Portfolio() {
                 { num: '24h',                   label: 'Resposta' },
               ].map(({ num, label }) => (
                 <div key={label} className="text-center">
-                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.5rem', fontWeight: 700, color: '#22d3ee' }}>{num}</div>
-                  <div style={{ fontSize: 11, color: '#556677', textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 }}>{label}</div>
+                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.5rem', fontWeight: 700, color: 'rgb(var(--c-accent-teal))' }}>{num}</div>
+                  <div style={{ fontSize: 11, color: 'rgb(var(--c-text-secondary))', textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 }}>{label}</div>
                 </div>
               ))}
             </div>
@@ -120,9 +120,9 @@ export default function Portfolio() {
                       fontSize: 13, fontWeight: 500,
                       padding: '7px 16px',
                       borderRadius: 50,
-                      border: isActive ? '1px solid #06b6d4' : '1px solid rgba(56,189,248,.08)',
-                      background: isActive ? 'rgba(6,182,212,.12)' : 'transparent',
-                      color: isActive ? '#22d3ee' : '#8899aa',
+                      border: isActive ? '1px solid rgb(var(--c-accent-teal))' : '1px solid rgb(var(--c-accent-teal) / .08)',
+                      background: isActive ? 'rgb(var(--c-accent-teal) / .12)' : 'transparent',
+                      color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
                       cursor: 'pointer',
                       transition: 'all .2s',
                       whiteSpace: 'nowrap',
@@ -132,8 +132,8 @@ export default function Portfolio() {
                     {cat}
                     <span style={{
                       fontSize: 11, fontFamily: 'JetBrains Mono, monospace',
-                      background: isActive ? 'rgba(6,182,212,.2)' : 'rgba(255,255,255,.06)',
-                      color: isActive ? '#22d3ee' : '#556677',
+                      background: isActive ? 'rgb(var(--c-accent-teal) / .2)' : 'rgba(255,255,255,.06)',
+                      color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
                       padding: '1px 7px', borderRadius: 50,
                     }}>
                       {count}
@@ -144,17 +144,17 @@ export default function Portfolio() {
             </div>
 
             {/* View toggle */}
-            <div className="hidden md:flex" style={{ gap: 4, background: '#0c1219', border: '1px solid rgba(56,189,248,.08)', borderRadius: 6, padding: 3 }}>
+            <div className="hidden md:flex" style={{ gap: 4, background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)', borderRadius: 6, padding: 3 }}>
               {(['grid', 'list'] as const).map(v => (
                 <button
                   key={v}
                   onClick={() => setView(v)}
                   title={v === 'grid' ? 'Grade' : 'Lista'}
                   style={{
-                    background: view === v ? '#111a24' : 'none',
+                    background: view === v ? 'rgb(var(--c-surface))' : 'none',
                     border: 'none', cursor: 'pointer',
                     padding: '6px 10px', borderRadius: 4,
-                    color: view === v ? '#22d3ee' : '#556677',
+                    color: view === v ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
                     transition: 'all .2s',
                     display: 'flex', alignItems: 'center',
                   }}
@@ -175,11 +175,11 @@ export default function Portfolio() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center" style={{ padding: '4rem 1rem' }}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3d4f5f" strokeWidth="1.5" strokeLinecap="round" style={{ margin: '0 auto 1rem' }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--c-text-muted))" strokeWidth="1.5" strokeLinecap="round" style={{ margin: '0 auto 1rem' }}>
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#e8edf3', marginBottom: 4 }}>Nenhum projeto encontrado</h3>
-            <p style={{ fontSize: 14, color: '#8899aa' }}>Tente selecionar outro filtro.</p>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'rgb(var(--c-text-bright))', marginBottom: 4 }}>Nenhum projeto encontrado</h3>
+            <p style={{ fontSize: 14, color: 'rgb(var(--c-text-secondary))' }}>Tente selecionar outro filtro.</p>
           </div>
         ) : (
           <div className={`${view === 'list' ? 'pf-list flex flex-col gap-3' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'}`}>
@@ -201,16 +201,16 @@ export default function Portfolio() {
               onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
               style={{
                 fontSize: 14, fontWeight: 600,
-                color: '#8899aa',
-                background: '#0c1219',
-                border: '1px solid rgba(56,189,248,.08)',
+                color: 'rgb(var(--c-text-secondary))',
+                background: 'rgb(var(--c-surface))',
+                border: '1px solid rgb(var(--c-accent-teal) / .08)',
                 borderRadius: 50,
                 padding: '12px 36px',
                 cursor: 'pointer',
                 transition: 'all .25s',
               }}
-              onMouseEnter={e => { const b = e.currentTarget; b.style.borderColor = 'rgba(56,189,248,.2)'; b.style.color = '#22d3ee'; b.style.transform = 'translateY(-1px)' }}
-              onMouseLeave={e => { const b = e.currentTarget; b.style.borderColor = 'rgba(56,189,248,.08)'; b.style.color = '#8899aa'; b.style.transform = '' }}
+              onMouseEnter={e => { const b = e.currentTarget; b.style.borderColor = 'rgb(var(--c-accent-teal) / .2)'; b.style.color = 'rgb(var(--c-accent-teal))'; b.style.transform = 'translateY(-1px)' }}
+              onMouseLeave={e => { const b = e.currentTarget; b.style.borderColor = 'rgb(var(--c-accent-teal) / .08)'; b.style.color = 'rgb(var(--c-text-secondary))'; b.style.transform = '' }}
             >
               Ver mais projetos
             </button>

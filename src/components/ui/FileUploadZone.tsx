@@ -82,7 +82,7 @@ export function FileUploadZone({ onFilesChange, accept, error }: Props) {
           <p className="text-sm text-text-secondary">
             Clique para enviar ou arraste arquivos aqui
           </p>
-          <p className="text-xs mt-0.5" style={{ color: '#3d4f5f' }}>STL, OBJ, JPG, PNG, MP4</p>
+          <p className="text-xs mt-0.5" style={{ color: 'rgb(var(--c-text-muted))' }}>STL, OBJ, JPG, PNG, MP4</p>
         </div>
         <input
           ref={inputRef}

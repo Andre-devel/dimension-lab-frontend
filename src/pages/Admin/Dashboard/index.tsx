@@ -66,9 +66,9 @@ export default function AdminDashboard() {
                 key={to}
                 to={to}
                 className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold
-                           text-[#4D9FFF] border border-[#4D9FFF33] bg-[#4D9FFF0D]
-                           hover:bg-[#4D9FFF1A] hover:border-[#4D9FFF66]
-                           hover:shadow-[0_0_12px_rgba(77,159,255,0.2)]
+                           text-[rgb(var(--c-accent-blue))] border border-[rgb(var(--c-accent-blue)/0.2)] bg-[rgb(var(--c-accent-blue)/0.05)]
+                           hover:bg-[rgb(var(--c-accent-blue)/0.1)] hover:border-[rgb(var(--c-accent-blue)/0.4)]
+                           hover:shadow-[0_0_12px_rgb(var(--c-accent-blue) / 0.2)]
                            transition-all duration-200"
               >
                 {label}
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
                 onClick={() => setActiveFilter(active ? null : status)}
                 className="text-left rounded-2xl p-5 transition-all duration-200 group"
                 style={{
-                  background:  'linear-gradient(135deg, #12121A 0%, #0e1520 100%)',
+                  background:  'linear-gradient(135deg, rgb(var(--c-surface)) 0%, rgb(var(--c-surface)) 100%)',
                   border:      `1px solid ${active ? color + '60' : 'rgba(255,255,255,0.06)'}`,
                   boxShadow:   active ? `0 0 20px ${color}22` : 'none',
                 }}
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
 
         {/* ── Glow separator ── */}
         <div className="h-px w-full" style={{
-          background: 'linear-gradient(90deg, transparent, #00dcc8, transparent)',
+          background: 'linear-gradient(90deg, transparent, rgb(var(--c-accent-teal)), transparent)',
           opacity: 0.18,
         }} />
 
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
             className={[
               'rounded-lg px-3 py-1.5 text-xs font-semibold border transition-all duration-150',
               activeFilter === null
-                ? 'bg-[#4D9FFF18] border-[#4D9FFF50] text-[#4D9FFF]'
+                ? 'bg-[rgb(var(--c-accent-blue)/0.09)] border-[rgb(var(--c-accent-blue)/0.31)] text-[rgb(var(--c-accent-blue))]'
                 : 'bg-transparent border-[rgba(255,255,255,0.08)] text-text-secondary hover:text-text-primary hover:border-[rgba(255,255,255,0.18)]',
             ].join(' ')}
           >
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
                 } : {
                   backgroundColor: 'transparent',
                   borderColor:     'rgba(255,255,255,0.08)',
-                  color:           '#7A7A9A',
+                  color:           'rgb(var(--c-text-secondary))',
                 }}
               >
                 {QUOTE_STATUS_LABELS[status]}
@@ -150,19 +150,19 @@ export default function AdminDashboard() {
         {/* ── Content ── */}
         {loading ? (
           <div className="flex items-center gap-3 py-12 text-text-secondary text-sm">
-            <div className="w-4 h-4 rounded-full border-2 border-[#4D9FFF] border-t-transparent animate-spin" />
+            <div className="w-4 h-4 rounded-full border-2 border-[rgb(var(--c-accent-blue))] border-t-transparent animate-spin" />
             Carregando...
           </div>
         ) : filtered.length === 0 ? (
           <div className="rounded-2xl p-12 text-center"
-               style={{ border: '1px solid var(--panel-border)', background: '#0e1118' }}>
+               style={{ border: '1px solid var(--panel-border)', background: 'rgb(var(--c-surface))' }}>
             <p className="text-text-secondary text-sm">Nenhum orçamento encontrado.</p>
           </div>
         ) : (
           <>
             {/* Desktop table */}
             <div className="hidden md:block rounded-2xl overflow-hidden"
-                 style={{ border: '1px solid var(--panel-border)', background: '#0e1118' }}>
+                 style={{ border: '1px solid var(--panel-border)', background: 'rgb(var(--c-surface))' }}>
               <table className="min-w-full">
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -175,7 +175,7 @@ export default function AdminDashboard() {
                           fontFamily:    'JetBrains Mono, monospace',
                           letterSpacing: '0.1em',
                           textTransform: 'uppercase',
-                          color:         '#7A7A9A',
+                          color:         'rgb(var(--c-text-secondary))',
                           fontWeight:    600,
                         }}
                       >
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
                       style={{
                         borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = '#141e30')}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgb(var(--c-surface-2))')}
                       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                     >
                       <td className="px-5 py-3.5 text-sm font-medium text-text-primary whitespace-nowrap">
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
                       <td className="px-5 py-3.5 text-sm text-text-secondary max-w-[200px]">
                         {truncate(quote.description)}
                       </td>
-                      <td className="px-5 py-3.5 text-xs font-mono text-[#4D9FFF] whitespace-nowrap">
+                      <td className="px-5 py-3.5 text-xs font-mono text-[rgb(var(--c-accent-blue))] whitespace-nowrap">
                         {quote.material}
                       </td>
                       <td className="px-5 py-3.5 text-xs text-text-secondary whitespace-nowrap">
@@ -218,10 +218,10 @@ export default function AdminDashboard() {
                       <td className="px-5 py-3.5">
                         <Link
                           to={`/admin/quotes/${quote.id}`}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-[#4D9FFF]
-                                     border border-[#4D9FFF33] bg-[#4D9FFF0D] rounded-lg px-3 py-1.5
-                                     hover:bg-[#4D9FFF1A] hover:border-[#4D9FFF66]
-                                     hover:shadow-[0_0_10px_rgba(77,159,255,0.2)]
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-[rgb(var(--c-accent-blue))]
+                                     border border-[rgb(var(--c-accent-blue)/0.2)] bg-[rgb(var(--c-accent-blue)/0.05)] rounded-lg px-3 py-1.5
+                                     hover:bg-[rgb(var(--c-accent-blue)/0.1)] hover:border-[rgb(var(--c-accent-blue)/0.4)]
+                                     hover:shadow-[0_0_10px_rgb(var(--c-accent-blue) / 0.2)]
                                      transition-all duration-150 whitespace-nowrap"
                         >
                           Ver →
@@ -239,7 +239,7 @@ export default function AdminDashboard() {
                 <div
                   key={quote.id}
                   className="rounded-2xl p-4 space-y-3"
-                  style={{ background: '#0e1118', border: '1px solid var(--panel-border)' }}
+                  style={{ background: 'rgb(var(--c-surface))', border: '1px solid var(--panel-border)' }}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold text-text-primary text-sm">
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
                     {truncate(quote.description)}
                   </p>
                   <div className="flex items-center gap-3 text-xs font-mono">
-                    <span className="text-[#4D9FFF]">{quote.material}</span>
+                    <span className="text-[rgb(var(--c-accent-blue))]">{quote.material}</span>
                     {quote.color && <span className="text-text-secondary">{quote.color}</span>}
                     <span className="ml-auto text-text-secondary">
                       {new Date(quote.createdAt).toLocaleDateString('pt-BR')}
@@ -261,9 +261,9 @@ export default function AdminDashboard() {
                   </div>
                   <Link
                     to={`/admin/quotes/${quote.id}`}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#4D9FFF]
-                               border border-[#4D9FFF33] bg-[#4D9FFF0D] rounded-lg px-3 py-1.5
-                               hover:bg-[#4D9FFF1A] transition-all duration-150"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[rgb(var(--c-accent-blue))]
+                               border border-[rgb(var(--c-accent-blue)/0.2)] bg-[rgb(var(--c-accent-blue)/0.05)] rounded-lg px-3 py-1.5
+                               hover:bg-[rgb(var(--c-accent-blue)/0.1)] transition-all duration-150"
                   >
                     Ver detalhes →
                   </Link>

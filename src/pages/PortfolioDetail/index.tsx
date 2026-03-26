@@ -34,7 +34,7 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
           position: 'absolute', top: 20, right: 24,
           background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)',
           borderRadius: '50%', width: 40, height: 40,
-          color: '#e8edf3', fontSize: 20, cursor: 'pointer',
+          color: 'rgb(var(--c-text-bright))', fontSize: 20, cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
         aria-label="Fechar"
@@ -52,11 +52,11 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
 /* ── Tag chip ─────────────────────────────────────── */
 function Tag({ children, color }: { children: React.ReactNode; color?: 'cyan' | 'amber' | 'emerald' }) {
   const palettes = {
-    cyan:    { background: 'rgba(6,182,212,.1)',   border: 'rgba(6,182,212,.2)',   color: '#22d3ee' },
-    amber:   { background: 'rgba(251,191,36,.1)',  border: 'rgba(251,191,36,.2)',  color: '#fbbf24' },
-    emerald: { background: 'rgba(52,211,153,.1)',  border: 'rgba(52,211,153,.2)',  color: '#34d399' },
+    cyan:    { background: 'rgb(var(--c-accent-teal) / .1)',   border: 'rgb(var(--c-accent-teal) / .2)',   color: 'rgb(var(--c-accent-teal))' },
+    amber:   { background: 'rgb(var(--c-accent-amber) / .1)',  border: 'rgb(var(--c-accent-amber) / .2)',  color: 'rgb(var(--c-accent-amber))' },
+    emerald: { background: 'rgb(var(--c-accent-green) / .1)',  border: 'rgb(var(--c-accent-green) / .2)',  color: 'rgb(var(--c-accent-green))' },
   }
-  const p = color ? palettes[color] : { background: 'rgba(255,255,255,.05)', border: 'rgba(255,255,255,.08)', color: '#8899aa' }
+  const p = color ? palettes[color] : { background: 'rgba(255,255,255,.05)', border: 'rgba(255,255,255,.08)', color: 'rgb(var(--c-text-secondary))' }
   return (
     <span style={{
       fontSize: 11, fontWeight: 500, letterSpacing: '.3px',
@@ -79,7 +79,7 @@ function RelatedCard({ item }: { item: PortfolioItem }) {
       style={{ textDecoration: 'none', display: 'block' }}
       className="pf-card"
     >
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '16/10', overflow: 'hidden', background: '#111a24' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '16/10', overflow: 'hidden', background: 'rgb(var(--c-surface))' }}>
         {item.photos.length > 0 ? (
           <img
             src={fileUrl(item.photos[0])}
@@ -89,7 +89,7 @@ function RelatedCard({ item }: { item: PortfolioItem }) {
             style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .5s' }}
           />
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#3d4f5f' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgb(var(--c-text-muted))' }}>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
               <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
             </svg>
@@ -97,7 +97,7 @@ function RelatedCard({ item }: { item: PortfolioItem }) {
         )}
       </div>
       <div style={{ padding: '14px 16px 16px' }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: '#e8edf3', marginBottom: 8, lineHeight: 1.3 }}>{item.title}</h3>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: 'rgb(var(--c-text-bright))', marginBottom: 8, lineHeight: 1.3 }}>{item.title}</h3>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           <Tag color="amber">{item.category.name}</Tag>
           <Tag color="cyan">{item.material}</Tag>
@@ -203,17 +203,17 @@ export default function PortfolioDetail() {
         {item === undefined ? (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr min(400px,100%)', gap: '2.5rem' }} className="lg:grid-detail">
             {/* skeleton */}
-            <div style={{ borderRadius: 16, background: '#0c1219', aspectRatio: '4/3' }} className="animate-pulse" />
+            <div style={{ borderRadius: 16, background: 'rgb(var(--c-surface))', aspectRatio: '4/3' }} className="animate-pulse" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {[80, 40, 60, 120].map((w, i) => (
-                <div key={i} style={{ height: i === 3 ? 140 : 20, width: `${w}%`, borderRadius: 8, background: '#0c1219' }} className="animate-pulse" />
+                <div key={i} style={{ height: i === 3 ? 140 : 20, width: `${w}%`, borderRadius: 8, background: 'rgb(var(--c-surface))' }} className="animate-pulse" />
               ))}
             </div>
           </div>
         ) : item === null ? (
           <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-            <p style={{ fontSize: '1.1rem', color: '#8899aa' }}>Item não encontrado.</p>
-            <button onClick={() => navigate('/portfolio')} style={{ marginTop: 16, color: '#22d3ee', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14 }}>
+            <p style={{ fontSize: '1.1rem', color: 'rgb(var(--c-text-secondary))' }}>Item não encontrado.</p>
+            <button onClick={() => navigate('/portfolio')} style={{ marginTop: 16, color: 'rgb(var(--c-accent-teal))', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14 }}>
               ← Voltar ao portfólio
             </button>
           </div>
@@ -231,7 +231,7 @@ export default function PortfolioDetail() {
                   onClick={() => item.photos.length > 0 && setLightbox(true)}
                   style={{
                     position: 'relative', borderRadius: 16, overflow: 'hidden',
-                    background: '#0c1219', border: '1px solid rgba(56,189,248,.08)',
+                    background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)',
                     flex: 1, minHeight: 280,
                     cursor: item.photos.length > 0 ? 'zoom-in' : 'default',
                     marginBottom: 12,
@@ -250,7 +250,7 @@ export default function PortfolioDetail() {
                       <div style={{
                         position: 'absolute', top: 12, right: 12,
                         background: 'rgba(0,0,0,.5)', borderRadius: 8,
-                        padding: '5px 10px', fontSize: 11, color: '#8899aa',
+                        padding: '5px 10px', fontSize: 11, color: 'rgb(var(--c-text-secondary))',
                         backdropFilter: 'blur(4px)',
                         display: 'flex', alignItems: 'center', gap: 5,
                       }}>
@@ -262,7 +262,7 @@ export default function PortfolioDetail() {
                       </div>
                     </>
                   ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#3d4f5f', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgb(var(--c-text-muted))', flexDirection: 'column', gap: 8 }}>
                       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
                         <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
                       </svg>
@@ -273,12 +273,12 @@ export default function PortfolioDetail() {
                   {/* Badge */}
                   <div style={{
                     position: 'absolute', bottom: 14, left: 14,
-                    background: 'rgba(16,185,129,.15)', border: '1px solid rgba(16,185,129,.3)',
+                    background: 'rgb(var(--c-accent-green) / .15)', border: '1px solid rgb(var(--c-accent-green) / .3)',
                     borderRadius: 50, padding: '5px 14px',
-                    fontSize: 11, fontWeight: 600, color: '#34d399',
+                    fontSize: 11, fontWeight: 600, color: 'rgb(var(--c-accent-green))',
                     display: 'flex', alignItems: 'center', gap: 6,
                   }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgb(var(--c-accent-green))', display: 'inline-block' }} />
                     Projeto concluído
                   </div>
                 </div>
@@ -291,8 +291,8 @@ export default function PortfolioDetail() {
                         key={i}
                         onClick={() => setSelectedPhoto(i)}
                         style={{
-                          padding: 0, border: `2px solid ${selectedPhoto === i ? '#06b6d4' : 'rgba(56,189,248,.08)'}`,
-                          borderRadius: 10, overflow: 'hidden', background: '#0c1219',
+                          padding: 0, border: `2px solid ${selectedPhoto === i ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-accent-teal) / .08)'}`,
+                          borderRadius: 10, overflow: 'hidden', background: 'rgb(var(--c-surface))',
                           cursor: 'pointer', aspectRatio: '4/3', transition: 'border-color .2s',
                         }}
                       >
@@ -320,44 +320,44 @@ export default function PortfolioDetail() {
                 </div>
 
                 {/* Title */}
-                <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', fontWeight: 700, color: '#e8edf3', lineHeight: 1.25, margin: 0 }}>
+                <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', fontWeight: 700, color: 'rgb(var(--c-text-bright))', lineHeight: 1.25, margin: 0 }}>
                   {item.title}
                 </h1>
 
                 {/* Description */}
                 {item.description && (
-                  <p style={{ fontSize: 14, color: '#8899aa', lineHeight: 1.75, margin: 0 }}>
+                  <p style={{ fontSize: 14, color: 'rgb(var(--c-text-secondary))', lineHeight: 1.75, margin: 0 }}>
                     {item.description}
                   </p>
                 )}
 
                 {/* Specs card */}
                 <div style={{
-                  background: '#0c1219', border: '1px solid rgba(56,189,248,.08)',
+                  background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)',
                   borderRadius: 14, padding: '1.25rem',
                 }}>
-                  <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: '#06b6d4', marginBottom: 14 }}>
+                  <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgb(var(--c-accent-teal))', marginBottom: 14 }}>
                     Especificações
                   </p>
                   <dl style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 1.5rem' }}>
                     <div>
-                      <dt style={{ fontSize: 11, color: '#556677', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Categoria</dt>
-                      <dd style={{ fontSize: 14, color: '#e8edf3', fontWeight: 500 }}>{item.category.name}</dd>
+                      <dt style={{ fontSize: 11, color: 'rgb(var(--c-text-secondary))', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Categoria</dt>
+                      <dd style={{ fontSize: 14, color: 'rgb(var(--c-text-bright))', fontWeight: 500 }}>{item.category.name}</dd>
                     </div>
                     <div>
-                      <dt style={{ fontSize: 11, color: '#556677', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Material</dt>
-                      <dd style={{ fontSize: 14, color: '#e8edf3', fontWeight: 500 }}>{item.material}</dd>
+                      <dt style={{ fontSize: 11, color: 'rgb(var(--c-text-secondary))', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Material</dt>
+                      <dd style={{ fontSize: 14, color: 'rgb(var(--c-text-bright))', fontWeight: 500 }}>{item.material}</dd>
                     </div>
                     {item.complexity && (
                       <div>
-                        <dt style={{ fontSize: 11, color: '#556677', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Complexidade</dt>
-                        <dd style={{ fontSize: 14, color: '#e8edf3', fontWeight: 500 }}>{item.complexity}</dd>
+                        <dt style={{ fontSize: 11, color: 'rgb(var(--c-text-secondary))', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Complexidade</dt>
+                        <dd style={{ fontSize: 14, color: 'rgb(var(--c-text-bright))', fontWeight: 500 }}>{item.complexity}</dd>
                       </div>
                     )}
                     {item.printTime != null && (
                       <div>
-                        <dt style={{ fontSize: 11, color: '#556677', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Tempo de impressão</dt>
-                        <dd style={{ fontSize: 14, color: '#e8edf3', fontWeight: 500 }}>{item.printTime}h</dd>
+                        <dt style={{ fontSize: 11, color: 'rgb(var(--c-text-secondary))', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Tempo de impressão</dt>
+                        <dd style={{ fontSize: 14, color: 'rgb(var(--c-text-bright))', fontWeight: 500 }}>{item.printTime}h</dd>
                       </div>
                     )}
                   </dl>
@@ -365,12 +365,12 @@ export default function PortfolioDetail() {
 
                 {/* CTA card */}
                 <div style={{
-                  background: 'linear-gradient(135deg, rgba(6,182,212,.12) 0%, rgba(139,92,246,.1) 100%)',
-                  border: '1px solid rgba(6,182,212,.18)',
+                  background: 'linear-gradient(135deg, rgb(var(--c-accent-teal) / .12) 0%, rgb(var(--c-accent-purple) / .1) 100%)',
+                  border: '1px solid rgb(var(--c-accent-teal) / .18)',
                   borderRadius: 14, padding: '1.25rem',
                 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#e8edf3', marginBottom: 4 }}>Quer algo parecido?</p>
-                  <p style={{ fontSize: 12, color: '#8899aa', marginBottom: '1rem', lineHeight: 1.6 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'rgb(var(--c-text-bright))', marginBottom: 4 }}>Quer algo parecido?</p>
+                  <p style={{ fontSize: 12, color: 'rgb(var(--c-text-secondary))', marginBottom: '1rem', lineHeight: 1.6 }}>
                     Envie seus arquivos e personalize cada detalhe. Orçamento gratuito em até 24h.
                   </p>
                   <Link
@@ -379,7 +379,7 @@ export default function PortfolioDetail() {
                     style={{
                       display: 'block', textAlign: 'center',
                       padding: '12px 24px', borderRadius: 50,
-                      background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
+                      background: 'linear-gradient(135deg, rgb(var(--c-accent-teal)), rgb(var(--c-accent-purple)))',
                       color: '#fff', fontSize: 13, fontWeight: 700,
                       letterSpacing: '.5px', textDecoration: 'none',
                       marginBottom: 10,
@@ -394,12 +394,12 @@ export default function PortfolioDetail() {
                     style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                       padding: '10px 24px', borderRadius: 50,
-                      border: '1px solid rgba(56,189,248,.15)',
-                      color: '#8899aa', fontSize: 12, textDecoration: 'none',
+                      border: '1px solid rgb(var(--c-accent-teal) / .15)',
+                      color: 'rgb(var(--c-text-secondary))', fontSize: 12, textDecoration: 'none',
                       transition: 'border-color .2s, color .2s',
                     }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(56,189,248,.35)'; (e.currentTarget as HTMLAnchorElement).style.color = '#22d3ee' }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(56,189,248,.15)'; (e.currentTarget as HTMLAnchorElement).style.color = '#8899aa' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgb(var(--c-accent-teal) / .35)'; (e.currentTarget as HTMLAnchorElement).style.color = 'rgb(var(--c-accent-teal))' }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgb(var(--c-accent-teal) / .15)'; (e.currentTarget as HTMLAnchorElement).style.color = 'rgb(var(--c-text-secondary))' }}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -416,8 +416,8 @@ export default function PortfolioDetail() {
                     style={{
                       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                       padding: '10px', borderRadius: 10,
-                      background: '#0c1219', border: '1px solid rgba(56,189,248,.08)',
-                      color: copied ? '#22d3ee' : '#8899aa',
+                      background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)',
+                      color: copied ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
                       fontSize: 12, cursor: 'pointer', transition: 'all .2s',
                     }}
                   >
@@ -433,8 +433,8 @@ export default function PortfolioDetail() {
                     style={{
                       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                       padding: '10px', borderRadius: 10,
-                      background: '#0c1219', border: '1px solid rgba(56,189,248,.08)',
-                      color: '#8899aa', fontSize: 12, textDecoration: 'none', transition: 'all .2s',
+                      background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)',
+                      color: 'rgb(var(--c-text-secondary))', fontSize: 12, textDecoration: 'none', transition: 'all .2s',
                     }}
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
@@ -454,11 +454,11 @@ export default function PortfolioDetail() {
               <Reveal>
               <section aria-label="Projetos relacionados">
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: '#06b6d4', marginBottom: 6 }}>
+                  <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgb(var(--c-accent-teal))', marginBottom: 6 }}>
                     Relacionados
                   </p>
-                  <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#e8edf3' }}>
-                    Outros projetos de <span style={{ color: '#22d3ee' }}>{item.category.name}</span>
+                  <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'rgb(var(--c-text-bright))' }}>
+                    Outros projetos de <span style={{ color: 'rgb(var(--c-accent-teal))' }}>{item.category.name}</span>
                   </h2>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
