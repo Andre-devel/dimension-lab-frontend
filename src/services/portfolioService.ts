@@ -54,6 +54,17 @@ export const portfolioService = {
     )
     return data
   },
+
+  async standardizeImage(file: File): Promise<{ imageBase64: string; mimeType: string }> {
+    const fd = new FormData()
+    fd.append('file', file)
+    const { data } = await api.post<{ imageBase64: string; mimeType: string }>(
+      '/api/v1/portfolio-items/standardize-image',
+      fd,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    )
+    return data
+  },
 }
 
 function buildFormData(formData: PortfolioItemFormData): FormData {

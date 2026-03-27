@@ -6,6 +6,7 @@ export interface SiteSettings {
   youtube_url: string
   whatsapp_admin_number: string
   bot_number: string
+  gemini_image_prompt: string
   [key: string]: string
 }
 

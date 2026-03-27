@@ -109,4 +109,27 @@ describe('portfolioService', () => {
       )
     })
   })
+
+  describe('standardizeImage', () => {
+    it('posts file as FormData and returns base64 response', async () => {
+      const response = { imageBase64: 'abc123base64', mimeType: 'image/jpeg' }
+      mockedApi.post = vi.fn().mockResolvedValue({ data: response })
+      const file = new File(['data'], 'photo.jpg', { type: 'image/jpeg' })
+
+      const result = await portfolioService.standardizeImage(file)
+
+      expect(result).toEqual(response)
+      const [url, body, config] = vi.mocked(mockedApi.post).mock.calls[0]
+      expect(url).toBe('/api/v1/portfolio-items/standardize-image')
+      expect(body).toBeInstanceOf(FormData)
+      expect(config?.headers?.['Content-Type']).toBe('multipart/form-data')
+    })
+
+    it('rejects when API call fails', async () => {
+      mockedApi.post = vi.fn().mockRejectedValue(new Error('Network error'))
+      const file = new File(['data'], 'photo.jpg', { type: 'image/jpeg' })
+
+      await expect(portfolioService.standardizeImage(file)).rejects.toThrow('Network error')
+    })
+  })
 })

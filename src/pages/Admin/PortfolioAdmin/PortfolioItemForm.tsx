@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import { Sparkles, Loader2 } from 'lucide-react'
 import type { PortfolioItemFormData } from '@/services/portfolioService'
+import { portfolioService } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
 import { materialService } from '@/services/catalogService'
 import type { Material } from '@/types/catalog'
+import { useToastStore } from '@/store/toastStore'
 
 interface Props {
   initialData?: PortfolioItem
@@ -20,9 +23,12 @@ export default function PortfolioItemForm({ initialData, onSubmit, saving }: Pro
   const [complexity, setComplexity] = useState(initialData?.complexity ?? '')
   const [materials, setMaterials] = useState<Material[]>([])
   const [photoFiles, setPhotoFiles] = useState<File[]>([])
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([])
+  const [standardizingIndexes, setStandardizingIndexes] = useState<Set<number>>(new Set())
   const [modelFile, setModelFile] = useState<File | null>(null)
   const photosInputRef = useRef<HTMLInputElement>(null)
   const modelInputRef = useRef<HTMLInputElement>(null)
+  const showToast = useToastStore((s) => s.show)
 
   useEffect(() => {
     materialService.listAll().then(setMaterials).catch(() => {})
@@ -37,6 +43,40 @@ export default function PortfolioItemForm({ initialData, onSubmit, saving }: Pro
       setComplexity(initialData.complexity ?? '')
     }
   }, [initialData])
+
+  useEffect(() => {
+    const urls = photoFiles.map((f) => URL.createObjectURL(f))
+    setPhotoPreviews(urls)
+    return () => urls.forEach((u) => URL.revokeObjectURL(u))
+  }, [photoFiles])
+
+  async function handleStandardize(index: number) {
+    const file = photoFiles[index]
+    setStandardizingIndexes((prev) => new Set(prev).add(index))
+    try {
+      const { imageBase64, mimeType } = await portfolioService.standardizeImage(file)
+      const binary = atob(imageBase64)
+      const bytes = new Uint8Array(binary.length)
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i)
+      }
+      const ext = mimeType.split('/')[1] ?? 'jpg'
+      const standardizedFile = new File([bytes], `standardized-${index}.${ext}`, { type: mimeType })
+      setPhotoFiles((prev) => {
+        const next = [...prev]
+        next[index] = standardizedFile
+        return next
+      })
+    } catch {
+      showToast('Falha ao padronizar imagem com IA. Tente novamente.', 'error')
+    } finally {
+      setStandardizingIndexes((prev) => {
+        const next = new Set(prev)
+        next.delete(index)
+        return next
+      })
+    }
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -146,10 +186,33 @@ export default function PortfolioItemForm({ initialData, onSubmit, saving }: Pro
           onChange={(e) => setPhotoFiles(Array.from(e.target.files ?? []))}
           className="block w-full text-sm text-text-secondary file:mr-3 file:rounded-md file:border-0 file:bg-surface-2 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-text-primary hover:file:bg-border cursor-pointer"
         />
+
         {photoFiles.length > 0 && (
-          <p className="mt-1 text-xs text-text-secondary">
-            {photoFiles.length} foto(s) selecionada(s)
-          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+            {photoFiles.map((file, index) => (
+              <div key={`${file.name}-${index}`} className="relative group rounded-md overflow-hidden border border-border aspect-square">
+                <img
+                  src={photoPreviews[index]}
+                  alt={file.name}
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleStandardize(index)}
+                  disabled={standardizingIndexes.has(index)}
+                  aria-label="Padronizar com IA"
+                  className="absolute bottom-1 right-1 flex items-center gap-1 rounded-md bg-black/70 px-2 py-1 text-xs text-accent-blue hover:bg-black/90 disabled:opacity-50 transition-colors"
+                >
+                  {standardizingIndexes.has(index) ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={12} />
+                  )}
+                  IA
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

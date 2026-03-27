@@ -28,6 +28,7 @@ const mockSettings = {
   whatsapp_url: 'https://wa.me/5511999999999',
   instagram_url: 'https://instagram.com/dimensionlab3d',
   youtube_url: '',
+  gemini_image_prompt: 'Remove the background and replace with white.',
 }
 
 function renderPage() {
@@ -82,6 +83,36 @@ describe('SettingsAdmin', () => {
 
     await waitFor(() =>
       expect(settingsService.update).toHaveBeenCalledWith('whatsapp_url', 'https://wa.me/5599999999999'),
+    )
+  })
+
+  it('renders textarea for gemini_image_prompt', async () => {
+    vi.mocked(settingsService.getAll).mockResolvedValue(mockSettings)
+    renderPage()
+    await waitFor(() =>
+      expect(screen.getByDisplayValue('Remove the background and replace with white.')).toBeInTheDocument()
+    )
+    expect(screen.getByDisplayValue('Remove the background and replace with white.')).toBeInstanceOf(HTMLTextAreaElement)
+  })
+
+  it('saves gemini_image_prompt on button click', async () => {
+    const user = userEvent.setup()
+    vi.mocked(settingsService.getAll).mockResolvedValue(mockSettings)
+    vi.mocked(settingsService.update).mockResolvedValueOnce({ key: 'gemini_image_prompt', value: 'New prompt.' })
+    renderPage()
+    await waitFor(() =>
+      expect(screen.getByDisplayValue('Remove the background and replace with white.')).toBeInTheDocument()
+    )
+
+    const textarea = screen.getByDisplayValue('Remove the background and replace with white.')
+    await user.clear(textarea)
+    await user.type(textarea, 'New prompt.')
+
+    const saveButtons = screen.getAllByRole('button', { name: /salvar/i })
+    await user.click(saveButtons[saveButtons.length - 1])
+
+    await waitFor(() =>
+      expect(settingsService.update).toHaveBeenCalledWith('gemini_image_prompt', 'New prompt.')
     )
   })
 
