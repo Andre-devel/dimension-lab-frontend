@@ -6,6 +6,7 @@ import { vi } from 'vitest'
 vi.mock('@/services/portfolioService', () => ({
   portfolioService: {
     list: vi.fn(),
+    listCategories: vi.fn(),
   },
 }))
 
@@ -15,9 +16,11 @@ vi.mock('@/components/seo/SEOHead', () => ({
 }))
 
 import { portfolioService } from '@/services/portfolioService'
+import type { PagedResponse } from '@/services/portfolioService'
+import type { PortfolioItem } from '@/types/portfolio'
 import Portfolio from '@/pages/Portfolio'
 
-const mockItems = [
+const mockItems: PortfolioItem[] = [
   {
     id: 'item-1',
     title: 'Suporte para câmera',
@@ -40,6 +43,17 @@ const mockItems = [
   },
 ]
 
+function pagedResponse(items: PortfolioItem[], total?: number): PagedResponse<PortfolioItem> {
+  return {
+    content: items,
+    page: 0,
+    size: 9,
+    totalElements: total ?? items.length,
+    totalPages: 1,
+    hasNext: false,
+  }
+}
+
 function renderPage() {
   return render(<MemoryRouter><Portfolio /></MemoryRouter>)
 }
@@ -48,15 +62,16 @@ describe('Portfolio page', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('shows loading skeleton initially', () => {
+    vi.mocked(portfolioService.listCategories).mockResolvedValue([])
     vi.mocked(portfolioService.list).mockImplementation(() => new Promise(() => {}))
     renderPage()
-    // During loading, items haven't rendered yet
     expect(screen.queryByText('Suporte para câmera')).not.toBeInTheDocument()
     expect(screen.queryByText('Vaso decorativo')).not.toBeInTheDocument()
   })
 
   it('renders all items after loading', async () => {
-    vi.mocked(portfolioService.list).mockResolvedValueOnce(mockItems)
+    vi.mocked(portfolioService.listCategories).mockResolvedValue([])
+    vi.mocked(portfolioService.list).mockResolvedValue(pagedResponse(mockItems))
     renderPage()
     await waitFor(() => {
       expect(screen.getByText('Suporte para câmera')).toBeInTheDocument()
@@ -65,32 +80,59 @@ describe('Portfolio page', () => {
   })
 
   it('shows empty message when no items', async () => {
-    vi.mocked(portfolioService.list).mockResolvedValueOnce([])
+    vi.mocked(portfolioService.listCategories).mockResolvedValue([])
+    vi.mocked(portfolioService.list).mockResolvedValue(pagedResponse([]))
     renderPage()
     await waitFor(() => {
       expect(screen.getByText(/nenhum projeto encontrado/i)).toBeInTheDocument()
     })
   })
 
-  it('filters items by category', async () => {
+  it('re-fetches from server with category param when category is selected', async () => {
     const user = userEvent.setup()
-    vi.mocked(portfolioService.list).mockResolvedValueOnce(mockItems)
+    vi.mocked(portfolioService.listCategories).mockResolvedValue([
+      { name: 'Mecânico', count: 1 },
+      { name: 'Decorativo', count: 1 },
+    ])
+    vi.mocked(portfolioService.list)
+      .mockResolvedValueOnce(pagedResponse(mockItems, 2))
+      .mockResolvedValueOnce(pagedResponse([mockItems[1]], 1))
+
     renderPage()
     await waitFor(() => expect(screen.getByText('Suporte para câmera')).toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: /^Decorativo/ }))
+
+    // click first matching button (mobile bar renders first in DOM)
+    await user.click(screen.getAllByRole('button', { name: /^Decorativo/ })[0])
+
+    await waitFor(() => {
+      expect(vi.mocked(portfolioService.list)).toHaveBeenCalledWith(0, 9, 'Decorativo')
+    })
     await waitFor(() => {
       expect(screen.queryByText('Suporte para câmera')).not.toBeInTheDocument()
       expect(screen.getByText('Vaso decorativo')).toBeInTheDocument()
     })
   })
 
-  it('clears filter when "Todos" is clicked', async () => {
+  it('re-fetches without category param when Todos is selected', async () => {
     const user = userEvent.setup()
-    vi.mocked(portfolioService.list).mockResolvedValueOnce(mockItems)
+    vi.mocked(portfolioService.listCategories).mockResolvedValue([
+      { name: 'Mecânico', count: 1 },
+    ])
+    vi.mocked(portfolioService.list)
+      .mockResolvedValueOnce(pagedResponse(mockItems, 2))
+      .mockResolvedValueOnce(pagedResponse([mockItems[0]], 1))
+      .mockResolvedValueOnce(pagedResponse(mockItems, 2))
+
     renderPage()
     await waitFor(() => expect(screen.getByText('Suporte para câmera')).toBeInTheDocument())
-    await user.click(screen.getByRole('button', { name: /^Decorativo/ }))
-    await user.click(screen.getByRole('button', { name: /^Todos/ }))
+
+    await user.click(screen.getAllByRole('button', { name: /^Mecânico/ })[0])
+    await waitFor(() => expect(screen.getByText('Suporte para câmera')).toBeInTheDocument())
+
+    await user.click(screen.getAllByRole('button', { name: /^Todos/ })[0])
+    await waitFor(() => {
+      expect(vi.mocked(portfolioService.list)).toHaveBeenCalledWith(0, 9, undefined)
+    })
     await waitFor(() => {
       expect(screen.getByText('Suporte para câmera')).toBeInTheDocument()
       expect(screen.getByText('Vaso decorativo')).toBeInTheDocument()

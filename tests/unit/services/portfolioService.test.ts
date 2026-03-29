@@ -30,11 +30,19 @@ describe('portfolioService', () => {
   beforeEach(() => vi.clearAllMocks())
 
   describe('list', () => {
-    it('returns an array of portfolio items', async () => {
-      mockedApi.get = vi.fn().mockResolvedValue({ data: [mockItem] })
+    it('returns a paged response of portfolio items', async () => {
+      const pagedData = { content: [mockItem], page: 0, size: 9, totalElements: 1, totalPages: 1, hasNext: false }
+      mockedApi.get = vi.fn().mockResolvedValue({ data: pagedData })
       const result = await portfolioService.list()
-      expect(result).toEqual([mockItem])
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/portfolio-items')
+      expect(result).toEqual(pagedData)
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/portfolio-items', { params: { page: 0, size: 9 } })
+    })
+
+    it('passes category param when provided', async () => {
+      const pagedData = { content: [mockItem], page: 0, size: 9, totalElements: 1, totalPages: 1, hasNext: false }
+      mockedApi.get = vi.fn().mockResolvedValue({ data: pagedData })
+      await portfolioService.list(0, 9, 'Mecânico')
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v1/portfolio-items', { params: { page: 0, size: 9, category: 'Mecânico' } })
     })
   })
 

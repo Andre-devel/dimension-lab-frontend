@@ -31,10 +31,10 @@ export const portfolioService = {
     return data
   },
 
-  async list(page = 0, size = 9): Promise<PagedResponse<PortfolioItem>> {
-    const { data } = await api.get<PagedResponse<PortfolioItem>>('/api/v1/portfolio-items', {
-      params: { page, size },
-    })
+  async list(page = 0, size = 9, category?: string): Promise<PagedResponse<PortfolioItem>> {
+    const params: Record<string, unknown> = { page, size }
+    if (category) params.category = category
+    const { data } = await api.get<PagedResponse<PortfolioItem>>('/api/v1/portfolio-items', { params })
     return data
   },
 

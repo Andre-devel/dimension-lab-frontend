@@ -47,39 +47,48 @@ export default function Portfolio() {
   const [page, setPage] = useState(0)
   const [hasNext, setHasNext] = useState(false)
   const [totalElements, setTotalElements] = useState(0)
+  const [allItemsTotal, setAllItemsTotal] = useState(0)
   const [activeCategory, setActiveCategory] = useState<string>('Todos')
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [showMoreCategories, setShowMoreCategories] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLDivElement>(null)
 
-  // Initial load — categories and first page in parallel
+  // Load categories once
+  useEffect(() => {
+    portfolioService.listCategories().then(setServerCategories)
+  }, [])
+
+  // Reload items from server whenever category changes (server-side filtering)
   useEffect(() => {
     setLoading(true)
-    Promise.all([
-      portfolioService.listCategories(),
-      portfolioService.list(0, PAGE_SIZE),
-    ]).then(([cats, res]) => {
-      setServerCategories(cats)
-      setItems(res.content)
-      setHasNext(res.hasNext)
-      setTotalElements(res.totalElements)
-      setPage(0)
-    }).finally(() => setLoading(false))
-  }, [])
+    setItems([])
+    setPage(0)
+    setHasNext(false)
+    const cat = activeCategory === 'Todos' ? undefined : activeCategory
+    portfolioService.list(0, PAGE_SIZE, cat)
+      .then(res => {
+        setItems(res.content)
+        setHasNext(res.hasNext)
+        setTotalElements(res.totalElements)
+        if (!cat) setAllItemsTotal(res.totalElements)
+      })
+      .finally(() => setLoading(false))
+  }, [activeCategory])
 
   const loadMore = useCallback(() => {
     if (loadingMore || !hasNext) return
     const nextPage = page + 1
     setLoadingMore(true)
-    portfolioService.list(nextPage, PAGE_SIZE)
+    const cat = activeCategory === 'Todos' ? undefined : activeCategory
+    portfolioService.list(nextPage, PAGE_SIZE, cat)
       .then(res => {
         setItems(prev => [...prev, ...res.content])
         setHasNext(res.hasNext)
         setPage(nextPage)
       })
       .finally(() => setLoadingMore(false))
-  }, [loadingMore, hasNext, page])
+  }, [loadingMore, hasNext, page, activeCategory])
 
   // Infinite scroll: re-attach observer whenever loadMore changes
   useEffect(() => {
@@ -104,17 +113,10 @@ export default function Portfolio() {
     return () => document.removeEventListener('mousedown', handler)
   }, [showMoreCategories])
 
-  // Categories come from the server — always complete, regardless of loaded pages
   const allCategories = serverCategories
   const visibleCategories = allCategories.slice(0, CATEGORY_LIMIT - 1) // -1 to leave room for "Todos"
   const hiddenCategories = allCategories.slice(CATEGORY_LIMIT - 1)
   const uniqueMaterials = new Set(items.map(i => i.material)).size
-
-  // Category filter is applied client-side on already-loaded items.
-  // More items are loaded from the server via infinite scroll regardless of filter.
-  const filtered = activeCategory === 'Todos'
-    ? items
-    : items.filter(i => i.category.name === activeCategory)
 
   return (
     <PageWrapper>
@@ -142,10 +144,10 @@ export default function Portfolio() {
             </p>
           </div>
 
-          {!loading && totalElements > 0 && (
+          {!loading && allItemsTotal > 0 && (
             <div className="flex gap-8">
               {[
-                { num: totalElements.toString(), label: 'Projetos' },
+                { num: allItemsTotal.toString(), label: 'Projetos' },
                 { num: `${uniqueMaterials}+`,    label: 'Materiais' },
                 { num: '24h',                    label: 'Resposta' },
               ].map(({ num, label }) => (
@@ -169,7 +171,7 @@ export default function Portfolio() {
               className="flex md:hidden gap-2 pb-1"
               style={{ overflowX: 'auto', scrollbarWidth: 'none' } as React.CSSProperties}
             >
-              {[{ name: 'Todos', count: totalElements }, ...allCategories].map(cat => {
+              {[{ name: 'Todos', count: allItemsTotal }, ...allCategories].map(cat => {
                 const isActive = cat.name === activeCategory
                 return (
                   <button
@@ -226,7 +228,7 @@ export default function Portfolio() {
                         color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
                         padding: '1px 7px', borderRadius: 50,
                       }}>
-                        {totalElements}
+                        {allItemsTotal}
                       </span>
                     </button>
                   )
@@ -361,7 +363,7 @@ export default function Portfolio() {
               <div key={i} className="rounded-[14px] bg-surface-2 animate-pulse" style={{ aspectRatio: '4/3' }} />
             ))}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className="text-center" style={{ padding: '4rem 1rem' }}>
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--c-text-muted))" strokeWidth="1.5" strokeLinecap="round" style={{ margin: '0 auto 1rem' }}>
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -371,7 +373,7 @@ export default function Portfolio() {
           </div>
         ) : (
           <div className={`${view === 'list' ? 'pf-list flex flex-col gap-3' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'}`}>
-            {filtered.map((item, i) => (
+            {items.map((item, i) => (
               <PortfolioCard
                 key={item.id}
                 item={item}

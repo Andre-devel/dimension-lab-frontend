@@ -121,8 +121,8 @@ describe('Portfolio — infinite scroll com paginação real', () => {
     })
 
     await waitFor(() => {
-      expect(portfolioService.list).toHaveBeenCalledWith(0, 9)
-      expect(portfolioService.list).toHaveBeenCalledWith(1, 9)
+      expect(portfolioService.list).toHaveBeenCalledWith(0, 9, undefined)
+      expect(portfolioService.list).toHaveBeenCalledWith(1, 9, undefined)
     })
   })
 

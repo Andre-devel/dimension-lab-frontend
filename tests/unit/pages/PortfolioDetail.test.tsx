@@ -5,7 +5,7 @@ import { vi } from 'vitest'
 vi.mock('@/services/portfolioService', () => ({
   portfolioService: {
     getById: vi.fn(),
-    list: vi.fn().mockResolvedValue([]),
+    list: vi.fn().mockResolvedValue({ content: [], page: 0, size: 9, totalElements: 0, totalPages: 0, hasNext: false }),
   },
 }))
 
