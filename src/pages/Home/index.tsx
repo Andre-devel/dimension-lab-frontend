@@ -261,7 +261,7 @@ export default function Home() {
   // ── Portfolio ──────────────────────────────────────────────────────────────
   useEffect(() => {
     portfolioService.list()
-      .then(items => setPortfolioItems(items))
+      .then(res => setPortfolioItems(res.content))
       .catch(() => {})
       .finally(() => setPortfolioLoading(false))
   }, [])

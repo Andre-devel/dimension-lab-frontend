@@ -126,7 +126,7 @@ export default function PortfolioDetail() {
       setSelectedPhoto(0)
       trackEvent('portfolio_item_viewed', { item_id: data.id, item_title: data.title, category: data.category.name, material: data.material })
     }).catch(() => setItem(null))
-    portfolioService.list().then(setAllItems)
+    portfolioService.list().then(res => setAllItems(res.content))
     settingsService.getAll().then(s => setBotNumber(s.bot_number ?? ''))
   }, [id])
 

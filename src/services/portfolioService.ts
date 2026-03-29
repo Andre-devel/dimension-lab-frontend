@@ -1,6 +1,20 @@
 import api from './api'
 import type { PortfolioItem } from '@/types/portfolio'
 
+export interface PagedResponse<T> {
+  content: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+  hasNext: boolean
+}
+
+export interface CategorySummary {
+  name: string
+  count: number
+}
+
 export interface PortfolioItemFormData {
   title: string
   categoryName: string
@@ -12,8 +26,15 @@ export interface PortfolioItemFormData {
 }
 
 export const portfolioService = {
-  async list(): Promise<PortfolioItem[]> {
-    const { data } = await api.get<PortfolioItem[]>('/api/v1/portfolio-items')
+  async listCategories(): Promise<CategorySummary[]> {
+    const { data } = await api.get<CategorySummary[]>('/api/v1/portfolio-items/categories')
+    return data
+  },
+
+  async list(page = 0, size = 9): Promise<PagedResponse<PortfolioItem>> {
+    const { data } = await api.get<PagedResponse<PortfolioItem>>('/api/v1/portfolio-items', {
+      params: { page, size },
+    })
     return data
   },
 

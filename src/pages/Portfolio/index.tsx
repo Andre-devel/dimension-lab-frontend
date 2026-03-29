@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+const CATEGORY_LIMIT = 5
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { PortfolioCard } from '@/components/shared/PortfolioCard'
 import { Reveal } from '@/components/ui/Reveal'
 import { SEOHead, SITE_URL } from '@/components/seo/SEOHead'
 import { portfolioService } from '@/services/portfolioService'
+import type { CategorySummary } from '@/services/portfolioService'
 import type { PortfolioItem } from '@/types/portfolio'
 
 const portfolioJsonLd = {
@@ -16,6 +19,7 @@ const portfolioJsonLd = {
 }
 
 const PAGE_SIZE = 9
+
 
 function GridIcon() {
   return (
@@ -37,29 +41,80 @@ function ListIcon() {
 
 export default function Portfolio() {
   const [items, setItems] = useState<PortfolioItem[]>([])
+  const [serverCategories, setServerCategories] = useState<CategorySummary[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [page, setPage] = useState(0)
+  const [hasNext, setHasNext] = useState(false)
+  const [totalElements, setTotalElements] = useState(0)
   const [activeCategory, setActiveCategory] = useState<string>('Todos')
   const [view, setView] = useState<'grid' | 'list'>('grid')
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [showMoreCategories, setShowMoreCategories] = useState(false)
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const moreRef = useRef<HTMLDivElement>(null)
 
+  // Initial load — categories and first page in parallel
   useEffect(() => {
-    portfolioService.list()
-      .then(setItems)
-      .finally(() => setLoading(false))
+    setLoading(true)
+    Promise.all([
+      portfolioService.listCategories(),
+      portfolioService.list(0, PAGE_SIZE),
+    ]).then(([cats, res]) => {
+      setServerCategories(cats)
+      setItems(res.content)
+      setHasNext(res.hasNext)
+      setTotalElements(res.totalElements)
+      setPage(0)
+    }).finally(() => setLoading(false))
   }, [])
 
-  // Reset pagination when filter changes
-  useEffect(() => { setVisibleCount(PAGE_SIZE) }, [activeCategory])
+  const loadMore = useCallback(() => {
+    if (loadingMore || !hasNext) return
+    const nextPage = page + 1
+    setLoadingMore(true)
+    portfolioService.list(nextPage, PAGE_SIZE)
+      .then(res => {
+        setItems(prev => [...prev, ...res.content])
+        setHasNext(res.hasNext)
+        setPage(nextPage)
+      })
+      .finally(() => setLoadingMore(false))
+  }, [loadingMore, hasNext, page])
 
-  const categories = ['Todos', ...Array.from(new Set(items.map(i => i.category.name)))]
+  // Infinite scroll: re-attach observer whenever loadMore changes
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) loadMore()
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [loadMore])
+
+  // Close "Mais" dropdown on outside click
+  useEffect(() => {
+    if (!showMoreCategories) return
+    const handler = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setShowMoreCategories(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showMoreCategories])
+
+  // Categories come from the server — always complete, regardless of loaded pages
+  const allCategories = serverCategories
+  const visibleCategories = allCategories.slice(0, CATEGORY_LIMIT - 1) // -1 to leave room for "Todos"
+  const hiddenCategories = allCategories.slice(CATEGORY_LIMIT - 1)
   const uniqueMaterials = new Set(items.map(i => i.material)).size
 
+  // Category filter is applied client-side on already-loaded items.
+  // More items are loaded from the server via infinite scroll regardless of filter.
   const filtered = activeCategory === 'Todos'
     ? items
     : items.filter(i => i.category.name === activeCategory)
-
-  const visible = filtered.slice(0, visibleCount)
-  const hasMore = visibleCount < filtered.length
 
   return (
     <PageWrapper>
@@ -87,12 +142,12 @@ export default function Portfolio() {
             </p>
           </div>
 
-          {!loading && items.length > 0 && (
+          {!loading && totalElements > 0 && (
             <div className="flex gap-8">
               {[
-                { num: items.length.toString(), label: 'Projetos' },
-                { num: `${uniqueMaterials}+`,   label: 'Materiais' },
-                { num: '24h',                   label: 'Resposta' },
+                { num: totalElements.toString(), label: 'Projetos' },
+                { num: `${uniqueMaterials}+`,    label: 'Materiais' },
+                { num: '24h',                    label: 'Resposta' },
               ].map(({ num, label }) => (
                 <div key={label} className="text-center">
                   <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '1.5rem', fontWeight: 700, color: 'rgb(var(--c-accent-teal))' }}>{num}</div>
@@ -106,63 +161,196 @@ export default function Portfolio() {
 
         {/* ── Toolbar ── */}
         {!loading && (
-          <div className="flex flex-wrap items-center justify-between gap-3" style={{ marginBottom: '2rem' }}>
-            {/* Category filters */}
-            <div className="flex flex-wrap gap-2" style={{ overflowX: 'auto' }}>
-              {categories.map(cat => {
-                const count = cat === 'Todos' ? items.length : items.filter(i => i.category.name === cat).length
-                const isActive = cat === activeCategory
+          <div style={{ marginBottom: '2rem' }}>
+
+            {/* ── Mobile: todas as categorias em scroll horizontal ── */}
+            <div
+              data-testid="category-bar-mobile"
+              className="flex md:hidden gap-2 pb-1"
+              style={{ overflowX: 'auto', scrollbarWidth: 'none' } as React.CSSProperties}
+            >
+              {[{ name: 'Todos', count: totalElements }, ...allCategories].map(cat => {
+                const isActive = cat.name === activeCategory
                 return (
                   <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
+                    key={cat.name}
+                    onClick={() => setActiveCategory(cat.name)}
                     style={{
-                      fontSize: 13, fontWeight: 500,
-                      padding: '7px 16px',
-                      borderRadius: 50,
+                      fontSize: 12, fontWeight: 500,
+                      padding: '6px 13px', borderRadius: 50,
                       border: isActive ? '1px solid rgb(var(--c-accent-teal))' : '1px solid rgb(var(--c-accent-teal) / .08)',
                       background: isActive ? 'rgb(var(--c-accent-teal) / .12)' : 'transparent',
                       color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
-                      cursor: 'pointer',
-                      transition: 'all .2s',
-                      whiteSpace: 'nowrap',
-                      display: 'flex', alignItems: 'center', gap: 6,
+                      cursor: 'pointer', transition: 'all .2s',
+                      whiteSpace: 'nowrap', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', gap: 5,
                     }}
                   >
-                    {cat}
+                    {cat.name}
                     <span style={{
-                      fontSize: 11, fontFamily: 'JetBrains Mono, monospace',
+                      fontSize: 10, fontFamily: 'JetBrains Mono, monospace',
                       background: isActive ? 'rgb(var(--c-accent-teal) / .2)' : 'rgba(255,255,255,.06)',
                       color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
-                      padding: '1px 7px', borderRadius: 50,
+                      padding: '1px 6px', borderRadius: 50,
                     }}>
-                      {count}
+                      {cat.count}
                     </span>
                   </button>
                 )
               })}
             </div>
 
-            {/* View toggle */}
-            <div className="hidden md:flex" style={{ gap: 4, background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)', borderRadius: 6, padding: 3 }}>
-              {(['grid', 'list'] as const).map(v => (
-                <button
-                  key={v}
-                  onClick={() => setView(v)}
-                  title={v === 'grid' ? 'Grade' : 'Lista'}
-                  style={{
-                    background: view === v ? 'rgb(var(--c-surface))' : 'none',
-                    border: 'none', cursor: 'pointer',
-                    padding: '6px 10px', borderRadius: 4,
-                    color: view === v ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
-                    transition: 'all .2s',
-                    display: 'flex', alignItems: 'center',
-                  }}
-                >
-                  {v === 'grid' ? <GridIcon /> : <ListIcon />}
-                </button>
-              ))}
+            {/* ── Desktop: pills limitados + dropdown Mais + view toggle ── */}
+            <div className="hidden md:flex items-center justify-between gap-3">
+              <div data-testid="category-bar-desktop" className="flex items-center gap-2">
+                {/* "Todos" pill sempre visível */}
+                {(() => {
+                  const isActive = activeCategory === 'Todos'
+                  return (
+                    <button
+                      onClick={() => setActiveCategory('Todos')}
+                      style={{
+                        fontSize: 13, fontWeight: 500,
+                        padding: '7px 16px', borderRadius: 50,
+                        border: isActive ? '1px solid rgb(var(--c-accent-teal))' : '1px solid rgb(var(--c-accent-teal) / .08)',
+                        background: isActive ? 'rgb(var(--c-accent-teal) / .12)' : 'transparent',
+                        color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
+                        cursor: 'pointer', transition: 'all .2s',
+                        whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6,
+                      }}
+                    >
+                      Todos
+                      <span style={{
+                        fontSize: 11, fontFamily: 'JetBrains Mono, monospace',
+                        background: isActive ? 'rgb(var(--c-accent-teal) / .2)' : 'rgba(255,255,255,.06)',
+                        color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
+                        padding: '1px 7px', borderRadius: 50,
+                      }}>
+                        {totalElements}
+                      </span>
+                    </button>
+                  )
+                })()}
+
+                {visibleCategories.map(cat => {
+                  const isActive = cat.name === activeCategory
+                  return (
+                    <button
+                      key={cat.name}
+                      onClick={() => setActiveCategory(cat.name)}
+                      style={{
+                        fontSize: 13, fontWeight: 500,
+                        padding: '7px 16px', borderRadius: 50,
+                        border: isActive ? '1px solid rgb(var(--c-accent-teal))' : '1px solid rgb(var(--c-accent-teal) / .08)',
+                        background: isActive ? 'rgb(var(--c-accent-teal) / .12)' : 'transparent',
+                        color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
+                        cursor: 'pointer', transition: 'all .2s',
+                        whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6,
+                      }}
+                    >
+                      {cat.name}
+                      <span style={{
+                        fontSize: 11, fontFamily: 'JetBrains Mono, monospace',
+                        background: isActive ? 'rgb(var(--c-accent-teal) / .2)' : 'rgba(255,255,255,.06)',
+                        color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
+                        padding: '1px 7px', borderRadius: 50,
+                      }}>
+                        {cat.count}
+                      </span>
+                    </button>
+                  )
+                })}
+
+                {/* "Mais" dropdown */}
+                {hiddenCategories.length > 0 && (
+                  <div ref={moreRef} style={{ position: 'relative' }}>
+                    <button
+                      onClick={() => setShowMoreCategories(v => !v)}
+                      style={{
+                        fontSize: 13, fontWeight: 500,
+                        padding: '7px 14px', borderRadius: 50,
+                        border: hiddenCategories.some(c => c.name === activeCategory)
+                          ? '1px solid rgb(var(--c-accent-teal))'
+                          : '1px solid rgb(var(--c-accent-teal) / .08)',
+                        background: hiddenCategories.some(c => c.name === activeCategory)
+                          ? 'rgb(var(--c-accent-teal) / .12)' : 'transparent',
+                        color: hiddenCategories.some(c => c.name === activeCategory)
+                          ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
+                        cursor: 'pointer', transition: 'all .2s',
+                        whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5,
+                      }}
+                    >
+                      {hiddenCategories.some(c => c.name === activeCategory) ? activeCategory : `Mais (${hiddenCategories.length})`}
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                        style={{ transform: showMoreCategories ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+
+                    {showMoreCategories && (
+                      <div style={{
+                        position: 'absolute', top: 'calc(100% + 6px)', left: 0,
+                        background: 'rgb(var(--c-surface))',
+                        border: '1px solid rgb(var(--c-accent-teal) / .12)',
+                        borderRadius: 10, padding: '6px',
+                        minWidth: 160, zIndex: 50,
+                        boxShadow: '0 8px 24px rgba(0,0,0,.35)',
+                      }}>
+                        {hiddenCategories.map(cat => {
+                          const isActive = cat.name === activeCategory
+                          return (
+                            <button
+                              key={cat.name}
+                              onClick={() => { setActiveCategory(cat.name); setShowMoreCategories(false) }}
+                              style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                width: '100%', padding: '8px 12px', borderRadius: 7,
+                                border: 'none', cursor: 'pointer', gap: 8,
+                                background: isActive ? 'rgb(var(--c-accent-teal) / .12)' : 'transparent',
+                                color: isActive ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
+                                fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap',
+                                transition: 'background .15s',
+                              }}
+                            >
+                              {cat.name}
+                              <span style={{
+                                fontSize: 11, fontFamily: 'JetBrains Mono, monospace',
+                                background: 'rgba(255,255,255,.06)',
+                                padding: '1px 7px', borderRadius: 50,
+                              }}>
+                                {cat.count}
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* View toggle */}
+              <div className="flex" style={{ gap: 4, background: 'rgb(var(--c-surface))', border: '1px solid rgb(var(--c-accent-teal) / .08)', borderRadius: 6, padding: 3 }}>
+                {(['grid', 'list'] as const).map(v => (
+                  <button
+                    key={v}
+                    onClick={() => setView(v)}
+                    title={v === 'grid' ? 'Grade' : 'Lista'}
+                    style={{
+                      background: view === v ? 'rgb(var(--c-surface))' : 'none',
+                      border: 'none', cursor: 'pointer',
+                      padding: '6px 10px', borderRadius: 4,
+                      color: view === v ? 'rgb(var(--c-accent-teal))' : 'rgb(var(--c-text-secondary))',
+                      transition: 'all .2s',
+                      display: 'flex', alignItems: 'center',
+                    }}
+                  >
+                    {v === 'grid' ? <GridIcon /> : <ListIcon />}
+                  </button>
+                ))}
+              </div>
             </div>
+
           </div>
         )}
 
@@ -183,7 +371,7 @@ export default function Portfolio() {
           </div>
         ) : (
           <div className={`${view === 'list' ? 'pf-list flex flex-col gap-3' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'}`}>
-            {visible.map((item, i) => (
+            {filtered.map((item, i) => (
               <PortfolioCard
                 key={item.id}
                 item={item}
@@ -194,26 +382,19 @@ export default function Portfolio() {
           </div>
         )}
 
-        {/* ── Load more ── */}
-        {hasMore && (
-          <div className="text-center" style={{ marginTop: '2.5rem' }}>
-            <button
-              onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
-              style={{
-                fontSize: 14, fontWeight: 600,
-                color: 'rgb(var(--c-text-secondary))',
-                background: 'rgb(var(--c-surface))',
-                border: '1px solid rgb(var(--c-accent-teal) / .08)',
-                borderRadius: 50,
-                padding: '12px 36px',
-                cursor: 'pointer',
-                transition: 'all .25s',
-              }}
-              onMouseEnter={e => { const b = e.currentTarget; b.style.borderColor = 'rgb(var(--c-accent-teal) / .2)'; b.style.color = 'rgb(var(--c-accent-teal))'; b.style.transform = 'translateY(-1px)' }}
-              onMouseLeave={e => { const b = e.currentTarget; b.style.borderColor = 'rgb(var(--c-accent-teal) / .08)'; b.style.color = 'rgb(var(--c-text-secondary))'; b.style.transform = '' }}
+        {/* ── Infinite scroll sentinel + spinner ── */}
+        <div ref={sentinelRef} style={{ height: 1 }} />
+        {(hasNext || loadingMore) && (
+          <div role="status" className="flex justify-center" style={{ marginTop: '2rem' }}>
+            <svg
+              width="28" height="28" viewBox="0 0 24 24"
+              fill="none" stroke="rgb(var(--c-accent-teal))"
+              strokeWidth="2" strokeLinecap="round"
+              className="animate-spin"
             >
-              Ver mais projetos
-            </button>
+              <circle cx="12" cy="12" r="10" strokeOpacity=".25" />
+              <path d="M12 2a10 10 0 0 1 10 10" />
+            </svg>
           </div>
         )}
 
