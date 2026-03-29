@@ -46,7 +46,6 @@ export default function Portfolio() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [page, setPage] = useState(0)
   const [hasNext, setHasNext] = useState(false)
-  const [totalElements, setTotalElements] = useState(0)
   const [allItemsTotal, setAllItemsTotal] = useState(0)
   const [activeCategory, setActiveCategory] = useState<string>('Todos')
   const [view, setView] = useState<'grid' | 'list'>('grid')
@@ -70,7 +69,6 @@ export default function Portfolio() {
       .then(res => {
         setItems(res.content)
         setHasNext(res.hasNext)
-        setTotalElements(res.totalElements)
         if (!cat) setAllItemsTotal(res.totalElements)
       })
       .finally(() => setLoading(false))
