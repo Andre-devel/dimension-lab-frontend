@@ -22,8 +22,8 @@ export function PortfolioCard({ item, view, animationDelay = 0 }: Props) {
             <img
               src={fileUrl(item.photos[0])}
               alt={item.title}
-              width={400}
-              height={300}
+              width={180}
+              height={320}
               loading="lazy"
               decoding="async"
             />
